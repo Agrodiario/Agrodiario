@@ -11,10 +11,19 @@ export class CultureResponseDto {
   supplier: string;
   plantingDate: Date;
   plantingArea: number;
+  plotName?: string;
   observations?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Calculated fields
+  daysElapsed: number; // Days since planting
+  daysRemaining: number; // Days remaining in cycle (can be negative if overdue)
+  isCycleComplete: boolean; // True if current date >= planting date + cycle
+  expectedHarvestDate: Date; // Planting date + cycle days
+  activitiesCount?: number; // Number of activities linked to this culture
+  
   property?: {
     id: string;
     name: string;

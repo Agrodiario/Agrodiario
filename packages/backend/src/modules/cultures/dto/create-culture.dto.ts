@@ -40,6 +40,11 @@ export class CreateCultureDto {
   plantingArea: number;
 
   @IsOptional()
+  @IsString({ message: 'Nome do talhão deve ser um texto' })
+  @MaxLength(255, { message: 'Nome do talhão deve ter no máximo 255 caracteres' })
+  plotName?: string;
+
+  @IsOptional()
   @IsString({ message: 'Observações devem ser um texto' })
   observations?: string;
 }

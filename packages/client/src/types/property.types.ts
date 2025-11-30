@@ -1,3 +1,8 @@
+export interface Plot {
+  name: string;
+  area: number;
+}
+
 export interface Property {
   id: string;
   name: string;
@@ -8,6 +13,7 @@ export interface Property {
   certifications?: string;
   isActive: boolean;
   userId: string;
+  plots?: Plot[];
   createdAt: string;
   updatedAt: string;
 }

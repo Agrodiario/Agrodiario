@@ -1,5 +1,6 @@
 // src/activities/entities/activity.entity.ts
 import { User } from '../../users/entities/user.entity';
+import { Culture } from '../../cultures/entities/culture.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 export enum ActivityType {
@@ -20,6 +21,13 @@ export class Activity {
 
   @Column()
   userId: number;
+
+  @ManyToOne(() => Culture, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'cultureId' })
+  culture: Culture;
+
+  @Column({ type: 'uuid', nullable: true })
+  cultureId: string;
 
   @Column({ nullable: true })
   titulo: string;

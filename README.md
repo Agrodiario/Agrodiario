@@ -41,15 +41,103 @@ cp .env.example .env
 yarn install
 ```
 
+---
+
+## Configuração do Serviço de Email
+
+O Agrodiário utiliza emails para funcionalidades de autenticação:
+- **Verificação de email** após o cadastro
+- **Recuperação de senha** (esqueci minha senha)
+
+### Variáveis de Ambiente
+
+Adicione as seguintes variáveis ao arquivo `.env` do backend:
+
+```env
+# Email Configuration
+SMTP_HOST=smtp.exemplo.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=seu-usuario
+SMTP_PASSWORD=sua-senha
+SMTP_FROM=AgroDiario <noreply@seudominio.com>
+
+# URL do Frontend (usado nos links dos emails)
+FRONTEND_URL=http://localhost:5173
+```
+
+### Provedores de Email Suportados
+
+#### Opção 1: SendGrid (Recomendado para Produção)
+
+SendGrid oferece 100 emails/dia gratuitos e é fácil de configurar.
+
+1. Crie uma conta em [sendgrid.com](https://sendgrid.com)
+2. Vá em **Settings → API Keys** e crie uma chave
+3. Vá em **Settings → Sender Authentication** e verifique um email
+4. Configure o `.env`:
+
+```env
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=apikey
+SMTP_PASSWORD=SG.sua-api-key-aqui
+SMTP_FROM=AgroDiario <seu-email-verificado@dominio.com>
+```
+
+> **Importante:** O `SMTP_USER` deve ser literalmente `apikey` (não seu email).
+
+#### Opção 2: Gmail
+
+Para usar Gmail, você precisa criar uma **Senha de App**:
+
+1. Ative a **Verificação em 2 etapas** na sua conta Google
+2. Acesse [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+3. Crie uma senha de app para "E-mail"
+4. Configure o `.env`:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=seu-email@gmail.com
+SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+SMTP_FROM=AgroDiario <seu-email@gmail.com>
+```
+
+> **Nota:** A senha de app tem 16 caracteres separados por espaços.
+
+### Testando a Configuração
+
+Para verificar se o email está funcionando:
+
+1. Inicie o backend: `yarn dev:backend`
+2. Acesse a página de login no frontend
+3. Clique em "Esqueceu a senha?"
+4. Digite um email cadastrado
+5. Verifique se o email chegou
+
+### Troubleshooting
+
+| Erro | Solução |
+|------|---------|
+| `Invalid login` | Verifique usuário e senha SMTP |
+| `Connection refused` | Verifique host e porta |
+| `Self signed certificate` | Defina `SMTP_SECURE=false` |
+| Email não chega | Verifique pasta de spam ou use Mailtrap para debug |
+
+---
+
 ## Running the project
 ### Front-end
 ```bash
-yarn dev
+yarn dev:client
 ```
 
 ### Back-end
 ```bash
-yarn start
+yarn dev:backend
 ```
 ## Figma Design
 You can view the project’s design prototype on Figma:

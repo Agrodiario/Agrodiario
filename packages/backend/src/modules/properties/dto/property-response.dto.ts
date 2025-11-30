@@ -26,6 +26,9 @@ export class PropertyResponseDto {
   isActive: boolean;
 
   @Expose()
+  plots?: { name: string; area: number }[];
+
+  @Expose()
   userId: string;
 
   @Expose()

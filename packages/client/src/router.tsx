@@ -6,10 +6,10 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { RootRedirector } from './components/RootRedirector';
 
 // Páginas
-import Landing from './pages/landing-page/Landing';
 import LoginPage from './pages/auth/Login';
 import RegisterPage from './pages/auth/Register';
-import HomePage from './pages/Home';
+import ForgotPasswordPage from './pages/auth/ForgotPassword';
+import ResetPasswordPage from './pages/auth/ResetPassword';
 import DiaryPage from './pages/Diary';
 import PropertiesPage from './pages/Properties';
 import CulturesPage from './pages/Cultures';
@@ -20,6 +20,10 @@ import EditActivity from './pages/EditActivity';
 import PropertiesLayout from './layouts/PropertiesLayout';
 import NewProperty from './pages/NewProperty';
 import EditProperty from './pages/EditProperty';
+import CulturesLayout from './layouts/CulturesLayout';
+import NewCulture from './pages/NewCulture';
+import EditCulture from './pages/EditCulture';
+import Landing from './pages/landing-page/Landing';
 
 export const router = createBrowserRouter([
   /* --- ROTA RAIZ - Redirecionamento Inteligente --- */
@@ -43,6 +47,14 @@ export const router = createBrowserRouter([
     path: '/register',
     element: <RegisterPage />,
   },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
+  },
 
   /* --- APP PRINCIPAL (Protegido) --- */
   {
@@ -53,11 +65,6 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      {
-        path: 'home',
-        element: <HomePage />,
-      },
-
       {
         path: 'diary',
         element: <DiaryLayout />,
@@ -78,12 +85,22 @@ export const router = createBrowserRouter([
         ],
       },
 
-      { path: 'cultures', element: <CulturesPage /> },
+      /* Culturas */
+      {
+        path: 'cultures',
+        element: <CulturesLayout />,
+        children: [
+          { index: true, element: <CulturesPage /> },
+          { path: 'new', element: <NewCulture /> },
+          { path: 'edit/:id', element: <EditCulture /> },
+        ],
+      },
+
       { path: 'products', element: <ProductsPage /> },
       
       {
         path: '*',
-        element: <Navigate to="/home" replace />,
+        element: <Navigate to="/diary" replace />,
       },
     ],
   },

@@ -110,7 +110,7 @@ export default function RegisterPage() {
       });
 
       // Se chegou aqui, o registro foi bem-sucedido (auto-login)
-      navigate('/');
+      navigate('/app');
     } catch (err: any) {
       console.error('Erro no registro:', err);
       setError(err.message || 'Erro ao criar conta. Tente novamente.');

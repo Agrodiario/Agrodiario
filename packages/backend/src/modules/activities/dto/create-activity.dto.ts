@@ -1,5 +1,5 @@
 // src/activities/dto/create-activity.dto.ts
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString, IsNumber } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString, IsNumber, IsUUID } from 'class-validator';
 import { ActivityType } from '../entities/activity.entity';
 import { Type } from 'class-transformer';
 
@@ -15,6 +15,10 @@ export class CreateActivityDto {
   @IsString()
   @IsNotEmpty()
   propriedade: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  cultureId: string;
 
   @IsEnum(ActivityType)
   @IsNotEmpty()

@@ -1,0 +1,56 @@
+/* src/components/cultures/CultureDetailsDrawer/CultureDetailsDrawer.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.mainContent {
+  padding: 1.5rem;
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: #dbeafe;
+  color: #1e40af;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+}
+
+.observations {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.activitiesInfo {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+.footer {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #eaecf0;
+  background-color: var(--color-bg-white);
+  flex-shrink: 0;
+}
+
+.footer > button {
+  flex: 1;
+}

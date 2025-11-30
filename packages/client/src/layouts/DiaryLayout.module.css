@@ -1,64 +1,73 @@
-/* src/layouts/DiaryLayout.module.css */
 .diaryLayout {
-    width: 100%;
-  }
-  
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 20px;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Estilo do botão de Link (copiado do Diary.module.css) */
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--border-radius-xx);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  /* Estilos do botão primary */
+  color: var(--color-text-on-primary);
+  background-color: var(--color-primary);
+}
+
+.primaryButton:hover {
+  background-color: var(--color-primary-dark);
+  color: var(--color-text-on-primary);
+  text-decoration: none;
+}
+
+.primaryButton:focus {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+/* Responsividade do header */
+@media (max-width: 768px) {
   .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-  
-  .title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-  }
-  
-  .actions {
-    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
   }
-  
-  .content {
-    /* O wrapper do Outlet */
+
+  .actions {
+    width: 100%;
   }
-  
-  /* Estilo do botão de Link (copiado do Diary.module.css) */
-  .linkButton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 12px 20px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border: none;
-    border-radius: var(--border-radius-md);
-    text-decoration: none; /* Remove sublinhado do link */
-    transition: all 0.2s ease;
-  
-    color: var(--color-text-on-primary);
-    background-color: var(--color-primary);
+
+  .actions>a,
+  .actions>button {
+    flex: 1;
+    /* Faz botões ocuparem 100% no mobile */
   }
-  
-  .linkButton:hover {
-    background-color: var(--color-primary-dark);
-  }
-  
-  /* Responsividade do header */
-  @media (max-width: 768px) {
-    .header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    .actions {
-      width: 100%;
-    }
-    .actions > a,
-    .actions > button {
-      flex: 1; /* Faz botões ocuparem 100% no mobile */
-    }
-  }
+}
