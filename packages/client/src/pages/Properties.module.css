@@ -1,61 +1,223 @@
-/* src/pages/Properties.module.css */
-.toolbar {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
+.propertiesPage {
+  width: 100%;
+  padding: 1rem;
+  min-height: 100vh;
+}
 
-  .toolbarButtons {
-    display: flex;
-    flex: 40;
-    gap: 1rem;
-  }
-  
-  .searchWrapper {
-    flex: 60; /* Faz a busca ocupar o espaço disponível */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.searchWrapper {
+  flex: 1;
+  min-width: 200px;
+}
+
+.toolbarButtons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+
+.sortButton,
+.reportButton {
+  border-radius: 16px;
+  white-space: nowrap;
+}
+
+.reportButton {
+  border-radius: 32px;
+}
+
+.buttonText {
+  display: inline;
+}
+
+/* Grid de Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.loadMoreButton {
+  width: auto;
+  min-width: 200px;
+  border-radius: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.loadingContainer,
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+.emptyState p {
+  margin: 0.5rem 0;
+}
+
+.endMessage {
+  color: #999;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.dropdownItem {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-primary);
+}
+
+/* ========== MEDIA QUERIES ========== */
+@media (max-width: 1024px) {
+  .propertiesPage {
+    padding: 0.75rem;
   }
   
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .toolbarButtons {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .propertiesPage {
+    padding: 0.5rem;
+  }
+  
+  .toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .searchWrapper {
+    min-width: unset;
+  }
+  
+  .toolbarButtons {
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .buttonText {
+    font-size: 0.9rem;
+  }
+  
+  .loadMoreButton {
+    min-width: 180px;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+@media (max-width: 667px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .toolbarButtons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .sortButton,
+  .reportButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .dropdownMenu {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .propertiesPage {
+    padding: 0.25rem;
+  }
+  
+  .toolbar {
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .grid {
+    gap: 0.75rem;
   }
   
   .footer {
-    display: flex;
-    justify-content: center;
-    padding: 2.5rem 0;
+    padding: 1.5rem 0;
   }
   
-  /* Estilos do Dropdown */
-  .dropdownMenu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  .dropdownItem {
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    padding: 0.6rem 0.75rem;
-    border-radius: 6px;
+  .loadMoreButton {
+    min-width: 160px;
+    padding: 0.625rem 1.25rem;
     font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: background-color 0.1s ease;
-  }
-  .dropdownItem:hover {
-    background-color: var(--color-bg-light);
-    color: var(--color-text-primary);
   }
   
-  /* Responsividade */
-  @media (max-width: 768px) {
-    .toolbar {
-      flex-direction: column;
-      align-items: stretch;
+  @media (max-width: 360px) {
+    .buttonText {
+      display: none;
+    }
+    
+    .sortButton,
+    .reportButton {
+      width: auto;
+      padding: 0.75rem;
+    }
+    
+    .sortButton span,
+    .reportButton span {
+      display: none;
     }
   }
+}
+
+@media (min-width: 1440px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+  
+  .propertiesPage {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}

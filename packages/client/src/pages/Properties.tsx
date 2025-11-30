@@ -11,56 +11,73 @@ import { useState, useEffect } from 'react';
 import { Property } from '@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer';
 import { PropertyDetailsDrawer } from '@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer';
 import { propertyService } from '../services/property.service';
-import { generatePropertyReport } from '@/utils/generatePDF'; // Importação da função de geração de relatório
-const ITEMS_PER_PAGE = 10; 
+import { generatePropertyReport } from '@/utils/generatePDF';
+
+const ITEMS_PER_PAGE = 6; // Igual ao diary
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'DESC' | 'ASC'>('DESC');
+  
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState<'DESC' | 'ASC'>('DESC'); // DESC por padrão (Mais recentes)
   
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedProperty, setselectedProperty] = useState<Property | null>(null);
-  
-  const fetchProperties = async (search: string, order: 'ASC' | 'DESC') => {
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+
+  const fetchProperties = async (
+    pageToLoad: number, 
+    orderToLoad: 'ASC' | 'DESC', 
+    searchToLoad: string
+  ) => {
     try {
-      setIsLoading(true);
-      const response = await propertyService.findAll(1, ITEMS_PER_PAGE, order, search); 
+      if (pageToLoad === 1) setLoading(true);
+      else setLoadingMore(true);
+
+      const response = await propertyService.findAll(
+        pageToLoad, 
+        ITEMS_PER_PAGE, 
+        orderToLoad, 
+        searchToLoad
+      );
 
       const transformedProperties = response.data.map(prop => ({
-          id: prop.id,
-          name: prop.name,
-          location: prop.address.split(',').slice(-2).join(',').trim(), 
-          talhoes: [], 
-          cultivo: prop.mainCrop,
-          area: prop.productionArea,
-          address: prop.address,
-          areaTotal: prop.totalArea,
-          areaCultivada: prop.productionArea,
-          cultivoPrincipal: prop.mainCrop,
+        id: prop.id,
+        name: prop.name,
+        location: prop.address.split(',').slice(-2).join(',').trim(), 
+        talhoes: [], 
+        cultivo: prop.mainCrop,
+        area: prop.productionArea,
+        address: prop.address,
+        areaTotal: prop.totalArea,
+        areaCultivada: prop.productionArea,
+        cultivoPrincipal: prop.mainCrop,
       }));
 
-      setProperties(transformedProperties);
+      if (pageToLoad === 1) {
+        setProperties(transformedProperties);
+      } else {
+        setProperties((prev) => [...prev, ...transformedProperties]);
+      }
+      setTotal(response.total || response.data.length);
     } catch (err: any) {
       console.error('Erro ao carregar propriedades:', err);
-      setError(err.message || 'Erro ao carregar propriedades');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
+      setLoadingMore(false);
     }
   };
 
   const handleGenerateReport = async () => {
     try {
       setIsGeneratingReport(true);
-
-      const response = await propertyService.findAll(1, 10000, sortOrder, searchTerm);
+      const response = await propertyService.findAll(1, 1000, sortOrder, searchTerm);
       const textoFiltro = searchTerm ? `Busca por: "${searchTerm}"` : 'Todos os registros';
-      generatePropertyReport(response.data, textoFiltro); 
-
+      generatePropertyReport(response.data, textoFiltro);
     } catch (error) {
       console.error('Erro ao gerar relatório de propriedades', error);
       alert('Erro ao gerar o relatório. Tente novamente.');
@@ -72,37 +89,51 @@ export default function PropertiesPage() {
   const handleSortChange = (newOrder: 'ASC' | 'DESC') => {
     if (newOrder === sortOrder) return;
     setSortOrder(newOrder);
+    setPage(1);
+    setProperties([]);
+    fetchProperties(1, newOrder, searchTerm);
   };
 
   const handleViewProperty = (property: Property) => {
-    setselectedProperty(property);
+    setSelectedProperty(property);
     setIsDrawerOpen(true);
   };
 
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
-    setTimeout(() => setselectedProperty(null), 300);
+    setTimeout(() => setSelectedProperty(null), 300);
   };
 
-  const handleDelete = () => {
-    console.log('Excluir:', selectedProperty?.id);
-    // Adicionar a lógica real de exclusão aqui e recarregar a lista:
+  const handleDelete = async () => {
+    if (!selectedProperty) return;
     // await propertyService.remove(selectedProperty.id);
-    // fetchProperties(searchTerm, sortOrder); 
+    await fetchProperties(1, sortOrder, searchTerm);
     handleCloseDrawer();
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchProperties(nextPage, sortOrder, searchTerm);
   };
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchProperties(searchTerm, sortOrder);
+      setPage(1);
+      fetchProperties(1, sortOrder, searchTerm);
     }, 500);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm, sortOrder]);
+  }, [searchTerm]);
 
+  useEffect(() => {
+    fetchProperties(1, sortOrder, searchTerm);
+  }, []);
+
+  const hasMore = properties.length < total;
 
   return (
-    <>
+    <div className={styles.propertiesPage}>
       <div className={styles.toolbar}>
         <div className={styles.searchWrapper}>
           <Input
@@ -111,63 +142,102 @@ export default function PropertiesPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon={<FiSearch size={18} />}
-            style={{ borderRadius: '128px', padding: '0.6rem 1rem', width: '95%' }}
           />
         </div>
-        <div className={styles.toolbarButtons} >
+        
+        <div className={styles.toolbarButtons}>
           <Dropdown
             trigger={
-              <Button variant="tertiary" leftIcon={<FaRegCalendarPlus size={18} />} rightIcon={<MdArrowDropDown size={18} />} style={{ borderRadius: '16px', width: 'max-content' }} >
-                Ordenar por
+              <Button 
+                variant="tertiary" 
+                leftIcon={<FaRegCalendarPlus size={18} />} 
+                rightIcon={<MdArrowDropDown size={18} />} 
+                className={styles.sortButton}
+              >
+                <span className={styles.buttonText}>Ordenar por</span>
               </Button>
             }
           >
             <div className={styles.dropdownMenu}>
-              <button
-                onClick={() => handleSortChange('DESC')}
+              <button 
                 className={styles.dropdownItem}
-                style={{ fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal' }}
+                onClick={() => handleSortChange('DESC')}
+                style={{ 
+                  fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal',
+                  backgroundColor: sortOrder === 'DESC' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
                 Mais recentes
               </button>
-              <button
-                onClick={() => handleSortChange('ASC')}
+              <button 
                 className={styles.dropdownItem}
-                style={{ fontWeight: sortOrder === 'ASC' ? 'bold' : 'normal' }}
+                onClick={() => handleSortChange('ASC')}
+                style={{ 
+                  fontWeight: sortOrder === 'ASC' ? 'bold' : 'normal',
+                  backgroundColor: sortOrder === 'ASC' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
                 Mais antigas
               </button>
             </div>
           </Dropdown>
           
-          <div></div>
-          
           <Button 
             variant="secondary" 
             leftIcon={<FiDownload size={18} />} 
-            style={{ borderRadius: '32px' }}
-            onClick={handleGenerateReport} 
-            disabled={isGeneratingReport} 
+            className={styles.reportButton}
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport}
           >
-            {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
+            <span className={styles.buttonText}>
+              {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
+            </span>
           </Button>
         </div>
       </div>
 
+      {/* Estados de loading e empty state iguais ao diary */}
       <div className={styles.grid}>
-        {isLoading && <p>Carregando propriedades...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {!isLoading && !error && properties.length === 0 && (
-          <p>Nenhuma propriedade cadastrada. Crie sua primeira propriedade!</p>
+        {loading && page === 1 ? (
+          <div className={styles.loadingContainer}>
+            <p>Carregando propriedades...</p>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>Nenhuma propriedade encontrada.</p>
+            {searchTerm && (
+              <p>Tente ajustar os termos da busca.</p>
+            )}
+          </div>
+        ) : (
+          properties.map((prop) => (
+            <PropertyCard 
+              key={prop.id} 
+              property={prop}
+              onView={() => handleViewProperty(prop)} 
+            />
+          ))
         )}
-        {!isLoading && !error && properties.map((prop) => (
-          <PropertyCard key={prop.id} property={prop}
-            onView={() => handleViewProperty(prop)} />
-        ))}
       </div>
 
       <footer className={styles.footer}>
-        <Button variant="quaternary" disabled>Carregar mais</Button> 
+        {hasMore && (
+          <Button 
+            variant="quaternary" 
+            className={styles.loadMoreButton}
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? 'Carregando...' : 'Carregar mais'}
+          </Button>
+        )}
+        
+        {/* Mensagem quando acaba */}
+        {!hasMore && properties.length > 0 && (
+          <span className={styles.endMessage}>
+            Você chegou ao fim da lista.
+          </span>
+        )}
       </footer>
 
       <Drawer
@@ -179,6 +249,6 @@ export default function PropertiesPage() {
           <PropertyDetailsDrawer property={selectedProperty} onDelete={handleDelete} />
         )}
       </Drawer>
-    </>
+    </div>
   );
 }
