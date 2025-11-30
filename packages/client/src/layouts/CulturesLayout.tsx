@@ -6,8 +6,8 @@ export default function CulturesLayout() {
   const location = useLocation();
 
   // Oculta o botão se estivermos em 'new' ou 'edit'
-  const isNewPage = location.pathname === '/app/cultures/new';
-  const isEditPage = location.pathname.startsWith('/app/cultures/edit');
+  const isNewPage = location.pathname === '/cultures/new';
+  const isEditPage = location.pathname.startsWith('/cultures/edit');
   const hideButton = isNewPage || isEditPage;
 
   return (
@@ -18,7 +18,7 @@ export default function CulturesLayout() {
           {!hideButton && (
             <Link to="new" className={styles.linkButton}>
               <FiPlus size={18} />
-              <span>Novo cultura</span>
+              <span>Nova cultura</span>
             </Link>
           )}
         </div>

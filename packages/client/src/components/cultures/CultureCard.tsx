@@ -51,7 +51,7 @@ export function CultureCard({ culture, onView }: CultureCardProps) {
       <div className={styles.content}>
         <InfoItem
           icon={<PiPlantFill />}
-          title="Talhão X"
+          title={culture.property?.name || 'Propriedade'}
           text={culture.cultivar || 'N/A'}
         />
         <InfoItem

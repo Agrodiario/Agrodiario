@@ -89,7 +89,7 @@ export class CulturesService {
 
   async findOne(id: string, userId: string): Promise<CultureResponseDto> {
     const culture = await this.culturesRepository.findOne({
-      where: { id, isActive: true },
+      where: { id },
       relations: ['property', 'activities'],
     });
 
@@ -117,7 +117,7 @@ export class CulturesService {
     userId: string,
   ): Promise<{ message: string; data: CultureResponseDto }> {
     const culture = await this.culturesRepository.findOne({
-      where: { id, isActive: true },
+      where: { id },
       relations: ['property'],
     });
 
@@ -158,7 +158,7 @@ export class CulturesService {
 
   async remove(id: string, userId: string): Promise<{ message: string }> {
     const culture = await this.culturesRepository.findOne({
-      where: { id, isActive: true },
+      where: { id },
     });
 
     if (!culture) {
@@ -187,12 +187,16 @@ export class CulturesService {
   }
 
   private mapToResponseDto(culture: Culture): CultureResponseDto {
-    const daysElapsed = this.calculateDaysElapsed(culture.plantingDate);
+    const plantingDate = culture.plantingDate instanceof Date 
+      ? culture.plantingDate 
+      : new Date(culture.plantingDate);
     
-    const expectedHarvestDate = this.calculateExpectedHarvestDate(culture.plantingDate, culture.cycle);
+    const daysElapsed = this.calculateDaysElapsed(plantingDate);
+    
+    const expectedHarvestDate = this.calculateExpectedHarvestDate(plantingDate, culture.cycle);
     
     const daysRemaining = culture.cycle - daysElapsed;
-    const isCycleComplete = this.isCycleComplete(culture.plantingDate, culture.cycle);
+    const isCycleComplete = this.isCycleComplete(plantingDate, culture.cycle);
 
     const response: CultureResponseDto = {
       id: culture.id,
@@ -203,7 +207,7 @@ export class CulturesService {
       cycle: culture.cycle,
       origin: culture.origin,
       supplier: culture.supplier,
-      plantingDate: culture.plantingDate,
+      plantingDate: plantingDate,
       plantingArea: culture.plantingArea,
       observations: culture.observations,
       isActive: culture.isActive,
