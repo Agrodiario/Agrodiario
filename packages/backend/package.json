@@ -16,11 +16,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:generate": "npm run typeorm -- -d ./src/database/data-source.ts migration:generate ./src/database/migrations/$npm_config_name",
-    "migration:create": "npm run typeorm -- migration:create ./src/database/migrations/$npm_config_name",
-    "migration:run": "npm run typeorm -- -d ./src/database/data-source.ts migration:run",
-    "migration:revert": "npm run typeorm -- -d ./src/database/data-source.ts migration:revert",
-    "migration:show": "npm run typeorm -- -d ./src/database/data-source.ts migration:show"
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate ./src/database/migrations/$npm_config_name -d ./src/database/data-source.ts",
+    "migration:create": "typeorm-ts-node-commonjs migration:create ./src/database/migrations/$npm_config_name",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ./src/database/data-source.ts",
+    "migration:show": "typeorm-ts-node-commonjs migration:show -d ./src/database/data-source.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
