@@ -23,10 +23,10 @@ export class Activity {
   userId: number;
 
   @ManyToOne(() => Culture, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'culture_id' })
+  @JoinColumn({ name: 'cultureId' })
   culture: Culture;
 
-  @Column({ type: 'uuid', nullable: true, name: 'culture_id' })
+  @Column({ type: 'uuid', nullable: true })
   cultureId: string;
 
   @Column({ nullable: true })
