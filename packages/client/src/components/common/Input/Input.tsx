@@ -1,3 +1,4 @@
+// Input.tsx - Versão atualizada
 import { ComponentPropsWithoutRef, ReactNode } from 'react';
 import styles from './Input.module.css';
 
@@ -11,6 +12,8 @@ type InputBaseProps = {
   icon?: ReactNode;
   onIconClick?: () => void;
   className?: string;
+  error?: string;
+  showError?: boolean;
 };
 
 type InputAsInput = InputBaseProps &
@@ -31,10 +34,19 @@ type InputAsSelect = InputBaseProps &
 
 type InputProps = InputAsInput | InputAsTextarea | InputAsSelect;
 
-export function Input({ as = 'input', label, icon, onIconClick, className, ...props }: InputProps) {
+export function Input({ 
+  as = 'input', 
+  label, 
+  icon, 
+  onIconClick, 
+  className, 
+  error,
+  showError,
+  ...props 
+}: InputProps) {
   const wrapperClass = `${styles.inputWrapper} ${
     as === 'textarea' ? styles.textareaWrapper : ''
-  } ${className || ''}`;
+  } ${error && showError ? styles.error : ''} ${className || ''}`;
 
   const inputClass = `${styles.input} ${
     as === 'textarea' ? styles.textarea : ''
@@ -82,6 +94,12 @@ export function Input({ as = 'input', label, icon, onIconClick, className, ...pr
         <span onClick={onIconClick} className={styles.icon}>
           {icon}
         </span>
+      )}
+      {error && showError && (
+        <div className={styles.tooltip}>
+          {error}
+          <div className={styles.tooltipArrow}></div>
+        </div>
       )}
     </div>
   );

@@ -1,8 +1,6 @@
-/* src/components/common/Input/Input.module.css */
-
 .inputWrapper {
   display: flex;
-  align-items: center; /* Padrão (bom para <input>) */
+  align-items: center;
   gap: 0.5rem;
   width: 100%;
   padding: 12px 16px;
@@ -76,4 +74,54 @@ input[type="date"] {
   /* Força a fonte correta */
   font-family: inherit;
   color: var(--color-text-primary);
+}
+
+/* Adicione estas regras ao seu Input.module.css existente */
+
+.inputWrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.inputWrapper.error .input {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 1px #e53e3e;
+}
+
+.tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #e53e3e;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 4px;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.2s ease-out;
+}
+
+.tooltipArrow {
+  position: absolute;
+  top: -4px;
+  left: 12px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid #e53e3e;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
