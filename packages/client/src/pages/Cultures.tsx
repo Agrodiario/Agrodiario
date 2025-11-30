@@ -12,6 +12,7 @@ import { Culture } from '@/types/culture.types';
 import { CultureDetailsDrawer } from '@/components/cultures/CultureDetailsDrawer/CultureDetailsDrawer';
 import { cultureService } from '../services/culture.service';
 import { useNavigate } from 'react-router-dom';
+import { generateCultureReport } from '@/utils/generatePDF';
 
 export default function CulturesPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function CulturesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -89,6 +91,36 @@ export default function CulturesPage() {
 
   const handleNewCulture = () => {
     navigate('/cultures/new');
+  };
+
+  // Nova função para gerar relatório
+  const handleGenerateReport = async () => {
+    try {
+      setIsGeneratingReport(true);
+      
+      // Buscar todas as culturas para o relatório
+      const response = await cultureService.findAll(
+        1, 
+        1000, // Número alto para pegar todas
+        searchTerm || undefined,
+        sortBy || undefined,
+        sortOrder
+      );
+      
+      const textoFiltro = searchTerm 
+        ? `Busca por: "${searchTerm}"` 
+        : sortBy 
+        ? `Ordenado por: ${sortBy} (${sortOrder === 'ASC' ? 'Crescente' : 'Decrescente'})`
+        : 'Todas as culturas';
+      
+      await generateCultureReport(response.data, textoFiltro);
+
+    } catch (error) {
+      console.error('Erro ao gerar relatório', error);
+      alert('Erro ao gerar o relatório. Tente novamente.');
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   return (
@@ -162,13 +194,15 @@ export default function CulturesPage() {
               </button>
             </div>
           </Dropdown>
-          <div></div>
+          
           <Button
             variant="secondary"
             leftIcon={<FiDownload size={18} />}
             style={{ borderRadius: '32px' }}
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport}
           >
-            Gerar relatório
+            {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
           </Button>
         </div>
       </div>
