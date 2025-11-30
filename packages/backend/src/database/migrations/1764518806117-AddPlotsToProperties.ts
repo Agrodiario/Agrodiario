@@ -4,8 +4,6 @@ export class AddPlotsToProperties1764518806117 implements MigrationInterface {
     name = 'AddPlotsToProperties1764518806117'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "cultures" DROP CONSTRAINT "fk_cultures_property"`);
-        await queryRunner.query(`ALTER TABLE "cultures" DROP CONSTRAINT "fk_cultures_user"`);
         await queryRunner.query(`ALTER TABLE "activities" DROP CONSTRAINT "FK_df32e8020b668f62f4ec62d6037"`);
         await queryRunner.query(`ALTER TABLE "properties" ADD "plots" jsonb`);
         await queryRunner.query(`ALTER TYPE "public"."culture_origin_enum" RENAME TO "culture_origin_enum_old"`);
@@ -27,8 +25,7 @@ export class AddPlotsToProperties1764518806117 implements MigrationInterface {
         await queryRunner.query(`ALTER TYPE "public"."culture_origin_enum_old" RENAME TO "culture_origin_enum"`);
         await queryRunner.query(`ALTER TABLE "properties" DROP COLUMN "plots"`);
         await queryRunner.query(`ALTER TABLE "activities" ADD CONSTRAINT "FK_df32e8020b668f62f4ec62d6037" FOREIGN KEY ("cultureId") REFERENCES "cultures"("id") ON DELETE SET NULL ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "cultures" ADD CONSTRAINT "fk_cultures_user" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "cultures" ADD CONSTRAINT "fk_cultures_property" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "cultures" ADD CONSTRAINT "FK_cultures_user" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "cultures" ADD CONSTRAINT "FK_cultures_property" FOREIGN KEY ("propertyId") REFERENCES "properties"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
     }
-
 }
