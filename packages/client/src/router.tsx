@@ -20,6 +20,8 @@ import PropertiesLayout from './layouts/PropertiesLayout';
 import NewProperty from './pages/NewProperty';
 import EditProperty from './pages/EditProperty';
 import CulturesLayout from './layouts/CulturesLayout';
+import NewCulture from './pages/NewCulture';
+import EditCulture from './pages/EditCulture';
 import Landing from './pages/landing-page/Landing';
 
 export const router = createBrowserRouter([
@@ -85,6 +87,8 @@ export const router = createBrowserRouter([
         element: <CulturesLayout />,
         children: [
           { index: true, element: <CulturesPage /> },
+          { path: 'new', element: <NewCulture /> },
+          { path: 'edit/:id', element: <EditCulture /> },
         ],
       },
 

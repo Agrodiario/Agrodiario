@@ -88,7 +88,7 @@ export default function CulturesPage() {
   };
 
   const handleNewCulture = () => {
-    navigate('/app/cultures/new');
+    navigate('/cultures/new');
   };
 
   return (
