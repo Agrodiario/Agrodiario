@@ -40,6 +40,7 @@ export default function EditCulture() {
           supplier: culture.supplier || '',
           plantingDate: plantingDateStr,
           plantingArea: culture.plantingArea.toString(),
+          plotName: culture.plotName || '',
           observations: culture.observations || '',
         });
       } catch (err: any) {
@@ -71,6 +72,7 @@ export default function EditCulture() {
         supplier: data.supplier || undefined,
         plantingDate: data.plantingDate,
         plantingArea: parseFloat(data.plantingArea),
+        plotName: data.plotName || null,
         observations: data.observations || undefined,
       };
 

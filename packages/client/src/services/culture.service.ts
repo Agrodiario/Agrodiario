@@ -53,6 +53,11 @@ class CultureService {
     });
     return response.data;
   }
+
+  async findByProperty(propertyId: string): Promise<Culture[]> {
+    const response = await apiClient.get<Culture[]>(`/cultures/by-property/${propertyId}`);
+    return response.data;
+  }
 }
 
 export const cultureService = new CultureService();

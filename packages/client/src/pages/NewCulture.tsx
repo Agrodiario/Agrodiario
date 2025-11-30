@@ -24,6 +24,7 @@ export default function NewCulture() {
         supplier: data.supplier || undefined,
         plantingDate: data.plantingDate,
         plantingArea: parseFloat(data.plantingArea),
+        plotName: data.plotName || undefined,
         observations: data.observations || undefined,
       };
 

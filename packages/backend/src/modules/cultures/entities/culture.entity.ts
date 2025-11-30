@@ -58,6 +58,10 @@ export class Culture extends BaseEntity {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   plantingArea: number;
 
+  // Plot name (optional - if using property's plot instead of manual area)
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  plotName: string;
+
   // Additional observations (optional)
   @Column({ type: 'text', nullable: true })
   observations: string;

@@ -18,6 +18,11 @@ type ActivityCardProps = {
     responsavel: string;
     operacao: string;
     tipo: string;
+    culture?: {
+      id: string;
+      cultureName: string;
+      cultivar?: string;
+    };
 
     insumoNome?: string;
     insumoQuantidade?: string;
@@ -59,6 +64,14 @@ function InfoItem({ icon, title, text }: any) {
   
         <div className={styles.content}>
           
+          {activity.culture && (
+            <InfoItem 
+              icon={<GiThreeLeaves />} 
+              title="Cultura" 
+              text={`${activity.culture.cultureName}${activity.culture.cultivar ? ` - ${activity.culture.cultivar}` : ''}`} 
+            />
+          )}
+
           <InfoItem 
             icon={<GiThreeLeaves />} 
             title={activity.tipo.charAt(0).toUpperCase() + activity.tipo.slice(1)} 

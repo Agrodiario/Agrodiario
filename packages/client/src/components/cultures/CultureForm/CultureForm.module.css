@@ -70,6 +70,31 @@
   box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
 }
 
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #101828;
+  background-color: #ffffff;
+  transition: all 0.2s;
+}
+
+.input:hover {
+  border-color: #008542;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #008542;
+  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
+}
+
+.input::placeholder {
+  color: #667085;
+}
+
 .inputWithIcon {
   position: relative;
 }
