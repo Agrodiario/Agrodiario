@@ -12,6 +12,7 @@ import { ActivityModule } from './modules/activities/activities.module';
 import { EmbrapaModule } from './embrapa/embrapa.module';
 import { PropertiesModule } from '@modules/properties/properties.module';
 import { CulturesModule } from '@modules/cultures/cultures.module';
+import { EmailModule } from '@modules/email/email.module';
 
 @Module({
   imports: [
@@ -42,12 +43,13 @@ import { CulturesModule } from '@modules/cultures/cultures.module';
     }),
 
     // Feature modules
+    EmailModule,
     UsersModule,
     AuthModule,
     ActivityModule,
     EmbrapaModule,
     PropertiesModule,
-    CulturesModule
+    CulturesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
