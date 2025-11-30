@@ -69,12 +69,22 @@
   border: 1px solid rgba(0, 0, 0, 0.5);
 }
 
-.dropdownMenu {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.5rem;
-  min-width: 160px;
+.loadingContainer,
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+.emptyState p {
+  margin: 0.5rem 0;
+}
+
+.endMessage {
+  color: #999;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .dropdownItem {
