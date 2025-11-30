@@ -53,18 +53,6 @@ export function Sidebar() {
 
           <nav className={styles.nav}>
             <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-              }
-              onClick={() => setIsMobileOpen(false)}
-            >
-              <FiHome size={20} />
-              <span>Início</span>
-            </NavLink>
-
-            <NavLink
               to="/diary"
               className={({ isActive }) =>
                 isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
