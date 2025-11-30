@@ -18,59 +18,45 @@ export interface WikidataCultivar {
 
 @Injectable()
 export class PlantsApiService {
+  private static readonly API_BASE_URL = 'https://trefle.io/api/v1';
+  private static readonly API_TIMEOUT = 15000;
+  private static readonly DEFAULT_LIMIT = 50;
+
   private readonly logger = new Logger(PlantsApiService.name);
   private readonly trefleApi: AxiosInstance;
-  private readonly apiToken: string;
 
   constructor(
-    private configService: ConfigService,
-    private translationService: TranslationService,
+    private readonly configService: ConfigService,
+    private readonly translationService: TranslationService,
   ) {
-    this.apiToken = this.configService.get<string>('TREFLE_API_TOKEN') || 'usr-KHirc_oh8C0Sk_y8uTPn8LmidIo7k66ANcadoCYqjF4';
+    this.trefleApi = this.createApiClient();
+  }
+
+  private createApiClient(): AxiosInstance {
+    const apiToken = this.configService.get<string>('TREFLE_API_TOKEN') || 
+                     'usr-KHirc_oh8C0Sk_y8uTPn8LmidIo7k66ANcadoCYqjF4';
     
-    this.trefleApi = axios.create({
-      baseURL: 'https://trefle.io/api/v1',
-      timeout: 15000,
-      params: {
-        token: this.apiToken,
-      },
+    return axios.create({
+      baseURL: PlantsApiService.API_BASE_URL,
+      timeout: PlantsApiService.API_TIMEOUT,
+      params: { token: apiToken },
     });
   }
 
-  async searchCrops(searchTerm?: string, limit: number = 50): Promise<WikidataCrop[]> {
+  async searchCrops(searchTerm?: string, limit: number = PlantsApiService.DEFAULT_LIMIT): Promise<WikidataCrop[]> {
     try {
-      const params: any = {};
-
-      if (searchTerm) {
-        params.q = searchTerm;
-      }
-
-      // Filter for edible plants only
-      params['filter[edible]'] = true;
-
+      const params = this.buildSearchParams(searchTerm);
       const response = await this.trefleApi.get('/plants/search', { params });
 
       if (!response.data?.data) {
         return [];
       }
 
-      // Filter: only plants with common_name (not null)
-      const plantsWithCommonName = response.data.data.filter((plant: any) => plant.common_name);
+      const plantsWithNames = this.filterPlantsWithCommonName(response.data.data);
+      const limitedPlants = plantsWithNames.slice(0, limit);
+      const crops = await this.translateAndMapToCrops(limitedPlants);
 
-      // Translate common names to Portuguese
-      const cropsData = plantsWithCommonName.slice(0, limit);
-      const translatedNames = await this.translationService.translateBatch(
-        cropsData.map((plant: any) => plant.common_name)
-      );
-
-      const crops = cropsData.map((plant: any, index: number) => ({
-        id: plant.id.toString(),
-        label: translatedNames[index], // Translated to Portuguese
-        description: plant.scientific_name,
-        aliases: [],
-      }));
-
-      this.logger.log(`Trefle found ${crops.length} crops with common names for term: ${searchTerm || 'all'}`);
+      this.logger.log(`Found ${crops.length} crops for term: ${searchTerm || 'all'}`);
       return crops;
     } catch (error) {
       this.logger.error(`Trefle API error: ${error.message}`);
@@ -80,37 +66,82 @@ export class PlantsApiService {
 
   async searchCultivars(cropName: string, limit: number = 20): Promise<WikidataCultivar[]> {
     try {
-      const response = await this.trefleApi.get('/plants/search', {
-        params: {
-          q: cropName,
-          'filter[edible]': true,
-        },
-      });
+      const params = this.buildSearchParams(cropName);
+      const response = await this.trefleApi.get('/plants/search', { params });
 
       if (!response.data?.data) {
         return [];
       }
 
-      // Filter: only plants with common_name (not null)
-      const plantsWithCommonName = response.data.data.filter((plant: any) => plant.common_name);
+      const plantsWithNames = this.filterPlantsWithCommonName(response.data.data);
+      const limitedPlants = plantsWithNames.slice(0, limit);
+      const cultivars = await this.translateAndMapToCultivars(limitedPlants);
 
-      // Translate common names to Portuguese
-      const cultivarsData = plantsWithCommonName.slice(0, limit);
-      const translatedNames = await this.translationService.translateBatch(
-        cultivarsData.map((plant: any) => plant.common_name)
-      );
-
-      const cultivars = cultivarsData.map((plant: any, index: number) => ({
-        id: plant.id.toString(),
-        label: translatedNames[index], // Translated to Portuguese
-        description: `${plant.scientific_name}${plant.family_common_name ? ` (${plant.family_common_name})` : ''}`,
-      }));
-
-      this.logger.log(`Trefle found ${cultivars.length} cultivars with common names`);
+      this.logger.log(`Found ${cultivars.length} cultivars for crop: ${cropName}`);
       return cultivars;
     } catch (error) {
       this.logger.error(`Trefle cultivars error: ${error.message}`);
       return [];
     }
+  }
+
+  /**
+   * Builds search parameters for Trefle API
+   */
+  private buildSearchParams(searchTerm?: string): Record<string, any> {
+    const params: Record<string, any> = {
+      'filter[edible]': true,
+    };
+
+    if (searchTerm) {
+      params.q = searchTerm;
+    }
+
+    return params;
+  }
+
+  /**
+   * Filters plants that have a common name
+   */
+  private filterPlantsWithCommonName(plants: any[]): any[] {
+    return plants.filter(plant => plant.common_name);
+  }
+
+  /**
+   * Translates plant names and maps to WikidataCrop format
+   */
+  private async translateAndMapToCrops(plants: any[]): Promise<WikidataCrop[]> {
+    const commonNames = plants.map(plant => plant.common_name);
+    const translatedNames = await this.translationService.translateBatch(commonNames);
+
+    return plants.map((plant, index) => ({
+      id: plant.id.toString(),
+      label: translatedNames[index],
+      description: plant.scientific_name,
+      aliases: [],
+    }));
+  }
+
+  /**
+   * Translates plant names and maps to WikidataCultivar format
+   */
+  private async translateAndMapToCultivars(plants: any[]): Promise<WikidataCultivar[]> {
+    const commonNames = plants.map(plant => plant.common_name);
+    const translatedNames = await this.translationService.translateBatch(commonNames);
+
+    return plants.map((plant, index) => ({
+      id: plant.id.toString(),
+      label: translatedNames[index],
+      description: this.buildCultivarDescription(plant),
+    }));
+  }
+
+  /**
+   * Builds a formatted description for cultivar
+   */
+  private buildCultivarDescription(plant: any): string {
+    const scientificName = plant.scientific_name || '';
+    const familyName = plant.family_common_name ? ` (${plant.family_common_name})` : '';
+    return `${scientificName}${familyName}`;
   }
 }

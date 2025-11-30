@@ -2,6 +2,8 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
+export const UPLOADS_URL = 'http://localhost:3000/uploads';
+
 class ApiClient {
   private client: AxiosInstance;
 

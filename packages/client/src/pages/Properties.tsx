@@ -2,8 +2,8 @@
 import { Button } from '../components/common/Button/Button';
 import { Input } from '../components/common/Input/Input';
 import { Dropdown } from '../components/common/Dropdown/Dropdown';
-import { PropertyCard } from '../components/properties/PropertyCard';
-import styles from './Properties.module.css';
+import { PropertyCard } from '../components/properties/PropertyCard'; 
+import styles from './Properties.module.css'; 
 import { FiSearch, FiDownload } from 'react-icons/fi';
 import { FaRegCalendarPlus } from 'react-icons/fa';
 import { MdArrowDropDown } from 'react-icons/md';
@@ -13,71 +13,68 @@ import { Property } from '@/components/properties/PropertyDetailsDrawer/Property
 import { PropertyDetailsDrawer } from '@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer';
 import { propertyService } from '../services/property.service';
 
-// Mock properties removed - now fetching from API
-
-// deixei aqui para referencia @zoen, quando não precisar mais vamos deletar
-// const _mockProperties = [
-//   {
-//     id: 1,
-//     name: 'Sítio Oliveira',
-//     location: 'Florínea (SP)',
-//     talhoes: [{ id: 1, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, {id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}], // Replace with appropriate Talhao structure
-//     cultivo: 'Soja',
-//     area: 45,
-//     address: 'Rua Principal, 123',
-//     areaTotal: 50,
-//     areaCultivada: 45,
-//     cultivoPrincipal: 'Soja',
-//   },
-//   {
-//     id: 2,
-//     name: 'Sítio Oliveira',
-//     location: 'Florínea (SP)',
-//     talhoes: [{ id: 2, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
-//     cultivo: 'Soja',
-//     area: 45,
-//     address: 'Rua Principal, 123',
-//     areaTotal: 50,
-//     areaCultivada: 45,
-//     cultivoPrincipal: 'Soja',
-//   },
-//   {
-//     id: 3,
-//     name: 'Sítio Oliveira',
-//     location: 'Florínea (SP)',
-//     talhoes: [{ id: 3, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
-//     cultivo: 'Soja',
-//     area: 45,
-//     address: 'Rua Principal, 123',
-//     areaTotal: 50,
-//     areaCultivada: 45,
-//     cultivoPrincipal: 'Soja',
-//   },
-//   {
-//     id: 4,
-//     name: 'Sítio Oliveira',
-//     location: 'Florínea (SP)',
-//     talhoes: [{ id: 4, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo' }],
-//     cultivo: 'Soja',
-//     area: 45,
-//     address: 'Rua Principal, 123',
-//     areaTotal: 50,
-//     areaCultivada: 45,
-//     cultivoPrincipal: 'Soja',
-//   },
-//   {
-//     id: 5,
-//     name: 'Sítio Oliveira',
-//     location: 'Florínea (SP)',
-//     talhoes: [{ id: 5, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, {id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
-//     cultivo: 'Soja',
-//     area: 45,
-//     address: 'Rua Principal, 123',
-//     areaTotal: 50,
-//     areaCultivada: 45,
-//     cultivoPrincipal: 'Soja',
-//   },
-// ];
+const mockProperties = [
+  {
+    id: 1,
+    name: 'Sítio Oliveira',
+    location: 'Florínea (SP)',
+    talhoes: [{ id: 1, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, {id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}], // Replace with appropriate Talhao structure
+    cultivo: 'Soja',
+    area: 45,
+    address: 'Rua Principal, 123',
+    areaTotal: 50,
+    areaCultivada: 45,
+    cultivoPrincipal: 'Soja',
+  },
+  {
+    id: 2,
+    name: 'Sítio Oliveira',
+    location: 'Florínea (SP)',
+    talhoes: [{ id: 2, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
+    cultivo: 'Soja',
+    area: 45,
+    address: 'Rua Principal, 123',
+    areaTotal: 50,
+    areaCultivada: 45,
+    cultivoPrincipal: 'Soja',
+  },
+  {
+    id: 3,
+    name: 'Sítio Oliveira',
+    location: 'Florínea (SP)',
+    talhoes: [{ id: 3, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
+    cultivo: 'Soja',
+    area: 45,
+    address: 'Rua Principal, 123',
+    areaTotal: 50,
+    areaCultivada: 45,
+    cultivoPrincipal: 'Soja',
+  },
+  {
+    id: 4,
+    name: 'Sítio Oliveira',
+    location: 'Florínea (SP)',
+    talhoes: [{ id: 4, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo' }],
+    cultivo: 'Soja',
+    area: 45,
+    address: 'Rua Principal, 123',
+    areaTotal: 50,
+    areaCultivada: 45,
+    cultivoPrincipal: 'Soja',
+  },
+  {
+    id: 5,
+    name: 'Sítio Oliveira',
+    location: 'Florínea (SP)',
+    talhoes: [{ id: 5, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, {id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
+    cultivo: 'Soja',
+    area: 45,
+    address: 'Rua Principal, 123',
+    areaTotal: 50,
+    areaCultivada: 45,
+    cultivoPrincipal: 'Soja',
+  },
+];
 
 export default function PropertiesPage() {
     const [properties, setProperties] = useState<any[]>([]);
@@ -137,25 +134,21 @@ export default function PropertiesPage() {
     
       const handleCloseDrawer = () => {
         setIsDrawerOpen(false);
-        // É uma boa prática limpar o estado ao fechar
-        setTimeout(() => setselectedProperty(null), 300); // Atraso pela animação
+        setTimeout(() => setselectedProperty(null), 300); 
       };
 
       const handleEdit = () => {
         console.log('Editar:', selectedProperty?.id);
-        // Aqui você pode navegar para a página de edição
         // navigate(`edit/${selectedActivity?.id}`)
       };
     
       const handleDelete = () => {
         console.log('Excluir:', selectedProperty?.id);
-        // Adicione a lógica de exclusão
-        handleCloseDrawer(); // Fecha o drawer após excluir
+        handleCloseDrawer(); 
       };
 
   return (
     <>
-      {/* Barra de Ferramentas (Toolbar) */}
       <div className={styles.toolbar}>
         <div className={styles.searchWrapper}>
           <Input
@@ -195,7 +188,6 @@ export default function PropertiesPage() {
         </div>
       </div>
 
-      {/* Grid de Cards */}
       <div className={styles.grid}>
         {isLoading && <p>Carregando propriedades...</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -208,9 +200,8 @@ export default function PropertiesPage() {
         ))}
       </div>
 
-      {/* (Opcional) Rodapé (Carregar mais) */}
       <footer className={styles.footer}>
-        <Button variant="quaternary">Carregar mais</Button>
+        <Button variant="outlined">Carregar mais</Button>
       </footer>
 
       <Drawer
@@ -218,7 +209,6 @@ export default function PropertiesPage() {
         onClose={handleCloseDrawer}
         title="Visualizar atividade"
       >
-        {/* Só renderiza o conteúdo se uma atividade estiver selecionada */}
         {selectedProperty && (
           <PropertyDetailsDrawer property={selectedProperty} onDelete={handleDelete} />
         )}

@@ -1,140 +1,77 @@
 // src/pages/EditActivity.tsx
-import ActivityForm from '../pages/ActivityForm';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-
-// (Você deve mover seu mockData para um local central, mas por enquanto...)
-const mockData = [
-  {
-    id: 1,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 2,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 3,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 4,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 5,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 6,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 7,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 8,
-    date: '12/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-  {
-    id: 9,
-    date: '02/07/25',
-    title: 'Lorem Ipsum',
-    preparo: 'Aragem no solo do talhão 3',
-    aplicacao: 'Fertilizante NPK (20 kg)',
-    responsavel: 'Lorem Ipsum e equipe',
-    propriedade: 'Sítio Oliveira',
-    tipo: 'preparo' as 'preparo',
-    descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    anexos: [{ name: 'Foto.png' }],
-  },
-];
+import { ActivityForm, ActivityFormData } from './ActivityForm'; 
+import { activityService } from '../services/activityService';
 
 export default function EditActivity() {
   const navigate = useNavigate();
-  const { id } = useParams(); // Pega o 'id' da URL (ex: /diary/edit/1)
+  const { id } = useParams(); 
 
-  // 1. "Busca" a atividade. (Em um app real, isso seria um fetch/useEffect)
-  const activityToEdit = mockData.find(
-    (activity) => activity.id.toString() === id
-  );
+  const [activityToEdit, setActivityToEdit] = useState<Partial<ActivityFormData> | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true); 
+  const [isSaving, setIsSaving] = useState(false);          
 
-  const handleEdit = (data: any) => {
-    console.log(`EDITANDO ATIVIDADE ${id}:`, data);
-    // Lógica para salvar...
-    navigate('/diary'); // Volta para a lista
+  useEffect(() => {
+    async function loadActivity() {
+      if (!id) return;
+
+      try {
+        setIsLoadingData(true);
+        const data = await activityService.getById(id);
+        
+        setActivityToEdit(data); 
+      } catch (error) {
+        console.error('Erro ao carregar atividade:', error);
+        alert('Não foi possível carregar os dados da atividade.');
+        navigate('/diary'); 
+      } finally {
+        setIsLoadingData(false);
+      }
+    }
+
+    loadActivity();
+  }, [id, navigate]);
+
+  const handleEdit = async (data: ActivityFormData, files: File[], removedFiles: string[]) => {
+    if (!id) return;
+
+    try {
+      setIsSaving(true);
+
+
+      await activityService.update(id, {
+        ...data,
+        insumoQuantidade: data.insumoQuantidade ? parseFloat(data.insumoQuantidade) : undefined,
+        files: files,          
+        removedFiles: removedFiles, 
+      });
+
+      navigate('/diary');
+    } catch (error) {
+      console.error('Erro ao atualizar atividade:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  if (!activityToEdit) {
-    return <div>Atividade não encontrada!</div>;
+  if (isLoadingData) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+        <p>Carregando dados da atividade...</p>
+      </div>
+    );
   }
 
-  // 2. Renderiza o formulário em modo "Editar"
+  if (!activityToEdit) {
+    return <div>Atividade não encontrada.</div>;
+  }
+
   return (
-    <ActivityForm initialData={activityToEdit} onSubmit={handleEdit} />
+    <ActivityForm 
+      initialData={activityToEdit} 
+      onSubmit={handleEdit} 
+      isLoading={isSaving} 
+    />
   );
 }

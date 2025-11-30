@@ -26,18 +26,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
 
-        // Verify token is still valid by fetching current user
         try {
           const currentUser = await authService.getCurrentUser();
           setUser(currentUser);
           localStorage.setItem('user', JSON.stringify(currentUser));
         } catch (error) {
-          // Token invalid, clear storage
+          console.log('Token inválido, fazendo logout...');
           logout();
         }
+      } else {
+        setUser(null);
+        setToken(null);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
+      setUser(null);
+      setToken(null);
     } finally {
       setIsLoading(false);
     }

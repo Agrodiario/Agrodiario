@@ -8,6 +8,8 @@ import databaseConfig from '@config/database.config';
 import { validationSchema } from '@config/validation.schema';
 import { UsersModule } from '@modules/users/users.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { ActivityModule } from './modules/activities/activities.module';
+import { EmbrapaModule } from './embrapa/embrapa.module';
 import { PropertiesModule } from '@modules/properties/properties.module';
 import { CulturesModule } from '@modules/cultures/cultures.module';
 
@@ -42,8 +44,10 @@ import { CulturesModule } from '@modules/cultures/cultures.module';
     // Feature modules
     UsersModule,
     AuthModule,
+    ActivityModule,
+    EmbrapaModule,
     PropertiesModule,
-    CulturesModule,
+    CulturesModule
   ],
   controllers: [AppController],
   providers: [AppService],

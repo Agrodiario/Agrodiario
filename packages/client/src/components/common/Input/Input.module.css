@@ -53,3 +53,27 @@
   min-height: 120px; /* Altura padrão para 'Descrição' */
   line-height: 1.5; /* Melhora a legibilidade do textarea */
 }
+
+.select {
+  appearance: none; /* Remove a seta padrão do navegador */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  background-color: transparent;
+  width: 100%;
+  /* Garante que o texto não fique por baixo do ícone */
+  padding-right: 20px; 
+}
+
+/* Ajuste de cor para o placeholder (opção vazia) no select */
+.select:invalid,
+.select option[value=""] {
+  color: var(--color-text-placeholder);
+}
+
+/* Ajuste para o input de data ficar consistente */
+input[type="date"] {
+  /* Força a fonte correta */
+  font-family: inherit;
+  color: var(--color-text-primary);
+}

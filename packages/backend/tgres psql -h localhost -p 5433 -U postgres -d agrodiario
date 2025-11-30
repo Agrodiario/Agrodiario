@@ -1,0 +1,20 @@
+  column_name  
+---------------
+ id
+ created_at
+ updated_at
+ propertyId
+ userId
+ isActive
+ property_id
+ user_id
+ cycle
+ origin
+ supplier
+ planting_date
+ planting_area
+ observations
+ cultureName
+ cultivar
+(16 rows)
+

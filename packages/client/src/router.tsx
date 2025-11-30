@@ -1,30 +1,41 @@
-// src/router.tsx
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 // Layouts
 import RootLayout from './layouts/RootLayout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { RootRedirector } from './components/RootRedirector';
 
-// Páginas de Autenticação
+// Páginas
 import LoginPage from './pages/auth/Login';
 import RegisterPage from './pages/auth/Register';
-
-// Páginas do App (dentro do RootLayout)
 import HomePage from './pages/Home';
 import DiaryPage from './pages/Diary';
 import PropertiesPage from './pages/Properties';
 import CulturesPage from './pages/Cultures';
 import ProductsPage from './pages/Products';
-import NewActivityPage from './pages/ActivityForm';
 import DiaryLayout from './layouts/DiaryLayout';
 import NewActivity from './pages/NewActivity';
 import EditActivity from './pages/EditActivity';
 import PropertiesLayout from './layouts/PropertiesLayout';
 import NewProperty from './pages/NewProperty';
 import EditProperty from './pages/EditProperty';
+import CulturesLayout from './layouts/CulturesLayout';
+import Landing from './pages/landing-page/Landing';
 
 export const router = createBrowserRouter([
-  /* --- ROTAS DE AUTENTICAÇÃO (Sem Sidebar) --- */
+  /* --- ROTA RAIZ - Redirecionamento Inteligente --- */
+  {
+    path: '/',
+    element: <RootRedirector />,
+  },
+
+  /* --- LANDING PAGE (Pública) --- */
+  {
+    path: '/landing',
+    element: <Landing />,
+  },
+
+  /* --- AUTENTICAÇÃO (Públicas) --- */
   {
     path: '/login',
     element: <LoginPage />,
@@ -34,7 +45,7 @@ export const router = createBrowserRouter([
     element: <RegisterPage />,
   },
 
-  /* --- ROTAS DO APP (Com Sidebar) --- */
+  /* --- APP PRINCIPAL (Protegido) --- */
   {
     path: '/',
     element: (
@@ -42,38 +53,52 @@ export const router = createBrowserRouter([
         <RootLayout />
       </ProtectedRoute>
     ),
-    // errorElement: <ErrorPage />,
     children: [
       {
-        index: true, // Rota 'Início'
+        path: 'home',
         element: <HomePage />,
       },
+
       {
         path: 'diary',
-        element: <DiaryLayout />, // O pai <Outlet> renderiza os filhos
+        element: <DiaryLayout />,
         children: [
-          { index: true, element: <DiaryPage /> },      // /diary
-          { path: 'new', element: <NewActivity /> },  // /diary/new
-          { path: 'edit/:id', element: <EditActivity /> }, // /diary/edit/1
+          { index: true, element: <DiaryPage /> }, 
+          { path: 'new', element: <NewActivity /> },
+          { path: 'edit/:id', element: <EditActivity /> }
         ],
       },
+
       {
         path: 'properties',
-        element: <PropertiesLayout />, // O novo layout de seção
+        element: <PropertiesLayout />,
         children: [
-          { index: true, element: <PropertiesPage /> },    // /properties
-          { path: 'new', element: <NewProperty /> },  // /properties/new
-          { path: 'edit/:id', element: <EditProperty /> }, // /properties/edit/1
+          { index: true, element: <PropertiesPage /> },
+          { path: 'new', element: <NewProperty /> },
+          { path: 'edit/:id', element: <EditProperty /> }
         ],
       },
+
+      /* Culturas */
       {
         path: 'cultures',
-        element: <CulturesPage />,
+        element: <CulturesLayout />,
+        children: [
+          { index: true, element: <CulturesPage /> },
+        ],
       },
+
+      { path: 'products', element: <ProductsPage /> },
+      
       {
-        path: 'products',
-        element: <ProductsPage />,
+        path: '*',
+        element: <Navigate to="/home" replace />,
       },
     ],
+  },
+
+  {
+    path: '*',
+    element: <Navigate to="/landing" replace />,
   },
 ]);

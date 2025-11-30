@@ -1,0 +1,63 @@
+/* src/pages/Cultures.module.css */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.toolbarButtons {
+  display: flex;
+  flex: 40;
+  gap: 1rem;
+}
+
+.searchWrapper {
+  flex: 60;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 0;
+}
+
+/* Estilos do Dropdown */
+.dropdownMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dropdownItem {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.dropdownItem:hover {
+  background-color: var(--color-bg-light);
+  color: var(--color-text-primary);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -36,7 +36,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password, rememberMe });
-      navigate('/');
+      navigate('/app');
     } catch (err: any) {
       console.error('Erro no login:', err);
       setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');

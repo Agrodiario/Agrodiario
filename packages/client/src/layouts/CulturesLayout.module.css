@@ -1,0 +1,58 @@
+/* src/layouts/CulturesLayout.module.css */
+.culturesLayout {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Botão "Novo cultura" */
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--border-radius-md);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  color: var(--color-text-on-primary);
+  background-color: var(--color-primary);
+}
+
+.linkButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .actions {
+    width: 100%;
+  }
+  .actions > a {
+    flex: 1;
+  }
+}

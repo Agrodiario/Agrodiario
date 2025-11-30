@@ -1,61 +1,86 @@
-// src/components/common/Input/Input.tsx
 import { ComponentPropsWithoutRef, ReactNode } from 'react';
 import styles from './Input.module.css';
 
-// 1. Unimos as props de 'input' e 'textarea'
-//    e adicionamos nossa prop customizada 'as'.
+// Definimos o tipo para as opções do select
+export type SelectOption = {
+  label: string;
+  value: string | number;
+};
+
+// Props agora aceitam 'select' e 'options'
 type InputProps = ComponentPropsWithoutRef<'input'> &
-  ComponentPropsWithoutRef<'textarea'> & {
-    as?: 'input' | 'textarea'; // 'as' decide qual tag renderizar
+  ComponentPropsWithoutRef<'textarea'> &
+  ComponentPropsWithoutRef<'select'> & {
+    as?: 'input' | 'textarea' | 'select';
     label: string;
     icon?: ReactNode;
     onIconClick?: () => void;
+    options?: SelectOption[]; // Novo array de opções
   };
 
 export function Input({
-  as = 'input', // 2. O padrão é 'input'
+  as = 'input',
   label,
   icon,
   onIconClick,
-  ...props // 3. 'props' conterá 'type', 'name', 'value', 'rows', etc.
+  options,
+  className,
+  ...props
 }: InputProps) {
   let InputElement;
-  
-  // 4. Classes condicionais
-  // Para o wrapper: corrige o alinhamento vertical do ícone
+
+  // Classes condicionais
   const wrapperClass = `${styles.inputWrapper} ${
     as === 'textarea' ? styles.textareaWrapper : ''
-  }`;
-  
-  // Para o input: permite estilizar o textarea (ex: altura, resize)
+  } ${className || ''}`;
+
   const inputClass = `${styles.input} ${
     as === 'textarea' ? styles.textarea : ''
-  }`;
+  } ${as === 'select' ? styles.select : ''}`;
 
-  // 5. Renderização condicional
+  // 1. Renderização condicional para TEXTAREA
   if (as === 'textarea') {
     InputElement = (
       <textarea
         className={inputClass}
         placeholder={label}
-        // Removemos 'type' que não existe em textarea
         {...(props as ComponentPropsWithoutRef<'textarea'>)}
-        // (props.rows || 3) é um bom padrão, se você não passar
-        rows={props.rows || 4} 
+        rows={props.rows || 4}
       />
     );
-  } else {
+  } 
+  // 2. Renderização condicional para SELECT (Novo)
+  else if (as === 'select') {
+    InputElement = (
+      <select
+        className={inputClass}
+        // O value="" serve como placeholder no select
+        {...(props as ComponentPropsWithoutRef<'select'>)}
+      >
+        <option value="" disabled hidden>
+          {label} {/* Usa o label como placeholder */}
+        </option>
+        {options?.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    );
+  } 
+  // 3. Padrão INPUT
+  else {
     InputElement = (
       <input
         className={inputClass}
-        placeholder={label}
+        placeholder={label} // No type="date", o placeholder pode não aparecer em alguns browsers
         {...(props as ComponentPropsWithoutRef<'input'>)}
       />
     );
   }
 
   return (
-    <div className={wrapperClass} style={props.style}>
+    <div className={wrapperClass}>
       {InputElement}
       {icon && (
         <span onClick={onIconClick} className={styles.icon}>

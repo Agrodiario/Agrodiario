@@ -1,0 +1,73 @@
+.ctaSection {
+    position: relative;
+    width: 100%;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 60px 40px;
+}
+
+.ctaBackground {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.ctaImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ctaOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right,
+            rgba(126, 206, 106, 0) 0%,
+            rgba(113, 185, 96, 0.1) 10%,
+            /* antes era 50%, agora começa antes */
+            rgba(64, 104, 54, 0.9) 60%
+            /* escurece mais gradualmente */
+        );
+}
+
+.ctaContent {
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.ctaTitle {
+    font-size: 32px;
+    font-weight: bold;
+    color: #f1f5ec;
+    margin: 0;
+    line-height: 1.3;
+    font-family: "Inter", sans-serif;
+}
+
+.ctaDescription {
+    font-size: 18px;
+    font-weight: 400;
+    color: #f1f5ec;
+    margin: 0;
+    line-height: 1.6;
+    font-family: "Inter", sans-serif;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .ctaSection {
+        padding: 60px 20px;
+    }
+
+    .ctaTitle {
+        font-size: 28px;
+    }
+}

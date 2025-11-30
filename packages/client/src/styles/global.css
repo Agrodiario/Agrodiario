@@ -1,7 +1,9 @@
 /* src/global.css */
 
+/* Fontes */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
+/* Reset básico */
 *,
 *::before,
 *::after {
@@ -10,51 +12,55 @@
   padding: 0;
 }
 
-:root {
-  /* Cores Principais */
-  --color-primary: #36693E;
-  --color-primary-container: #B7F1BA;
-  --color-primary-dark: #006a35;
-  --color-on-primary-container: #1D5128;
-  --color-on-surface-variant: #424941;
-
-  /* Cores de Texto */
-  --color-text-primary: #101828;
-  /* Títulos escuros */
-  --color-text-secondary: #475467;
-  /* Subtítulos */
-  --color-text-placeholder: #667085;
-  /* Placeholders */
-  --color-text-on-primary: #FFFFFF;
-  /* Texto sobre botão verde */
-
-  /* Cores de Fundo */
-  --color-bg-light: #f7f9f7;
-  /* Fundo da página (verde claro) */
-  --color-bg-white: #FFFFFF;
-  /* Fundo do card */
-
-  /* Outras */
-  --color-border: #d0d5dd;
-  /* Bordas do input */
-
-  --color-icon: #36693E;
-  /* Ícones */
-
-  /* Tipografia */
-  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-
-  /* Sizing */
-  --border-radius-md: 8px;
-  --border-radius-lg: 16px;
-  --border-radius-xx: 32px;
-}
-
 html,
 body,
 #root {
   height: 100%;
 }
+
+/* =================================================================== */
+/* Variáveis Globais */
+/* =================================================================== */
+
+:root {
+  /* Cores Principais */
+  --color-primary: #36693E;
+  --color-primary-container: #B7F1BA;
+  --color-primary-dark: #003412;
+  --color-on-primary-container: #1D5128;
+
+  /* Cores de Texto */
+  --color-text-primary: #101828;          /* Títulos escuros */
+  --color-text-secondary: #475467;        /* Subtítulos */
+  --color-text-placeholder: #667085;      /* Placeholders */
+  --color-text-on-primary: #FFFFFF;       /* Texto sobre botão verde */
+  --color-text-on-surface: #181D18;
+  --color-text-on-surface-variant: #424941;
+
+  /* Cores de Fundo */
+  --color-bg-light: #f7f9f7;              /* Fundo da página (verde claro) */
+  --color-bg-white: #FFFFFF;              /* Fundo do card */
+  --color-bg-surface-container-low: #F1F5EC;
+
+  /* Outras */
+  --color-border: #d0d5dd;                /* Bordas de inputs */
+  --color-outline: #727970;
+  --color-icon: #36693E;
+
+  /* Tipografia */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+
+  /* Sizing */
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+  --border-radius-xx: 32px;
+  --border-radius-button: 100px;
+}
+
+/* =================================================================== */
+/* Estilos Base */
+/* =================================================================== */
 
 body {
   font-family: var(--font-family-sans);
@@ -66,16 +72,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Para Firefox */
+  /* Firefox */
   scrollbar-width: none;
 
-  /* Para IE e Edge */
+  /* IE/Edge */
   -ms-overflow-style: none;
 }
 
+/* Remover scrollbar no Chrome/Safari */
 body::-webkit-scrollbar {
   display: none;
 }
+
+/* =================================================================== */
+/* Mídias */
+/* =================================================================== */
 
 img,
 picture,
@@ -86,6 +97,10 @@ svg {
   max-width: 100%;
 }
 
+/* =================================================================== */
+/* Links */
+/* =================================================================== */
+
 a {
   color: var(--color-primary);
   text-decoration: none;
@@ -94,6 +109,10 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+/* =================================================================== */
+/* Formulários */
+/* =================================================================== */
 
 button,
 input,

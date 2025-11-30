@@ -4,9 +4,11 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from '@common/filters/all-exceptions.filter';
 import { HttpExceptionFilter } from '@common/filters/http-exception.filter';
 import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Global API prefix
   const apiPrefix = process.env.API_PREFIX || 'api/v1';
@@ -35,6 +37,10 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/', // URL será http://localhost:3000/uploads/nome-do-arquivo.jpg
+  });
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

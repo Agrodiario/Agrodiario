@@ -44,12 +44,12 @@ yarn install
 ## Running the project
 ### Front-end
 ```bash
-yarn dev
+yarn dev:client
 ```
 
 ### Back-end
 ```bash
-yarn start
+yarn dev:backend
 ```
 ## Figma Design
 You can view the project’s design prototype on Figma:

@@ -1,50 +1,49 @@
 /* src/components/common/Button/Button.module.css */
 .button {
-    width: 100%;
-    
-    color: var(--color-text-on-primary);
-    background-color: var(--color-primary);
-    border: none;
-    border-radius: var(--border-radius-md); 
-    
-    transition: background-color 0.2s ease, opacity 0.2s ease;
-
-    display: inline-flex; /* Alinha o ícone com o texto */
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem; /* Espaço entre ícone e texto */
-    padding: 12px 20px;
-    font-size: 0.95rem; /* Ajuste fino */
-    font-weight: 600;
-    border: none;
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
-  }
+  width: auto;
+  color: var(--color-text-on-primary);
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--border-radius-button);
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+  display: inline-flex;
+  /* Alinha o ícone com o texto */
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  /* Espaço entre ícone e texto */
+  padding: 12px 20px;
+  /* src/components/common/Button/Button.module.css */
 
   .icon {
-    display: flex; /* Garante que o ícone fique centralizado */
+    display: flex;
+    /* Garante que o ícone fique centralizado */
     align-items: center;
   }
-  
+
   /* --- Variantes de Cor --- */
-  
+
   .button.primary {
     color: var(--color-text-on-primary);
     background-color: var(--color-primary);
   }
+
   .button.primary:hover {
     background-color: var(--color-primary-dark);
   }
-  
+
   /* "Gerar relatório" */
   .button.secondary {
-    color: #d95a2a; /* Laranja escuro */
-    background-color: #ffeee8; /* Laranja claro (pêssego) */
+    color: #d95a2a;
+    /* Laranja escuro */
+    background-color: #ffeee8;
+    /* Laranja claro (pêssego) */
   }
+
   .button.secondary:hover {
     background-color: #ffd8cc;
   }
-  
+
   /* "Ordenar por" */
   .button.tertiary {
     color: var(--color-text-secondary);
@@ -52,33 +51,140 @@
     border: 1px solid var(--color-border);
     box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
   }
+
   .button.tertiary:hover {
     background-color: #f9fafb;
   }
-  
-  /* "Visualizar" e "Carregar mais" */
+
+  /* "Visualizar" */
   .button.quaternary {
-    color: var(--color-primary-dark);
-    background-color: #e3f4e9; /* Verde bem claro */
-    font-weight: 500;
+    color: var(--color-primary);
+    background-color: var(--color-bg-surface-container-low);
+    box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
   }
+
   .button.quaternary:hover {
+    background-color: #d1ebd9;
+  }
+
+  /* "Carregar mais" */
+  .button.outlined {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-outline);
+  }
+
+  .button.outlined:hover {
     background-color: #d1ebd9;
   }
 
   .button.danger {
     color: var(--color-text-on-primary);
-    background-color: #d9402a; /* Vermelho do seu TagToggle */
+    background-color: #d9402a;
+    /* Vermelho do seu TagToggle */
   }
+
   .button.danger:hover {
     background-color: #b92915;
   }
-  
+
   .button:hover {
     background-color: var(--color-primary-dark);
   }
 
   .button:disabled,
+  .button:disabled:hover {
+    background-color: var(--color-border);
+    color: var(--color-text-placeholder);
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+
+  font-size: 0.95rem;
+  /* Ajuste fino */
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.icon {
+  display: flex;
+  /* Garante que o ícone fique centralizado */
+  align-items: center;
+}
+
+/* --- Variantes de Cor --- */
+
+.button.primary {
+  color: var(--color-text-on-primary);
+  background-color: var(--color-primary);
+}
+
+.button.primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* "Gerar relatório" */
+.button.secondary {
+  color: #d95a2a;
+  /* Laranja escuro */
+  background-color: #ffeee8;
+  /* Laranja claro (pêssego) */
+}
+
+.button.secondary:hover {
+  background-color: #ffd8cc;
+}
+
+/* "Ordenar por" */
+.button.tertiary {
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.button.tertiary:hover {
+  background-color: #f9fafb;
+}
+
+/* "Visualizar" */
+.button.quaternary {
+  color: var(--color-primary);
+  background-color: var(--color-bg-surface-container-low);
+  /* Verde bem claro */
+}
+
+.button.quaternary:hover {
+  background-color: #d1ebd9;
+}
+
+/* "Carregar mais" */
+.button.outlined {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-outline);
+}
+
+.button.outlined:hover {
+  background-color: #d1ebd9;
+}
+
+.button.danger {
+  color: var(--color-text-on-primary);
+  background-color: #d9402a;
+  /* Vermelho do seu TagToggle */
+}
+
+.button.danger:hover {
+  background-color: #b92915;
+}
+
+.button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.button:disabled,
 .button:disabled:hover {
   background-color: var(--color-border);
   color: var(--color-text-placeholder);
