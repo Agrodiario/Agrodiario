@@ -1,14 +1,10 @@
-// src/layouts/DiaryLayout.tsx
-import { Outlet, Link, useLocation } from 'react-router-dom'; // 1. Importe useLocation
-import { Button } from '../components/common/Button/Button';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import styles from './DiaryLayout.module.css';
-import { FiPlus, FiDownload } from 'react-icons/fi';
+import { FiPlus} from 'react-icons/fi';
 
 export default function DiaryLayout() {
-  // 2. Obtenha a localização atual
   const location = useLocation();
 
-  // 3. Verifique se estamos na página 'new'
   const isNewActivityPage = location.pathname === '/diary/new';
 
   return (
@@ -21,7 +17,7 @@ export default function DiaryLayout() {
           {/* 4. RENDERIZAÇÃO CONDICIONAL */}
           {/* Só mostre o botão se NÃO estiver na página new */}
           {!isNewActivityPage && (
-            <Link to="new" className={styles.linkButton}>
+            <Link to="new" className={styles.primaryButton}>
               <FiPlus size={18} />
               <span>Nova atividade</span>
             </Link>
