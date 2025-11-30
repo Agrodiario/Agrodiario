@@ -1,8 +1,8 @@
 // src/components/properties/PropertyForm/PropertyForm.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Polygon, useMapEvents, FeatureGroup } from 'react-leaflet';
-import { EditControl } from 'react-leaflet-draw';
+import { MapContainer, TileLayer, Marker, Polygon, useMapEvents } from 'react-leaflet';
+import { EditableMap } from '../../map/EditableMap';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
@@ -263,31 +263,11 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               <TileLayer
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               />
-              
-              <FeatureGroup>
-                <EditControl
-                  position='topright'
-                  onCreated={_onCreated}
-                  onDeleted={_onDeleted}
-                  draw={{
-                    rectangle: false,
-                    circle: false,
-                    circlemarker: false,
-                    marker: false,
-                    polyline: false,
-                    polygon: {
-                      allowIntersection: false,
-                      showArea: true,
-                      drawError: { color: '#e1e100', message: '<strong>Erro:</strong> linhas não podem se cruzar!' },
-                      shapeOptions: { color: 'yellow', fillOpacity: 0.4 }
-                    }
-                  }}
-                />
-                {/* Se estivermos editando e já existir um polígono, mostramos ele aqui */}
-                {formData.talhaoPolygon && (
-                  <Polygon positions={formData.talhaoPolygon} pathOptions={{ color: 'yellow', fillOpacity: 0.4 }} />
-                )}
-              </FeatureGroup>
+              <EditableMap
+                onCreated={_onCreated}
+                onDeleted={_onDeleted}
+                existingPolygon={formData.talhaoPolygon}
+              />
             </MapContainer>
           </div>
         </div>

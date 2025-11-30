@@ -19,7 +19,7 @@ export function CultureDetailsDrawer({ culture, onDelete }: Props) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleEdit = () => {
-    navigate(`/app/cultures/edit/${culture.id}`);
+    navigate(`/cultures/edit/${culture.id}`);
   };
 
   const handleConfirmDelete = () => {
