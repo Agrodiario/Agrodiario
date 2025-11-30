@@ -16,7 +16,7 @@ export default function CulturesLayout() {
         <h1 className={styles.title}>Minhas culturas</h1>
         <div className={styles.actions}>
           {!hideButton && (
-            <Link to="new" className={styles.linkButton}>
+            <Link to="new" className={styles.primaryButton}>
               <FiPlus size={18} />
               <span>Nova cultura</span>
             </Link>
