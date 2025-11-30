@@ -20,12 +20,15 @@ import { IoIosArrowDown } from 'react-icons/io';
 import { UPLOADS_URL } from '../config/api.client';
 import { apiClient } from '../config/api.client';
 import { SearchableSelect } from '@/components/common/SearchableSelect/SearchableSelect';
+import { cultureService } from '../services/culture.service';
+import { propertyService } from '../services/property.service';
 
 // Tipos
 export type ActivityFormData = {
   date: string;
   titulo: string;
   propriedade: string;
+  cultureId: string;
   tipo: 'preparo' | 'aplicacao' | 'colheita' | 'manejo';
   descricao: string;
   operacao: string;
@@ -68,6 +71,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
     titulo: initialData?.titulo || '',
     date: initialData?.date || '',
     propriedade: initialData?.propriedade || '',
+    cultureId: initialData?.cultureId || '',
     tipo: initialData?.tipo || 'preparo',
     descricao: initialData?.descricao || '',
     operacao: initialData?.operacao || '',
@@ -81,6 +85,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   const [showInsumos, setShowInsumos] = useState(!!initialData?.insumoNome);
   const [insumoOptions, setInsumoOptions] = useState<{label: string, value: string}[]>([]);
   const [isLoadingInsumos, setIsLoadingInsumos] = useState(false);
+  const [culturesOptions, setCulturesOptions] = useState<{label: string, value: string}[]>([]);
 
   const [isValid, setIsValid] = useState(false);
 
@@ -134,13 +139,42 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   };
 
   useEffect(() => {
-    const isBasicInfoValid = formData.date.trim() !== '' && formData.propriedade.trim() !== '' && formData.descricao.trim() !== '' && formData.responsavel.trim() !== '';
+    const isBasicInfoValid = formData.date.trim() !== '' && formData.propriedade.trim() !== '' && formData.cultureId.trim() !== '' && formData.descricao.trim() !== '' && formData.responsavel.trim() !== '';
     let isInsumoValid = true;
     if (showInsumos) {
       isInsumoValid = (formData.insumoNome || "").trim() !== '';
     }
     setIsValid(isBasicInfoValid && isInsumoValid);
   }, [formData, showInsumos]);
+
+  // Buscar culturas quando a propriedade mudar
+  useEffect(() => {
+    async function fetchCultures() {
+      if (!formData.propriedade) {
+        setCulturesOptions([]);
+        return;
+      }
+      
+      try {
+        // Buscar propriedades para pegar o ID
+        const propertiesResponse = await propertyService.findAll(1, 100);
+        const selectedProperty = propertiesResponse.data.find(p => p.name === formData.propriedade);
+        
+        if (selectedProperty) {
+          const cultures = await cultureService.findByProperty(selectedProperty.id);
+          setCulturesOptions(cultures.map(c => ({
+            label: `${c.cultureName}${c.cultivar ? ` - ${c.cultivar}` : ''}`,
+            value: c.id
+          })));
+        }
+      } catch (error) {
+        console.error("Erro ao carregar culturas:", error);
+        setCulturesOptions([]);
+      }
+    }
+
+    fetchCultures();
+  }, [formData.propriedade]);
 
   useEffect(() => {
     async function fetchEmbrapaInputs() {
@@ -190,6 +224,16 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             <Input label="Data da atividade" name="date" type="date" value={formData.date} onChange={handleChange} />
             <Input as="select" label="Propriedade associada" name="propriedade" value={formData.propriedade} onChange={handleChange} options={mockProperties} icon={<IoIosArrowDown size={18} />} />
           </div>
+          <Input 
+            as="select" 
+            label="Cultura associada" 
+            name="cultureId" 
+            value={formData.cultureId} 
+            onChange={handleChange} 
+            options={culturesOptions} 
+            icon={<IoIosArrowDown size={18} />}
+            disabled={!formData.propriedade || culturesOptions.length === 0}
+          />
         </div>
 
          <div className={styles.section}>

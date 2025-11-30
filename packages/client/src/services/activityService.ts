@@ -6,6 +6,12 @@ export interface ActivityDTO {
   titulo: string;   
   date: string;
   propriedade: string;
+  cultureId: string;
+  culture?: {
+    id: string;
+    cultureName: string;
+    cultivar?: string;
+  };
   tipo: string;
   descricao: string;
   operacao: string;
@@ -29,6 +35,7 @@ const createFormData = (data: ActivityDTO) => {
   formData.append('titulo', data.titulo);
   formData.append('date', data.date);
   formData.append('propriedade', data.propriedade);
+  formData.append('cultureId', data.cultureId);
   formData.append('tipo', data.tipo);
   formData.append('descricao', data.descricao);
   formData.append('responsavel', data.responsavel);

@@ -43,6 +43,7 @@ export class ActivityService {
     const skip = (page - 1) * limit;
 
     const query = this.activityRepository.createQueryBuilder('activity');
+    query.leftJoinAndSelect('activity.culture', 'culture');
     query.where('activity.userId = :userId', { userId });
 
     if (search && search.trim().length > 0) {
@@ -51,7 +52,8 @@ export class ActivityService {
           qb.where('activity.titulo ILIKE :search', { search: `%${search}%` })
             .orWhere('activity.descricao ILIKE :search', { search: `%${search}%` })
             .orWhere('activity.propriedade ILIKE :search', { search: `%${search}%` })
-            .orWhere('activity.insumoNome ILIKE :search', { search: `%${search}%` });
+            .orWhere('activity.insumoNome ILIKE :search', { search: `%${search}%` })
+            .orWhere('culture.cultureName ILIKE :search', { search: `%${search}%` });
         }),
       );
     }

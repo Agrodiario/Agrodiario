@@ -17,6 +17,7 @@ export type CultureFormData = {
   plantingDate: string;
   plantingArea: string;
   observations: string;
+  plotName?: string;
 };
 
 type Props = {
@@ -39,9 +40,14 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
     plantingDate: initialData?.plantingDate || '',
     plantingArea: initialData?.plantingArea || '',
     observations: initialData?.observations || '',
+    plotName: initialData?.plotName || '',
   });
 
   const [properties, setProperties] = useState<any[]>([]);
+  const [areaInputType, setAreaInputType] = useState<'hectares' | 'plot'>(
+    initialData?.plotName ? 'plot' : 'hectares'
+  );
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
 
   // Carrega propriedades do usuário
   useEffect(() => {
@@ -49,12 +55,29 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
       try {
         const response = await propertyService.findAll(1, 100);
         setProperties(response.data);
+        // Se está editando, encontrar a propriedade selecionada
+        if (initialData?.propertyId) {
+          const prop = response.data.find((p: any) => p.id === initialData.propertyId);
+          setSelectedProperty(prop);
+        }
       } catch (error) {
         console.error('Erro ao carregar propriedades:', error);
       }
     };
     fetchProperties();
   }, []);
+
+  // Atualiza propriedade selecionada quando propertyId muda
+  useEffect(() => {
+    if (formData.propertyId) {
+      const prop = properties.find(p => p.id === formData.propertyId);
+      setSelectedProperty(prop);
+      // Se mudar de propriedade, limpar seleção de talhão
+      if (areaInputType === 'plot') {
+        setFormData(prev => ({ ...prev, plotName: '' }));
+      }
+    }
+  }, [formData.propertyId, properties]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -74,7 +97,27 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
     setFormData(prev => ({ ...prev, cultureName }));
   };
 
+  const handleAreaTypeChange = (type: 'hectares' | 'plot') => {
+    setAreaInputType(type);
+    if (type === 'hectares') {
+      setFormData(prev => ({ ...prev, plotName: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, plantingArea: '' }));
+    }
+  };
+
+  const handlePlotChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const plotName = e.target.value;
+    const plot = selectedProperty?.plots?.find((p: any) => p.name === plotName);
+    setFormData(prev => ({
+      ...prev,
+      plotName,
+      plantingArea: plot ? plot.area.toString() : '',
+    }));
+  };
+
   const submitText = isEditMode ? 'Salvar alterações' : 'Salvar cultura';
+  const hasPlots = selectedProperty?.plots && selectedProperty.plots.length > 0;
 
   return (
     <div className={styles.page}>
@@ -118,24 +161,26 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
 
         {/* Nome do cultivar/variedade */}
         <div className={styles.section}>
-          <Input
-            label="Nome do cultivar/variedade"
+          <label className={styles.label}>Nome do cultivar/variedade</label>
+          <input
             name="cultivar"
             value={formData.cultivar}
             onChange={handleChange}
             placeholder="AG 1051"
+            className={styles.input}
           />
         </div>
 
         {/* Ciclo */}
         <div className={styles.section}>
-          <Input
-            label="Ciclo (em dias)"
+          <label className={styles.label}>Ciclo (em dias)</label>
+          <input
             name="cycle"
             type="number"
             value={formData.cycle}
             onChange={handleChange}
             placeholder="120"
+            className={styles.input}
             required
           />
         </div>
@@ -170,39 +215,93 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
 
         {/* Fornecedor/empresa sementeira */}
         <div className={styles.section}>
-          <Input
-            label="Fornecedor/empresa sementeira"
+          <label className={styles.label}>Fornecedor/empresa sementeira</label>
+          <input
             name="supplier"
             value={formData.supplier}
             onChange={handleChange}
             placeholder="Lorem Ipsum"
+            className={styles.input}
           />
         </div>
 
         {/* Data de plantio prevista ou realizada */}
         <div className={styles.section}>
-          <Input
-            label="Data de plantio prevista ou realizada"
+          <label className={styles.label}>Data de plantio prevista ou realizada</label>
+          <input
             name="plantingDate"
             type="date"
             value={formData.plantingDate}
             onChange={handleChange}
+            className={styles.input}
             required
           />
         </div>
 
         {/* Área de plantio */}
         <div className={styles.section}>
-          <Input
-            label="Área de plantio (hectares ou talhão)"
-            name="plantingArea"
-            type="number"
-            step="0.01"
-            value={formData.plantingArea}
-            onChange={handleChange}
-            placeholder="1"
-            required
-          />
+          <label className={styles.label}>Área de plantio</label>
+          
+          {formData.propertyId && hasPlots && (
+            <div className={styles.radioGroup} style={{ flexDirection: 'row', gap: '1.5rem', marginBottom: '0.75rem' }}>
+              <Radio
+                name="areaType"
+                value="hectares"
+                label="Hectares"
+                checked={areaInputType === 'hectares'}
+                onChange={() => handleAreaTypeChange('hectares')}
+              />
+              <Radio
+                name="areaType"
+                value="plot"
+                label="Talhão"
+                checked={areaInputType === 'plot'}
+                onChange={() => handleAreaTypeChange('plot')}
+              />
+            </div>
+          )}
+
+          {formData.propertyId && !hasPlots && (
+            <p style={{ fontSize: '0.85rem', color: '#667085', marginBottom: '0.5rem' }}>
+              Esta propriedade não possui talhões cadastrados. Digite a área em hectares.
+            </p>
+          )}
+
+          {areaInputType === 'hectares' ? (
+            <input
+              name="plantingArea"
+              type="number"
+              step="0.01"
+              value={formData.plantingArea}
+              onChange={handleChange}
+              placeholder="Digite a área em hectares"
+              className={styles.input}
+              required
+            />
+          ) : (
+            <>
+              {selectedProperty?.plots && selectedProperty.plots.length > 0 ? (
+                <select
+                  name="plotName"
+                  value={formData.plotName}
+                  onChange={handlePlotChange}
+                  className={styles.select}
+                  required
+                >
+                  <option value="">Selecione um talhão</option>
+                  {selectedProperty.plots.map((plot: any) => (
+                    <option key={plot.name} value={plot.name}>
+                      {plot.name} - {plot.area} hectares
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p style={{ fontSize: '0.9rem', color: '#d92d20', padding: '0.75rem', backgroundColor: '#fef3f2', borderRadius: '8px' }}>
+                  Não há talhões cadastrados para esta propriedade.
+                </p>
+              )}
+            </>
+          )}
         </div>
 
         {/* Observações adicionais */}

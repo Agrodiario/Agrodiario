@@ -11,6 +11,7 @@ export class CultureResponseDto {
   supplier: string;
   plantingDate: Date;
   plantingArea: number;
+  plotName?: string;
   observations?: string;
   isActive: boolean;
   createdAt: Date;

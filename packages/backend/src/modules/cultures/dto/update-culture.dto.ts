@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsEnum, IsDateString, IsDecimal, IsOptional, Min, MaxLength } from 'class-validator';
+import { IsString, IsInt, IsEnum, IsDateString, IsDecimal, IsOptional, Min, MaxLength, ValidateIf } from 'class-validator';
 import { CultureOrigin } from '../enums/culture-origin.enum';
 
 export class UpdateCultureDto {
@@ -32,6 +32,12 @@ export class UpdateCultureDto {
 
   @IsOptional()
   plantingArea?: number;
+
+  @IsOptional()
+  @ValidateIf((o) => o.plotName !== null)
+  @IsString({ message: 'Nome do talhão deve ser um texto' })
+  @MaxLength(255, { message: 'Nome do talhão deve ter no máximo 255 caracteres' })
+  plotName?: string | null;
 
   @IsOptional()
   @IsString({ message: 'Observações devem ser um texto' })
