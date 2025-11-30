@@ -8,6 +8,8 @@ import { RootRedirector } from './components/RootRedirector';
 // Páginas
 import LoginPage from './pages/auth/Login';
 import RegisterPage from './pages/auth/Register';
+import ForgotPasswordPage from './pages/auth/ForgotPassword';
+import ResetPasswordPage from './pages/auth/ResetPassword';
 import HomePage from './pages/Home';
 import DiaryPage from './pages/Diary';
 import PropertiesPage from './pages/Properties';
@@ -45,6 +47,14 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
 
   /* --- APP PRINCIPAL (Protegido) --- */

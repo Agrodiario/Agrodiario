@@ -5,6 +5,7 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -17,9 +18,11 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly maxLoginAttempts: number;
 
   constructor(
@@ -27,6 +30,7 @@ export class AuthService {
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private emailService: EmailService,
   ) {
     this.maxLoginAttempts = this.configService.get<number>('MAX_LOGIN_ATTEMPTS', 5);
   }
@@ -58,8 +62,12 @@ export class AuthService {
 
     const savedUser = await this.usersRepository.save(user);
 
-    // TODO: Send verification email (will implement in Phase 2)
-    // await this.emailService.sendVerificationEmail(savedUser.email, emailVerificationToken);
+    // Send verification email (non-blocking)
+    this.emailService
+      .sendVerificationEmail(savedUser.email, emailVerificationToken)
+      .catch((err) => {
+        this.logger.error(`Failed to send verification email: ${err.message}`);
+      });
 
     // Generate JWT token for auto-login
     const accessToken = this.generateToken(savedUser.id, savedUser.email, false);
@@ -182,8 +190,10 @@ export class AuthService {
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     await this.usersRepository.update(user.id, { emailVerificationToken });
 
-    // TODO: Send verification email (will implement in Phase 2)
-    // await this.emailService.sendVerificationEmail(user.email, emailVerificationToken);
+    // Send verification email (non-blocking)
+    this.emailService.sendVerificationEmail(user.email, emailVerificationToken).catch((err) => {
+      this.logger.error(`Failed to send verification email: ${err.message}`);
+    });
 
     return { message: 'Verification email sent successfully' };
   }
@@ -209,8 +219,10 @@ export class AuthService {
       passwordResetExpires,
     });
 
-    // TODO: Send password reset email (will implement in Phase 2)
-    // await this.emailService.sendPasswordResetEmail(user.email, passwordResetToken);
+    // Send password reset email (non-blocking)
+    this.emailService.sendPasswordResetEmail(user.email, passwordResetToken).catch((err) => {
+      this.logger.error(`Failed to send password reset email: ${err.message}`);
+    });
 
     return {
       message: 'If your email is registered, you will receive a password reset link',

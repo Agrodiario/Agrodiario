@@ -103,17 +103,22 @@ export default function LoginPage() {
               onIconClick={() => setShowPassword(!showPassword)}
             />
 
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-              <input
-                type="checkbox"
-                id="rememberMe"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                style={{ marginRight: '8px' }}
-              />
-              <label htmlFor="rememberMe" style={{ fontSize: '14px', cursor: 'pointer' }}>
-                Lembrar de mim (30 dias)
-              </label>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  style={{ marginRight: '8px' }}
+                />
+                <label htmlFor="rememberMe" style={{ fontSize: '14px', cursor: 'pointer' }}>
+                  Lembrar de mim (30 dias)
+                </label>
+              </div>
+              <Link to="/forgot-password" className={styles.link} style={{ fontSize: '14px' }}>
+                Esqueceu a senha?
+              </Link>
             </div>
 
             <Button type="submit" disabled={isLoading}>
