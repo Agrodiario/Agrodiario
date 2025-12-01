@@ -1,6 +1,9 @@
 export interface Plot {
   name: string;
   area: number;
+  culture: string;
+  situacao: 'producao' | 'preparo' | 'pousio';
+  polygon?: any;
 }
 
 export interface Property {
@@ -25,6 +28,7 @@ export interface CreatePropertyDto {
   productionArea: number;
   mainCrop: string;
   certifications?: string;
+  plots?: Plot[];
 }
 
 export interface UpdatePropertyDto {
@@ -34,6 +38,7 @@ export interface UpdatePropertyDto {
   productionArea?: number;
   mainCrop?: string;
   certifications?: string;
+  plots?: Plot[];
 }
 
 export interface PropertiesListResponse {
