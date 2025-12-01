@@ -77,26 +77,25 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   const [insumoOptions, setInsumoOptions] = useState<{ label: string, value: string }[]>([]);
   const [isLoadingInsumos, setIsLoadingInsumos] = useState(false);
   const [culturesOptions, setCulturesOptions] = useState<{ label: string, value: string }[]>([]);
+  const [isLoadingCultures, setIsLoadingCultures] = useState(false);
 
-  // NOVOS ESTADOS PARA A BUSCA DE PROPRIEDADES
+  // ESTADOS PARA PROPRIEDADES
   const [propertiesOptions, setPropertiesOptions] = useState<{ label: string, value: string }[]>([]);
   const [allProperties, setAllProperties] = useState<any[]>([]);
   const [isLoadingProperties, setIsLoadingProperties] = useState(false);
 
   const [isValid, setIsValid] = useState(false);
-
   const [newFiles, setNewFiles] = useState<File[]>([]);
-
   const [existingFiles, setExistingFiles] = useState<string[]>(initialData?.anexos || []);
-
   const [removedFiles, setRemovedFiles] = useState<string[]>([]);
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  
   const handleTypeChange = (type: any) => setFormData(prev => ({ ...prev, tipo: type }));
+  
   const handleInsumoOption = (show: boolean) => {
     setShowInsumos(show);
     if (!show) setFormData(prev => ({ ...prev, insumoNome: '', insumoQuantidade: '', insumoUnidade: '' }));
@@ -135,23 +134,32 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   };
 
   useEffect(() => {
-    const isBasicInfoValid = formData.date.trim() !== '' && formData.propriedade.trim() !== '' && formData.cultureId.trim() !== '' && formData.descricao.trim() !== '' && formData.responsavel.trim() !== '';
+    const isBasicInfoValid = 
+      formData.date.trim() !== '' && 
+      formData.propriedade.trim() !== '' && 
+      formData.cultureId.trim() !== '' && 
+      formData.descricao.trim() !== '' && 
+      formData.responsavel.trim() !== '';
+    
     let isInsumoValid = true;
     if (showInsumos) {
       isInsumoValid = (formData.insumoNome || "").trim() !== '';
     }
+    
     setIsValid(isBasicInfoValid && isInsumoValid);
   }, [formData, showInsumos]);
 
-  // EFEITO PARA BUSCAR AS PROPRIEDADES 
+  // EFEITO PARA BUSCAR PROPRIEDADES
   useEffect(() => {
     async function fetchProperties() {
       setIsLoadingProperties(true);
       try {
+        console.log('[ActivityForm] Buscando propriedades...');
         const response = await propertyService.findAll(1, 100);
-
-        // Salva a lista completa (com ID) para uso na busca de culturas
+        console.log('[ActivityForm] Propriedades carregadas:', response.data);
+        
         setAllProperties(response.data);
+        
         const options = response.data.map(p => ({
           label: p.name,
           value: p.name,
@@ -159,7 +167,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
         setPropertiesOptions(options);
 
       } catch (error) {
-        console.error("Erro ao carregar propriedades:", error);
+        console.error("[ActivityForm] Erro ao carregar propriedades:", error);
       } finally {
         setIsLoadingProperties(false);
       }
@@ -168,36 +176,76 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
     fetchProperties();
   }, []);
 
-
+  // EFEITO PARA BUSCAR CULTURAS DA PROPRIEDADE SELECIONADA
   useEffect(() => {
-    async function fetchCultures() {
+    async function fetchCulturesForProperty() {
+      console.log('[ActivityForm] fetchCulturesForProperty chamado');
+      console.log('[ActivityForm] formData.propriedade:', formData.propriedade);
+      console.log('[ActivityForm] allProperties length:', allProperties.length);
+      
       if (!formData.propriedade || allProperties.length === 0) {
+        console.log('[ActivityForm] Sem propriedade selecionada, limpando culturas');
         setCulturesOptions([]);
+        setFormData(prev => ({ ...prev, cultureId: '' }));
         return;
       }
 
+      setIsLoadingCultures(true);
+      
       try {
         const selectedProperty = allProperties.find(p => p.name === formData.propriedade);
+        console.log('[ActivityForm] Propriedade selecionada:', selectedProperty);
 
         if (selectedProperty) {
+          console.log(`[ActivityForm] Buscando culturas para propertyId: ${selectedProperty.id}`);
+          
+          // Limpa o cultureId enquanto carrega novas culturas
+          setFormData(prev => ({ ...prev, cultureId: '' }));
+          
           const cultures = await cultureService.findByProperty(selectedProperty.id);
-          setCulturesOptions(cultures.map(c => ({
+          console.log('[ActivityForm] Culturas retornadas:', cultures);
+          
+          const options = cultures.map(c => ({
             label: `${c.cultureName}${c.cultivar ? ` - ${c.cultivar}` : ''}`,
             value: c.id
-          })));
+          }));
+          
+          console.log('[ActivityForm] Options geradas:', options);
+          setCulturesOptions(options);
+          
+          // Se estiver editando e a cultura atual pertence a esta propriedade, mantém selecionada
+          if (isEditMode && initialData?.cultureId) {
+            const currentCultureExists = cultures.some(c => c.id === initialData.cultureId);
+            if (currentCultureExists) {
+              console.log('[ActivityForm] Mantendo cultura atual:', initialData.cultureId);
+              setFormData(prev => ({ ...prev, cultureId: initialData.cultureId! }));
+            }
+          }
         } else {
+          console.log('[ActivityForm] Propriedade não encontrada no array');
           setCulturesOptions([]);
+          setFormData(prev => ({ ...prev, cultureId: '' }));
         }
       } catch (error) {
-        console.error("Erro ao carregar culturas:", error);
+        console.error("[ActivityForm] Erro ao carregar culturas:", error);
         setCulturesOptions([]);
+        setFormData(prev => ({ ...prev, cultureId: '' }));
+      } finally {
+        setIsLoadingCultures(false);
       }
     }
 
-    fetchCultures();
-  }, [formData.propriedade, allProperties]);
+    fetchCulturesForProperty();
+  }, [formData.propriedade, allProperties, isEditMode]);
 
+  // Reset cultureId quando mudar propriedade (já tratado no useEffect acima)
+  useEffect(() => {
+    if (formData.propriedade) {
+      console.log('[ActivityForm] Propriedade alterada, aguardando carregamento de culturas...');
+    }
+  }, [formData.propriedade]);
 
+  // EFEITO PARA BUSCAR INSUMOS
   useEffect(() => {
     async function fetchEmbrapaInputs() {
       setIsLoadingInsumos(true);
@@ -243,7 +291,13 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             placeholder="Ex: Adubação do talhão 1"
           />
           <div className={styles.fieldGroup}>
-            <Input label="Data da atividade" name="date" type="date" value={formData.date} onChange={handleChange} />
+            <Input 
+              label="Data da atividade" 
+              name="date" 
+              type="date" 
+              value={formData.date} 
+              onChange={handleChange} 
+            />
 
             <Input
               as="select"
@@ -251,12 +305,12 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
               name="propriedade"
               value={formData.propriedade}
               onChange={handleChange}
-              options={propertiesOptions} // USANDO A LISTA DO BACKEND
+              options={propertiesOptions}
               icon={<IoIosArrowDown size={18} />}
-              disabled={isLoadingProperties} // Desabilita enquanto carrega
+              disabled={isLoadingProperties}
             />
-
           </div>
+          
           <Input
             as="select"
             label="Cultura associada"
@@ -265,8 +319,18 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             onChange={handleChange}
             options={culturesOptions}
             icon={<IoIosArrowDown size={18} />}
-            disabled={!formData.propriedade || culturesOptions.length === 0}
+            disabled={!formData.propriedade || isLoadingCultures || culturesOptions.length === 0}
           />
+          {isLoadingCultures && formData.propriedade && (
+            <div className={styles.loadingMessage}>
+              Carregando culturas da propriedade...
+            </div>
+          )}
+          {!isLoadingCultures && formData.propriedade && culturesOptions.length === 0 && (
+            <div className={styles.warningMessage}>
+              Nenhuma cultura encontrada para esta propriedade.
+            </div>
+          )}
         </div>
 
         <div className={styles.section}>
