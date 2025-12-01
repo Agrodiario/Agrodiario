@@ -122,6 +122,79 @@
   min-width: 140px;
 }
 
+/* --- Talhões --- */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.talhoesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.talhaoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-bg-white);
+}
+
+.talhaoCard:hover {
+  border-color: var(--color-primary);
+  background-color: #f8fafc;
+}
+
+.talhaoCardActive {
+  border-color: var(--color-primary);
+  background-color: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
+}
+
+.talhaoCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.talhaoCardTitle {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.talhaoRemoveBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.talhaoRemoveBtn:hover {
+  color: #dc2626;
+  background-color: #fee2e2;
+}
+
+.talhaoCardInfo {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
 @media (max-width: 600px) {
   .row {
     grid-template-columns: 1fr;
@@ -129,5 +202,10 @@
 
   .footer button {
     flex: 1;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

@@ -22,9 +22,9 @@ function InfoItem({ icon, title, text }: any) {
 }
 
 export function PropertyCard({ property, onView }: any) {
-  const numTalhoes = Array.isArray(property.talhoes) 
-    ? property.talhoes.length 
-    : property.talhoes;
+  const numTalhoes = Array.isArray(property.plots)
+    ? property.plots.length
+    : 0;
   return (
     <div className={styles.card}>
       {/* Cabeçalho */}

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PropertyForm, PropertyFormData } from '../components/properties/PropertyForm/PropertyForm';
 import { propertyService } from '../services/property.service';
-import { CreatePropertyDto } from '../types/property.types';
+import { CreatePropertyDto, Plot } from '../types/property.types';
 
 export default function NewPropertyPage() {
   const navigate = useNavigate();
@@ -16,14 +16,24 @@ export default function NewPropertyPage() {
     setError(null);
 
     try {
+      // Transform talhões to plots
+      const plots: Plot[] = data.talhoes.map(talhao => ({
+        name: talhao.name,
+        area: parseFloat(talhao.area.replace(',', '.')),
+        culture: talhao.cultura,
+        situacao: talhao.situacao,
+        polygon: talhao.polygon,
+      }));
+
       // Transform form data to match backend DTO
       const propertyDto: CreatePropertyDto = {
         name: data.name,
         address: data.address,
-        totalArea: parseFloat(data.areaTotal),
-        productionArea: parseFloat(data.areaProducao),
+        totalArea: parseFloat(data.areaTotal.replace(',', '.')),
+        productionArea: parseFloat(data.areaProducao.replace(',', '.')),
         mainCrop: data.cultivo,
         certifications: '', // Optional field - can be empty for now
+        plots: plots.length > 0 ? plots : undefined,
       };
 
       // Validate data

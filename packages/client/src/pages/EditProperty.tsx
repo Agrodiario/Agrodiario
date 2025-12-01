@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { PropertyForm, PropertyFormData } from '../components/properties/PropertyForm/PropertyForm';
+import { PropertyForm, PropertyFormData, TalhaoData } from '../components/properties/PropertyForm/PropertyForm';
 import { propertyService } from '../services/property.service';
-import { Property, UpdatePropertyDto } from '../types/property.types';
+import { Property, UpdatePropertyDto, Plot } from '../types/property.types';
 
 export default function EditPropertyPage() {
   const navigate = useNavigate();
@@ -24,12 +24,23 @@ export default function EditPropertyPage() {
       try {
         setIsLoadingData(true);
         const data: Property = await propertyService.findOne(id);
+
+        // Transform plots to talhões format
+        const talhoes: TalhaoData[] = (data.plots || []).map(plot => ({
+          name: plot.name,
+          area: String(plot.area).replace('.', ','),
+          cultura: plot.culture || '',
+          situacao: plot.situacao || 'preparo',
+          polygon: plot.polygon || null,
+        }));
+
         const mappedData: Partial<PropertyFormData> = {
           name: data.name,
           address: data.address,
-          areaTotal: data.totalArea ? String(data.totalArea) : '0',
-          areaProducao: data.productionArea ? String(data.productionArea) : '0',
+          areaTotal: data.totalArea ? String(data.totalArea).replace('.', ',') : '0',
+          areaProducao: data.productionArea ? String(data.productionArea).replace('.', ',') : '0',
           cultivo: data.mainCrop,
+          talhoes: talhoes,
         };
 
         setPropertyToEdit(mappedData);
@@ -50,12 +61,23 @@ export default function EditPropertyPage() {
 
     try {
       setIsSaving(true);
+
+      // Transform talhões to plots
+      const plots: Plot[] = data.talhoes.map(talhao => ({
+        name: talhao.name,
+        area: parseFloat(talhao.area.replace(',', '.')),
+        culture: talhao.cultura,
+        situacao: talhao.situacao,
+        polygon: talhao.polygon,
+      }));
+
       const updateData: UpdatePropertyDto = {
         name: data.name,
         address: data.address,
-        totalArea: data.areaTotal ? parseFloat(data.areaTotal) : undefined,
-        productionArea: data.areaProducao ? parseFloat(data.areaProducao) : undefined,
+        totalArea: data.areaTotal ? parseFloat(data.areaTotal.replace(',', '.')) : undefined,
+        productionArea: data.areaProducao ? parseFloat(data.areaProducao.replace(',', '.')) : undefined,
         mainCrop: data.cultivo,
+        plots: plots.length > 0 ? plots : undefined,
       };
 
       await propertyService.update(id, updateData);
