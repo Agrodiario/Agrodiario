@@ -1,7 +1,6 @@
 // src/layouts/PropertiesLayout.tsx
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Button } from '../components/common/Button/Button';
-import styles from './PropertiesLayout.module.css'; // Vamos criar este CSS
+import styles from './PropertiesLayout.module.css';
 import { FiPlus } from 'react-icons/fi';
 
 export default function PropertiesLayout() {
@@ -18,7 +17,7 @@ export default function PropertiesLayout() {
         <h1 className={styles.title}>Minhas propriedades</h1>
         <div className={styles.actions}>
           {!hideButton && (
-            <Link to="new" className={styles.linkButton}>
+            <Link to="new" className={styles.primaryButton}>
               <FiPlus size={18} />
               <span>Nova propriedade</span>
             </Link>

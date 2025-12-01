@@ -1,10 +1,9 @@
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import styles from './Sidebar.module.css';
-import logo from '../../../assets/logo.png';
+import logo from '@/assets/logo-grande.png';
 
 import {
-  FiHome,
   FiLogOut,
   FiMenu,
   FiX
