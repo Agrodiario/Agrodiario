@@ -1,20 +1,51 @@
+/* Wrapper */
 .inputWrapper {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   width: 100%;
   padding: 12px 16px;
-  box-sizing: border-box;
   background-color: var(--color-bg-white);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-md);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.inputWrapper:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
+
+.inputWrapper.error {
+  border-color: #e53e3e;
 }
 
+.textareaWrapper {
+  align-items: flex-start;
+}
+
+/* Floating Label */
+.inputLabel {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+/* WHEN FLOATING */
+.floating {
+  top: -8px;
+  left: 12px;
+  background-color: var(--color-bg-white);
+  padding: 0 6px;
+  font-size: 12px;
+  color: var(--color-primary);
+}
+
+.errorLabel {
+  color: #e53e3e !important;
+}
+
+/* Inputs */
 .input {
   flex: 1;
   min-width: 0;
@@ -24,14 +55,31 @@
   background-color: transparent;
   font-size: 0.95rem;
   color: var(--color-text-primary);
-  
-  resize: none; 
 }
 
-.input::placeholder {
-  color: var(--color-text-placeholder);
+.textarea {
+  min-height: 120px;
+  line-height: 1.5;
 }
 
+/* Select */
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  background-color: transparent;
+  width: 100%;
+  padding-right: 20px;
+}
+
+/* Hide placeholder normally */
+.input::placeholder,
+.textarea::placeholder {
+  color: transparent;
+}
+
+/* Icon */
 .icon {
   display: flex;
   align-items: center;
@@ -39,55 +87,7 @@
   color: var(--color-text-placeholder);
 }
 
-/* --- 👇 ADICIONE ESTAS NOVAS CLASSES --- */
-
-/* 1. Alinha o ícone (se houver) ao topo, não ao centro */
-.textareaWrapper {
-  align-items: flex-start;
-}
-
-/* 2. Define uma altura mínima para o textarea */
-.textarea {
-  min-height: 120px; /* Altura padrão para 'Descrição' */
-  line-height: 1.5; /* Melhora a legibilidade do textarea */
-}
-
-.select {
-  appearance: none; /* Remove a seta padrão do navegador */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  cursor: pointer;
-  background-color: transparent;
-  width: 100%;
-  /* Garante que o texto não fique por baixo do ícone */
-  padding-right: 20px; 
-}
-
-/* Ajuste de cor para o placeholder (opção vazia) no select */
-.select:invalid,
-.select option[value=""] {
-  color: var(--color-text-placeholder);
-}
-
-/* Ajuste para o input de data ficar consistente */
-input[type="date"] {
-  /* Força a fonte correta */
-  font-family: inherit;
-  color: var(--color-text-primary);
-}
-
-/* Adicione estas regras ao seu Input.module.css existente */
-
-.inputWrapper {
-  position: relative;
-  margin-bottom: 16px;
-}
-
-.inputWrapper.error .input {
-  border-color: #e53e3e;
-  box-shadow: 0 0 0 1px #e53e3e;
-}
-
+/* Tooltip (erros) */
 .tooltip {
   position: absolute;
   top: 100%;
@@ -108,8 +108,6 @@ input[type="date"] {
   position: absolute;
   top: -4px;
   left: 12px;
-  width: 0;
-  height: 0;
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-bottom: 4px solid #e53e3e;

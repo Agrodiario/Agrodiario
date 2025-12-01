@@ -1,5 +1,4 @@
-// Input.tsx - Versão atualizada
-import { ComponentPropsWithoutRef, ReactNode } from 'react';
+import { ComponentPropsWithoutRef, ReactNode, useState } from 'react';
 import styles from './Input.module.css';
 
 export type SelectOption = {
@@ -34,16 +33,23 @@ type InputAsSelect = InputBaseProps &
 
 type InputProps = InputAsInput | InputAsTextarea | InputAsSelect;
 
-export function Input({ 
-  as = 'input', 
-  label, 
-  icon, 
-  onIconClick, 
-  className, 
+export function Input({
+  as = 'input',
+  label,
+  icon,
+  onIconClick,
+  className,
   error,
   showError,
-  ...props 
+  ...props
 }: InputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
+  const hasValue =
+    (props as any).value !== undefined &&
+    (props as any).value !== null &&
+    String((props as any).value).trim() !== '';
+
   const wrapperClass = `${styles.inputWrapper} ${
     as === 'textarea' ? styles.textareaWrapper : ''
   } ${error && showError ? styles.error : ''} ${className || ''}`;
@@ -54,22 +60,54 @@ export function Input({
 
   let InputElement;
 
-  if (as === 'textarea') {
+  const commonEvents = {
+    onFocus: () => setIsFocused(true),
+    onBlur: (e: any) => {
+      setIsFocused(false);
+      props.onBlur?.(e);
+    },
+  };
+
+  // INPUT
+  if (as === 'input') {
+    InputElement = (
+      <input
+        className={inputClass}
+        {...(props as ComponentPropsWithoutRef<'input'>)}
+        {...commonEvents}
+        placeholder={isFocused || hasValue ? '' : label}
+      />
+    );
+  }
+
+  // TEXTAREA
+  else if (as === 'textarea') {
     InputElement = (
       <textarea
         className={inputClass}
-        placeholder={label}
         {...(props as ComponentPropsWithoutRef<'textarea'>)}
+        {...commonEvents}
+        placeholder={isFocused || hasValue ? '' : label}
       />
     );
-  } else if (as === 'select') {
+  }
+
+  // SELECT
+  else {
     const { options, ...rest } = props as InputAsSelect;
 
     InputElement = (
-      <select className={inputClass} {...rest}>
-        <option value="" disabled hidden>
-          {label}
-        </option>
+      <select
+        className={inputClass}
+        {...rest}
+        {...commonEvents}
+        value={(props as any).value || ''}
+      >
+        {!hasValue && (
+          <option value="" disabled hidden>
+            {label}
+          </option>
+        )}
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
@@ -77,24 +115,27 @@ export function Input({
         ))}
       </select>
     );
-  } else {
-    InputElement = (
-      <input
-        className={inputClass}
-        placeholder={label}
-        {...(props as ComponentPropsWithoutRef<'input'>)}
-      />
-    );
   }
 
   return (
     <div className={wrapperClass}>
+      {/* Floating Label */}
+      <label
+        className={`${styles.inputLabel} ${
+          isFocused || hasValue ? styles.floating : ''
+        } ${error && showError ? styles.errorLabel : ''}`}
+      >
+        {label}
+      </label>
+
       {InputElement}
+
       {icon && (
         <span onClick={onIconClick} className={styles.icon}>
           {icon}
         </span>
       )}
+
       {error && showError && (
         <div className={styles.tooltip}>
           {error}
