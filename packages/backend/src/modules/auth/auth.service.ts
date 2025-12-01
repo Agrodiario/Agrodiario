@@ -36,21 +36,36 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.usersRepository.findOne({
+    // 1. Verifica Email
+    const existingUserByEmail = await this.usersRepository.findOne({
       where: { email: registerDto.email },
     });
 
-    if (existingUser) {
+    if (existingUserByEmail) {
       throw new ConflictException('Email já registrado');
     }
 
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    // Remove formatação do CPF para buscar no banco
+    const userCpf = registerDto.cpf.replace(/[^\d]/g, '');
 
+    // 2. Verifica CPF
+    const existingUserByCpf = await this.usersRepository.findOne({
+      where: { cpf: userCpf },
+    });
+
+    if (existingUserByCpf) {
+      throw new ConflictException('CPF já registrado');
+    }
+
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    const userPhone = registerDto.phone.replace(/[^\d]/g, '');
 
     const user = this.usersRepository.create({
       ...registerDto,
       password: hashedPassword,
+      cpf: userCpf, // Salva sem máscara
+      phone: userPhone, // Salva sem máscara
       emailVerified: false,
       emailVerificationToken,
       failedLoginAttempts: 0,
