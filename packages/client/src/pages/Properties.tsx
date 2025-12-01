@@ -1,9 +1,8 @@
-// src/pages/Properties.tsx
 import { Button } from '../components/common/Button/Button';
 import { Input } from '../components/common/Input/Input';
 import { Dropdown } from '../components/common/Dropdown/Dropdown';
-import { PropertyCard } from '../components/properties/PropertyCard'; 
-import styles from './Properties.module.css'; 
+import { PropertyCard } from '../components/properties/PropertyCard';
+import styles from './Properties.module.css';
 import { FiSearch, FiDownload } from 'react-icons/fi';
 import { FaRegCalendarPlus } from 'react-icons/fa';
 import { MdArrowDropDown } from 'react-icons/md';
@@ -12,140 +11,95 @@ import { useState, useEffect } from 'react';
 import { Property } from '@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer';
 import { PropertyDetailsDrawer } from '@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer';
 import { propertyService } from '../services/property.service';
-
-const mockProperties = [
-  {
-    id: 1,
-    name: 'Sítio Oliveira',
-    location: 'Florínea (SP)',
-    talhoes: [{ id: 1, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, {id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}], // Replace with appropriate Talhao structure
-    cultivo: 'Soja',
-    area: 45,
-    address: 'Rua Principal, 123',
-    areaTotal: 50,
-    areaCultivada: 45,
-    cultivoPrincipal: 'Soja',
-  },
-  {
-    id: 2,
-    name: 'Sítio Oliveira',
-    location: 'Florínea (SP)',
-    talhoes: [{ id: 2, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
-    cultivo: 'Soja',
-    area: 45,
-    address: 'Rua Principal, 123',
-    areaTotal: 50,
-    areaCultivada: 45,
-    cultivoPrincipal: 'Soja',
-  },
-  {
-    id: 3,
-    name: 'Sítio Oliveira',
-    location: 'Florínea (SP)',
-    talhoes: [{ id: 3, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
-    cultivo: 'Soja',
-    area: 45,
-    address: 'Rua Principal, 123',
-    areaTotal: 50,
-    areaCultivada: 45,
-    cultivoPrincipal: 'Soja',
-  },
-  {
-    id: 4,
-    name: 'Sítio Oliveira',
-    location: 'Florínea (SP)',
-    talhoes: [{ id: 4, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, { id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo' }],
-    cultivo: 'Soja',
-    area: 45,
-    address: 'Rua Principal, 123',
-    areaTotal: 50,
-    areaCultivada: 45,
-    cultivoPrincipal: 'Soja',
-  },
-  {
-    id: 5,
-    name: 'Sítio Oliveira',
-    location: 'Florínea (SP)',
-    talhoes: [{ id: 5, name: 'Talhão 1', cultura: 'Aoba', area: 30, status: 'plantado' as 'plantado' }, {id: 5, name: 'Talhão 2', cultura: 'Aoba', area: 15, status: 'em preparo' as 'em preparo'}],
-    cultivo: 'Soja',
-    area: 45,
-    address: 'Rua Principal, 123',
-    areaTotal: 50,
-    areaCultivada: 45,
-    cultivoPrincipal: 'Soja',
-  },
-];
+import { generatePropertyReport } from '@/utils/generatePDF'; // Importação da função de geração de relatório
+const ITEMS_PER_PAGE = 10; 
 
 export default function PropertiesPage() {
-    const [properties, setProperties] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    // Fetch properties from API
-    useEffect(() => {
-      const fetchProperties = async () => {
-        try {
-          setIsLoading(true);
-          const response = await propertyService.findAll(1, 100);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'DESC' | 'ASC'>('DESC'); // DESC por padrão (Mais recentes)
+  
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedProperty, setselectedProperty] = useState<Property | null>(null);
+  
+  const fetchProperties = async (search: string, order: 'ASC' | 'DESC') => {
+    try {
+      setIsLoading(true);
+      const response = await propertyService.findAll(1, ITEMS_PER_PAGE, order, search); 
 
-          // Transform backend properties to match frontend format
-          const transformedProperties = response.data.map(prop => ({
-            id: prop.id,
-            name: prop.name,
-            location: prop.address.split(',').slice(-2).join(',').trim(), // Extract city/state from address
-            talhoes: [], // No talhoes in simplified version
-            cultivo: prop.mainCrop,
-            area: prop.productionArea,
-            address: prop.address,
-            areaTotal: prop.totalArea,
-            areaCultivada: prop.productionArea,
-            cultivoPrincipal: prop.mainCrop,
-          }));
+      const transformedProperties = response.data.map(prop => ({
+          id: prop.id,
+          name: prop.name,
+          location: prop.address.split(',').slice(-2).join(',').trim(), 
+          talhoes: [], 
+          cultivo: prop.mainCrop,
+          area: prop.productionArea,
+          address: prop.address,
+          areaTotal: prop.totalArea,
+          areaCultivada: prop.productionArea,
+          cultivoPrincipal: prop.mainCrop,
+      }));
 
-          setProperties(transformedProperties);
-        } catch (err: any) {
-          console.error('Erro ao carregar propriedades:', err);
-          setError(err.message || 'Erro ao carregar propriedades');
-        } finally {
-          setIsLoading(false);
-        }
-      };
+      setProperties(transformedProperties);
+    } catch (err: any) {
+      console.error('Erro ao carregar propriedades:', err);
+      setError(err.message || 'Erro ao carregar propriedades');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      fetchProperties();
-    }, []);
+  const handleGenerateReport = async () => {
+    try {
+      setIsGeneratingReport(true);
 
-    const handleSortNewest = () => {
-        console.log('Ordenando por mais recentes');
-      };
+      const response = await propertyService.findAll(1, 10000, sortOrder, searchTerm);
+      const textoFiltro = searchTerm ? `Busca por: "${searchTerm}"` : 'Todos os registros';
+      generatePropertyReport(response.data, textoFiltro); 
 
-      const handleSortOldest = () => {
-        console.log('Ordenando por mais antigas');
-      };
+    } catch (error) {
+      console.error('Erro ao gerar relatório de propriedades', error);
+      alert('Erro ao gerar o relatório. Tente novamente.');
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
 
-      const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-      const [selectedProperty, setselectedProperty] = useState<Property | null>(
-        null
-      );
-    
-      const handleViewProperty = (property: Property) => {
-        setselectedProperty(property);
-        setIsDrawerOpen(true);
-      };
-    
-      const handleCloseDrawer = () => {
-        setIsDrawerOpen(false);
-        setTimeout(() => setselectedProperty(null), 300); 
-      };
+  const handleSortChange = (newOrder: 'ASC' | 'DESC') => {
+    if (newOrder === sortOrder) return;
+    setSortOrder(newOrder);
+  };
 
-      const handleEdit = () => {
-        console.log('Editar:', selectedProperty?.id);
-        // navigate(`edit/${selectedActivity?.id}`)
-      };
-    
-      const handleDelete = () => {
-        console.log('Excluir:', selectedProperty?.id);
-        handleCloseDrawer(); 
-      };
+  const handleViewProperty = (property: Property) => {
+    setselectedProperty(property);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setTimeout(() => setselectedProperty(null), 300);
+  };
+
+  const handleDelete = () => {
+    console.log('Excluir:', selectedProperty?.id);
+    // Adicionar a lógica real de exclusão aqui e recarregar a lista:
+    // await propertyService.remove(selectedProperty.id);
+    // fetchProperties(searchTerm, sortOrder); 
+    handleCloseDrawer();
+  };
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchProperties(searchTerm, sortOrder);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm, sortOrder]);
+
 
   return (
     <>
@@ -154,6 +108,8 @@ export default function PropertiesPage() {
           <Input
             label="Busque por nome da propriedade"
             name="search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             icon={<FiSearch size={18} />}
             style={{ borderRadius: '128px', padding: '0.6rem 1rem', width: '95%' }}
           />
@@ -168,22 +124,32 @@ export default function PropertiesPage() {
           >
             <div className={styles.dropdownMenu}>
               <button
-                onClick={handleSortNewest}
+                onClick={() => handleSortChange('DESC')}
                 className={styles.dropdownItem}
+                style={{ fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal' }}
               >
                 Mais recentes
               </button>
               <button
-                onClick={handleSortOldest}
+                onClick={() => handleSortChange('ASC')}
                 className={styles.dropdownItem}
+                style={{ fontWeight: sortOrder === 'ASC' ? 'bold' : 'normal' }}
               >
                 Mais antigas
               </button>
             </div>
           </Dropdown>
+          
           <div></div>
-          <Button variant="secondary" leftIcon={<FiDownload size={18} />} style={{ borderRadius: '32px' }} >
-            Gerar relatório
+          
+          <Button 
+            variant="secondary" 
+            leftIcon={<FiDownload size={18} />} 
+            style={{ borderRadius: '32px' }}
+            onClick={handleGenerateReport} 
+            disabled={isGeneratingReport} 
+          >
+            {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
           </Button>
         </div>
       </div>
@@ -196,18 +162,18 @@ export default function PropertiesPage() {
         )}
         {!isLoading && !error && properties.map((prop) => (
           <PropertyCard key={prop.id} property={prop}
-          onView={() => handleViewProperty(prop)}/>
+            onView={() => handleViewProperty(prop)} />
         ))}
       </div>
 
       <footer className={styles.footer}>
-        <Button variant="outlined">Carregar mais</Button>
+        <Button variant="quaternary" disabled>Carregar mais</Button> 
       </footer>
 
       <Drawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
-        title="Visualizar atividade"
+        title="Visualizar propriedade"
       >
         {selectedProperty && (
           <PropertyDetailsDrawer property={selectedProperty} onDelete={handleDelete} />

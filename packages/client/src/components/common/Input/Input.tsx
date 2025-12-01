@@ -1,35 +1,37 @@
 import { ComponentPropsWithoutRef, ReactNode } from 'react';
 import styles from './Input.module.css';
 
-// Definimos o tipo para as opções do select
 export type SelectOption = {
   label: string;
   value: string | number;
 };
 
-// Props agora aceitam 'select' e 'options'
-type InputProps = ComponentPropsWithoutRef<'input'> &
-  ComponentPropsWithoutRef<'textarea'> &
-  ComponentPropsWithoutRef<'select'> & {
-    as?: 'input' | 'textarea' | 'select';
-    label: string;
-    icon?: ReactNode;
-    onIconClick?: () => void;
-    options?: SelectOption[]; // Novo array de opções
+type InputBaseProps = {
+  label: string;
+  icon?: ReactNode;
+  onIconClick?: () => void;
+  className?: string;
+};
+
+type InputAsInput = InputBaseProps &
+  ComponentPropsWithoutRef<'input'> & {
+    as?: 'input';
   };
 
-export function Input({
-  as = 'input',
-  label,
-  icon,
-  onIconClick,
-  options,
-  className,
-  ...props
-}: InputProps) {
-  let InputElement;
+type InputAsTextarea = InputBaseProps &
+  ComponentPropsWithoutRef<'textarea'> & {
+    as: 'textarea';
+  };
 
-  // Classes condicionais
+type InputAsSelect = InputBaseProps &
+  ComponentPropsWithoutRef<'select'> & {
+    as: 'select';
+    options: SelectOption[];
+  };
+
+type InputProps = InputAsInput | InputAsTextarea | InputAsSelect;
+
+export function Input({ as = 'input', label, icon, onIconClick, className, ...props }: InputProps) {
   const wrapperClass = `${styles.inputWrapper} ${
     as === 'textarea' ? styles.textareaWrapper : ''
   } ${className || ''}`;
@@ -38,42 +40,36 @@ export function Input({
     as === 'textarea' ? styles.textarea : ''
   } ${as === 'select' ? styles.select : ''}`;
 
-  // 1. Renderização condicional para TEXTAREA
+  let InputElement;
+
   if (as === 'textarea') {
     InputElement = (
       <textarea
         className={inputClass}
         placeholder={label}
         {...(props as ComponentPropsWithoutRef<'textarea'>)}
-        rows={props.rows || 4}
       />
     );
-  } 
-  // 2. Renderização condicional para SELECT (Novo)
-  else if (as === 'select') {
+  } else if (as === 'select') {
+    const { options, ...rest } = props as InputAsSelect;
+
     InputElement = (
-      <select
-        className={inputClass}
-        // O value="" serve como placeholder no select
-        {...(props as ComponentPropsWithoutRef<'select'>)}
-      >
+      <select className={inputClass} {...rest}>
         <option value="" disabled hidden>
-          {label} {/* Usa o label como placeholder */}
+          {label}
         </option>
-        {options?.map((opt) => (
+        {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}
       </select>
     );
-  } 
-  // 3. Padrão INPUT
-  else {
+  } else {
     InputElement = (
       <input
         className={inputClass}
-        placeholder={label} // No type="date", o placeholder pode não aparecer em alguns browsers
+        placeholder={label}
         {...(props as ComponentPropsWithoutRef<'input'>)}
       />
     );
