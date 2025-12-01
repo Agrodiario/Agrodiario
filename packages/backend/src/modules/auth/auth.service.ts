@@ -36,22 +36,18 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    // Check if email already exists
     const existingUser = await this.usersRepository.findOne({
       where: { email: registerDto.email },
     });
 
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('Email já registrado');
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Generate email verification token
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
-    // Create user
     const user = this.usersRepository.create({
       ...registerDto,
       password: hashedPassword,
@@ -62,18 +58,14 @@ export class AuthService {
 
     const savedUser = await this.usersRepository.save(user);
 
-    // Send verification email (non-blocking)
     this.emailService
       .sendVerificationEmail(savedUser.email, emailVerificationToken)
       .catch((err) => {
-        this.logger.error(`Failed to send verification email: ${err.message}`);
+        this.logger.error(`Falha ao enviar email de verificação: ${err.message}`);
       });
 
-    // Generate JWT token for auto-login
     const accessToken = this.generateToken(savedUser.id, savedUser.email, false);
 
-    // Remove password from response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = savedUser;
 
     return {
@@ -83,7 +75,6 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    // Find user with password field (normally excluded)
     const user = await this.usersRepository.findOne({
       where: { email: loginDto.email },
       select: [
@@ -103,49 +94,40 @@ export class AuthService {
       ],
     });
 
-    // Generic error for security
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciais incorretas');
     }
 
-    // Check if user is active
     if (!user.isActive) {
-      throw new UnauthorizedException('Account is inactive');
+      throw new UnauthorizedException('Esta conta está inativa');
     }
 
-    // Check rate limiting
     if (user.failedLoginAttempts >= this.maxLoginAttempts) {
       throw new HttpException(
-        'Too many failed login attempts. Please try again later.',
+        'Muitas tentativas de login. Por favor, tente novamente mais tarde',
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
 
     if (!isPasswordValid) {
-      // Increment failed attempts
       await this.usersRepository.update(user.id, {
         failedLoginAttempts: user.failedLoginAttempts + 1,
         lastFailedLogin: new Date(),
       });
 
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciais incorretas');
     }
 
-    // Reset failed attempts on successful login
     await this.usersRepository.update(user.id, {
       failedLoginAttempts: 0,
       lastFailedLogin: null,
     });
 
-    // Generate JWT token
     const rememberMe = loginDto.rememberMe || false;
     const accessToken = this.generateToken(user.id, user.email, rememberMe);
 
-    // Remove password from response
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
 
     return {
@@ -160,16 +142,15 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException('Invalid verification token');
+      throw new BadRequestException('Token de verificação inválido');
     }
 
-    // Update user
     await this.usersRepository.update(user.id, {
       emailVerified: true,
       emailVerificationToken: null,
     });
 
-    return { message: 'Email verified successfully' };
+    return { message: 'Email verificado com sucesso' };
   }
 
   async resendVerification(email: string) {
@@ -178,24 +159,26 @@ export class AuthService {
     });
 
     if (!user) {
-      // Return success even if user not found (security)
-      return { message: 'If your email is registered, you will receive a verification link' };
+      return {
+        message:
+          'Se seu email estiver registrado, você receberá um link de verificação',
+      };
     }
 
     if (user.emailVerified) {
-      throw new BadRequestException('Email already verified');
+      throw new BadRequestException('Email já foi verificado');
     }
 
-    // Generate new token
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     await this.usersRepository.update(user.id, { emailVerificationToken });
 
-    // Send verification email (non-blocking)
-    this.emailService.sendVerificationEmail(user.email, emailVerificationToken).catch((err) => {
-      this.logger.error(`Failed to send verification email: ${err.message}`);
-    });
+    this.emailService
+      .sendVerificationEmail(user.email, emailVerificationToken)
+      .catch((err) => {
+        this.logger.error(`Falha ao enviar email de verificação: ${err.message}`);
+      });
 
-    return { message: 'Verification email sent successfully' };
+    return { message: 'Email de verificação enviado com sucesso' };
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
@@ -203,29 +186,30 @@ export class AuthService {
       where: { email: forgotPasswordDto.email },
     });
 
-    // Always return success for security (don't reveal if email exists)
     if (!user) {
       return {
-        message: 'If your email is registered, you will receive a password reset link',
+        message:
+          'Se seu email estiver registrado, você receberá um link para redefinição de senha',
       };
     }
 
-    // Generate reset token and expiration (1 hour)
     const passwordResetToken = crypto.randomBytes(32).toString('hex');
-    const passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
 
     await this.usersRepository.update(user.id, {
       passwordResetToken,
       passwordResetExpires,
     });
 
-    // Send password reset email (non-blocking)
-    this.emailService.sendPasswordResetEmail(user.email, passwordResetToken).catch((err) => {
-      this.logger.error(`Failed to send password reset email: ${err.message}`);
-    });
+    this.emailService
+      .sendPasswordResetEmail(user.email, passwordResetToken)
+      .catch((err) => {
+        this.logger.error(`Falha ao enviar email de redefinição de senha: ${err.message}`);
+      });
 
     return {
-      message: 'If your email is registered, you will receive a password reset link',
+      message:
+        'Se seu email estiver registrado, você receberá um link para redefinição de senha',
     };
   }
 
@@ -235,26 +219,23 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException('Invalid or expired reset token');
+      throw new BadRequestException('Token de redefinição inválido ou expirado');
     }
 
-    // Check if token is expired
     if (user.passwordResetExpires < new Date()) {
-      throw new BadRequestException('Reset token has expired');
+      throw new BadRequestException('O token de redefinição expirou');
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
 
-    // Update user
     await this.usersRepository.update(user.id, {
       password: hashedPassword,
       passwordResetToken: null,
       passwordResetExpires: null,
-      failedLoginAttempts: 0, // Reset failed attempts
+      failedLoginAttempts: 0,
     });
 
-    return { message: 'Password reset successfully' };
+    return { message: 'Senha redefinida com sucesso' };
   }
 
   private generateToken(userId: string, email: string, rememberMe: boolean): string {
