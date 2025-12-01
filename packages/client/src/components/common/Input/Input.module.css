@@ -73,6 +73,10 @@
   padding-right: 20px;
 }
 
+.select option[value=""][disabled] {
+  display: none;
+}
+
 /* Hide placeholder normally */
 .input::placeholder,
 .textarea::placeholder {

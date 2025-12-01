@@ -50,13 +50,11 @@ export function Input({
     (props as any).value !== null &&
     String((props as any).value).trim() !== '';
 
-  const wrapperClass = `${styles.inputWrapper} ${
-    as === 'textarea' ? styles.textareaWrapper : ''
-  } ${error && showError ? styles.error : ''} ${className || ''}`;
+  const wrapperClass = `${styles.inputWrapper} ${as === 'textarea' ? styles.textareaWrapper : ''
+    } ${error && showError ? styles.error : ''} ${className || ''}`;
 
-  const inputClass = `${styles.input} ${
-    as === 'textarea' ? styles.textarea : ''
-  } ${as === 'select' ? styles.select : ''}`;
+  const inputClass = `${styles.input} ${as === 'textarea' ? styles.textarea : ''
+    } ${as === 'select' ? styles.select : ''}`;
 
   let InputElement;
 
@@ -103,11 +101,10 @@ export function Input({
         {...commonEvents}
         value={(props as any).value || ''}
       >
-        {!hasValue && (
-          <option value="" disabled hidden>
-            {label}
-          </option>
-        )}
+        {/* Remova o option placeholder e deixe apenas opções vazias se necessário */}
+        <option value="" disabled hidden>
+          {/* Label vazia ou um espaço para consistência */}
+        </option>
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
@@ -121,9 +118,8 @@ export function Input({
     <div className={wrapperClass}>
       {/* Floating Label */}
       <label
-        className={`${styles.inputLabel} ${
-          isFocused || hasValue ? styles.floating : ''
-        } ${error && showError ? styles.errorLabel : ''}`}
+        className={`${styles.inputLabel} ${isFocused || hasValue ? styles.floating : ''
+          } ${error && showError ? styles.errorLabel : ''}`}
       >
         {label}
       </label>
