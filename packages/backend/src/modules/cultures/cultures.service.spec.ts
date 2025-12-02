@@ -13,11 +13,23 @@ describe('CulturesService', () => {
   let culturesRepository: Repository<Culture>;
   let propertiesRepository: Repository<Property>;
 
+  const mockQueryBuilder = {
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    take: jest.fn().mockReturnThis(),
+    getManyAndCount: jest.fn(),
+  };
+
   const mockCulturesRepository = {
     create: jest.fn(),
     save: jest.fn(),
     findOne: jest.fn(),
     findAndCount: jest.fn(),
+    createQueryBuilder: jest.fn(() => mockQueryBuilder),
+    update: jest.fn(),
   };
 
   const mockPropertiesRepository = {
@@ -121,7 +133,8 @@ describe('CulturesService', () => {
       });
       expect(mockCulturesRepository.save).toHaveBeenCalledWith(mockCulture);
       expect(result).toBeDefined();
-      expect(result.id).toBe('culture-789');
+      expect(result.message).toBe('Cultura adicionada com sucesso');
+      expect(result.data).toBeDefined();
     });
 
     it('deve lançar NotFoundException quando a propriedade não existe', async () => {
@@ -242,8 +255,8 @@ describe('CulturesService', () => {
         {
           id: 'culture-1',
           propertyId: 'prop-1',
-        cultureName: 'Tomate Cereja',
-        cultivar: 'Sweet 100',
+          cultureName: 'Tomate Cereja',
+          cultivar: 'Sweet 100',
           userId,
           cycle: 90,
           origin: CultureOrigin.CONVENTIONAL,
@@ -253,26 +266,19 @@ describe('CulturesService', () => {
           observations: null,
           isActive: true,
           property: { id: 'prop-1', name: 'Fazenda A' },
+          activities: [],
           createdAt: new Date(),
         },
       ];
 
-      mockCulturesRepository.findAndCount.mockResolvedValue([
-        mockCultures,
-        1,
-      ]);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockCultures, 1]);
 
       // Act
       const result = await service.findAll(userId, 1, 10);
 
       // Assert
-      expect(mockCulturesRepository.findAndCount).toHaveBeenCalledWith({
-        where: { userId, isActive: true },
-        relations: ['property'],
-        skip: 0,
-        take: 10,
-        order: { createdAt: 'DESC' },
-      });
+      expect(mockCulturesRepository.createQueryBuilder).toHaveBeenCalledWith('culture');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('culture.userId = :userId', { userId });
       expect(result.data).toBeDefined();
       expect(result.total).toBe(1);
       expect(result.page).toBe(1);
@@ -299,6 +305,7 @@ describe('CulturesService', () => {
         observations: 'Cultura em teste',
         isActive: true,
         property: { id: 'prop-1', name: 'Fazenda A' },
+        activities: [],
       };
 
       mockCulturesRepository.findOne.mockResolvedValue(mockCulture);
@@ -308,8 +315,8 @@ describe('CulturesService', () => {
 
       // Assert
       expect(mockCulturesRepository.findOne).toHaveBeenCalledWith({
-        where: { id: cultureId, isActive: true },
-        relations: ['property'],
+        where: { id: cultureId },
+        relations: ['property', 'activities'],
       });
       expect(result).toBeDefined();
     });

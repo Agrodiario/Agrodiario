@@ -144,7 +144,7 @@ yarn dev:backend
 
 ## Testes
 
-O projeto utiliza **Jest** como framework de testes para o backend.
+O projeto possui **133 testes unitários** no backend utilizando **Jest**.
 
 ### Executando os Testes
 
@@ -158,60 +158,20 @@ yarn test:watch
 
 # Rodar testes com cobertura de código
 yarn test:cov
-
-# Rodar apenas testes de autenticação e email
-yarn test --testPathPattern="(email|auth)\.service\.spec\.ts"
-```
-
-### Estrutura dos Testes
-
-Os arquivos de teste ficam junto aos arquivos de código fonte, com a extensão `.spec.ts`:
-
-```
-src/modules/
-├── auth/
-│   ├── auth.service.ts
-│   └── auth.service.spec.ts    # 24 testes
-├── email/
-│   ├── email.service.ts
-│   └── email.service.spec.ts   # 11 testes
-└── ...
 ```
 
 ### Cobertura de Testes
 
-| Módulo | Testes | Descrição |
-|--------|--------|-----------|
-| **AuthService** | 24 | Login, registro, recuperação de senha, verificação de email |
-| **EmailService** | 11 | Envio de emails de verificação e recuperação |
-
-### Escrevendo Novos Testes
-
-Siga o padrão existente utilizando `@nestjs/testing`:
-
-```typescript
-import { Test, TestingModule } from '@nestjs/testing';
-
-describe('MeuService', () => {
-  let service: MeuService;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        MeuService,
-        { provide: DependenciaService, useValue: mockDependencia },
-      ],
-    }).compile();
-
-    service = module.get<MeuService>(MeuService);
-  });
-
-  it('deve fazer algo', async () => {
-    const result = await service.metodo();
-    expect(result).toBeDefined();
-  });
-});
-```
+| Módulo | Arquivo | Testes | Descrição |
+|--------|---------|--------|-----------|
+| Auth | `auth.service.spec.ts` | 24 | Autenticação, registro, verificação de email, reset de senha |
+| Email | `email.service.spec.ts` | 11 | Envio de emails (reset de senha, verificação) |
+| Activities | `activities.controller.spec.ts` | 6 | Endpoints de atividades |
+| Activities | `activities.service.spec.ts` | 9 | Lógica de negócio de atividades |
+| Cultures | `cultures.controller.spec.ts` | 5 | Endpoints de culturas |
+| Cultures | `cultures.service.spec.ts` | 9 | Lógica de negócio de culturas |
+| Cultures | `create-culture.dto.spec.ts` | 65 | Validação de DTOs |
+| Embrapa | `embrapa.service.spec.ts` | 4 | Integração com API externa |
 
 ---
 
@@ -227,22 +187,11 @@ O workflow é executado automaticamente em:
 
 ### Jobs do Pipeline
 
-| Job | Descrição | Obrigatório |
-|-----|-----------|-------------|
-| `test-auth-email` | Testes de autenticação e email (35 testes) | Sim |
-| `test-backend-all` | Todos os testes do backend | Não* |
-| `test-frontend` | Verificação de tipos TypeScript | Não* |
-| `build` | Compilação do backend | Sim |
-
-> *Estes jobs podem falhar sem bloquear o merge (continue-on-error)
-
-### Verificando o Status
-
-Após abrir um PR ou fazer push, verifique o status dos checks:
-
-1. Acesse a aba **Actions** no GitHub
-2. Clique no workflow run mais recente
-3. Verifique se os jobs obrigatórios passaram
+| Job | Descrição |
+|-----|-----------|
+| `test-backend` | Executa todos os 133 testes unitários com cobertura |
+| `test-frontend` | Verificação de tipos TypeScript |
+| `build` | Compilação do backend |
 
 ### Arquivo de Configuração
 

@@ -20,13 +20,11 @@ describe('EmbrapaService', () => {
   };
 
   const mockProductsResponse: AxiosResponse = {
-    data: {
-      data: [
-        { marca_comercial: ['Produto A'] },
-        { marca_comercial: ['Produto A'] }, 
-        { marca_comercial: ['Produto B'] },
-      ],
-    },
+    data: [
+      { marca_comercial: ['Produto A'] },
+      { marca_comercial: ['Produto A'] },
+      { marca_comercial: ['Produto B'] },
+    ],
     status: 200,
     statusText: 'OK',
     headers: {},

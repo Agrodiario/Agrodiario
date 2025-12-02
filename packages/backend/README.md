@@ -130,6 +130,37 @@ The API will be available at: `http://localhost:3000/api/v1`
 - `yarn test:cov` - Run tests with coverage
 - `yarn test:e2e` - Run end-to-end tests
 
+## Testes Unitários
+
+O projeto possui **133 testes unitários** cobrindo os principais módulos:
+
+| Módulo | Arquivo | Testes | Descrição |
+|--------|---------|--------|-----------|
+| Auth | `auth.service.spec.ts` | 24 | Autenticação, registro, verificação de email, reset de senha |
+| Email | `email.service.spec.ts` | 11 | Envio de emails (reset de senha, verificação) |
+| Activities | `activities.controller.spec.ts` | 6 | Endpoints de atividades |
+| Activities | `activities.service.spec.ts` | 9 | Lógica de negócio de atividades |
+| Cultures | `cultures.controller.spec.ts` | 5 | Endpoints de culturas |
+| Cultures | `cultures.service.spec.ts` | 9 | Lógica de negócio de culturas |
+| Cultures | `create-culture.dto.spec.ts` | 65 | Validação de DTOs |
+| Embrapa | `embrapa.service.spec.ts` | 4 | Integração com API externa |
+
+### Executando os Testes
+
+```bash
+# Executar todos os testes
+yarn test
+
+# Executar com cobertura
+yarn test:cov
+
+# Executar em modo watch (desenvolvimento)
+yarn test:watch
+
+# Executar testes específicos
+yarn test --testPathPattern="auth.service"
+```
+
 ## API Endpoints
 
 ### Health Check
@@ -281,9 +312,9 @@ export class AppModule {}
 - [ ] Caching (Redis)
 - [ ] File upload support
 - [ ] Database migrations
-- [ ] Comprehensive test coverage
+- [x] Unit test coverage (133 tests)
 - [ ] Docker support
-- [ ] CI/CD pipeline
+- [x] CI/CD pipeline (GitHub Actions)
 
 ## Database Schema
 

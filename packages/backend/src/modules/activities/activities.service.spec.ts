@@ -35,6 +35,7 @@ const mockOneActivity = {
 };
 
 const mockQueryBuilder = {
+  leftJoinAndSelect: jest.fn().mockReturnThis(),
   where: jest.fn().mockReturnThis(),
   andWhere: jest.fn().mockReturnThis(),
   orderBy: jest.fn().mockReturnThis(),
@@ -84,6 +85,7 @@ describe('ActivityService', () => {
       const createDto = {
         date: '2025-11-20',
         propriedade: 'Sítio',
+        cultureId: 'a1b2c3d4-e5f6-4789-a012-3456789abcde',
         tipo: 'preparo' as any,
         descricao: 'Teste',
         responsavel: 'João',
