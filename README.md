@@ -139,6 +139,117 @@ yarn dev:client
 ```bash
 yarn dev:backend
 ```
+
+---
+
+## Testes
+
+O projeto utiliza **Jest** como framework de testes para o backend.
+
+### Executando os Testes
+
+```bash
+# Rodar todos os testes do backend
+cd packages/backend
+yarn test
+
+# Rodar testes em modo watch (re-executa ao salvar)
+yarn test:watch
+
+# Rodar testes com cobertura de código
+yarn test:cov
+
+# Rodar apenas testes de autenticação e email
+yarn test --testPathPattern="(email|auth)\.service\.spec\.ts"
+```
+
+### Estrutura dos Testes
+
+Os arquivos de teste ficam junto aos arquivos de código fonte, com a extensão `.spec.ts`:
+
+```
+src/modules/
+├── auth/
+│   ├── auth.service.ts
+│   └── auth.service.spec.ts    # 24 testes
+├── email/
+│   ├── email.service.ts
+│   └── email.service.spec.ts   # 11 testes
+└── ...
+```
+
+### Cobertura de Testes
+
+| Módulo | Testes | Descrição |
+|--------|--------|-----------|
+| **AuthService** | 24 | Login, registro, recuperação de senha, verificação de email |
+| **EmailService** | 11 | Envio de emails de verificação e recuperação |
+
+### Escrevendo Novos Testes
+
+Siga o padrão existente utilizando `@nestjs/testing`:
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+
+describe('MeuService', () => {
+  let service: MeuService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        MeuService,
+        { provide: DependenciaService, useValue: mockDependencia },
+      ],
+    }).compile();
+
+    service = module.get<MeuService>(MeuService);
+  });
+
+  it('deve fazer algo', async () => {
+    const result = await service.metodo();
+    expect(result).toBeDefined();
+  });
+});
+```
+
+---
+
+## CI/CD
+
+O projeto utiliza **GitHub Actions** para integração contínua.
+
+### Pipeline de Testes
+
+O workflow é executado automaticamente em:
+- Push para `main` ou `develop`
+- Pull requests para `main` ou `develop`
+
+### Jobs do Pipeline
+
+| Job | Descrição | Obrigatório |
+|-----|-----------|-------------|
+| `test-auth-email` | Testes de autenticação e email (35 testes) | Sim |
+| `test-backend-all` | Todos os testes do backend | Não* |
+| `test-frontend` | Verificação de tipos TypeScript | Não* |
+| `build` | Compilação do backend | Sim |
+
+> *Estes jobs podem falhar sem bloquear o merge (continue-on-error)
+
+### Verificando o Status
+
+Após abrir um PR ou fazer push, verifique o status dos checks:
+
+1. Acesse a aba **Actions** no GitHub
+2. Clique no workflow run mais recente
+3. Verifique se os jobs obrigatórios passaram
+
+### Arquivo de Configuração
+
+O workflow está definido em `.github/workflows/test.yml`.
+
+---
+
 ## Figma Design
 You can view the project’s design prototype on Figma:
 
