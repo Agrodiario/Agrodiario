@@ -8,13 +8,12 @@ import { FiTrash2, FiEdit2, FiMap, FiPlus } from 'react-icons/fi';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal/ConfirmationModal';
 import { useState } from 'react';
 
-// Defina o tipo completo da Propriedade
 export type Property = {
-  id: number;
+  id: string;
   name: string;
   address: string;
   areaTotal: number;
-  areaCultivada: number; // Assumindo que o segundo "Área total" na imagem era Cultivada
+  areaCultivada: number;
   cultivoPrincipal: string;
   talhoes: Talhao[];
 };
