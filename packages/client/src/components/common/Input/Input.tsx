@@ -45,10 +45,14 @@ export function Input({
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
+  // Determina se o campo tem valor preenchido
   const hasValue =
     (props as any).value !== undefined &&
     (props as any).value !== null &&
     String((props as any).value).trim() !== '';
+
+  // Verifica se a prop 'required' está presente (para Input, Textarea e Select)
+  const isRequired = (props as any).required;
 
   const wrapperClass = `${styles.inputWrapper} ${as === 'textarea' ? styles.textareaWrapper : ''
     } ${error && showError ? styles.error : ''} ${className || ''}`;
@@ -122,6 +126,8 @@ export function Input({
           } ${error && showError ? styles.errorLabel : ''}`}
       >
         {label}
+        {/* NOVO: Adiciona o asterisco vermelho se o campo for obrigatório */}
+        {isRequired && <span style={{ color: 'red', marginLeft: '2px' }}>*</span>}
       </label>
 
       {InputElement}
