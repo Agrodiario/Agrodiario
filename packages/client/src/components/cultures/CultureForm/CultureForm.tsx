@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CultureForm.module.css';
-import { Input } from '../../common/Input/Input';
 import { Button } from '../../common/Button/Button';
 import { Radio } from '../../common/Radio/Radio';
 import { CultureSearchSelect } from '../CultureSearchSelect/CultureSearchSelect';
 import { propertyService } from '../../../services/property.service';
+// Adicione estas importações
+import { isValidDate } from '../../../utils/validators';
+import { dateMask } from '../../../utils/masks';
 
 export type CultureFormData = {
   propertyId: string;
@@ -14,7 +16,7 @@ export type CultureFormData = {
   cycle: string;
   origin: 'organic' | 'conventional' | 'transgenic';
   supplier: string;
-  plantingDate: string;
+  plantingDate: string; // Agora será DD/MM/AAAA no frontend
   plantingArea: string;
   observations: string;
   plotName?: string;
@@ -24,6 +26,43 @@ type Props = {
   initialData?: Partial<CultureFormData>;
   onSubmit: (data: CultureFormData) => void;
   isLoading?: boolean;
+};
+
+// Função para converter data do formato YYYY-MM-DD para DD/MM/AAAA
+const convertDateToDisplayFormat = (dateString: string): string => {
+  if (!dateString) return '';
+
+  // Se já estiver no formato DD/MM/AAAA, retorna como está
+  if (dateString.includes('/')) return dateString;
+
+  // Converte de YYYY-MM-DD para DD/MM/AAAA
+  const [year, month, day] = dateString.split('-');
+  return `${day}/${month}/${year}`;
+};
+
+// Função para converter data do formato DD/MM/AAAA para YYYY-MM-DD
+const convertDateToSubmitFormat = (dateString: string): string => {
+  if (!dateString || dateString.length < 10) return '';
+
+  const [day, month, year] = dateString.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+};
+
+// Função de validação de data
+const validateDate = (dateValue: string): string => {
+  if (!dateValue || dateValue.trim() === '') {
+    return 'Data de plantio é obrigatória';
+  }
+
+  if (dateValue.length < 10) {
+    return 'Data incompleta (DD/MM/AAAA)';
+  }
+
+  if (!isValidDate(dateValue)) {
+    return 'Data inválida. Verifique o dia e o mês.';
+  }
+
+  return '';
 };
 
 export function CultureForm({ initialData, onSubmit, isLoading = false }: Props) {
@@ -37,7 +76,7 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
     cycle: initialData?.cycle || '',
     origin: initialData?.origin || 'conventional',
     supplier: initialData?.supplier || '',
-    plantingDate: initialData?.plantingDate || '',
+    plantingDate: convertDateToDisplayFormat(initialData?.plantingDate || ''),
     plantingArea: initialData?.plantingArea || '',
     observations: initialData?.observations || '',
     plotName: initialData?.plotName || '',
@@ -48,6 +87,11 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
     initialData?.plotName ? 'plot' : 'hectares'
   );
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
+
+  // Estados para validação
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isValid, setIsValid] = useState(false);
 
   // Carrega propriedades do usuário
   useEffect(() => {
@@ -79,9 +123,61 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
     }
   }, [formData.propertyId, properties]);
 
+  // Função de validação geral
+  const validateField = (fieldName: keyof CultureFormData, value: string): string => {
+    switch (fieldName) {
+      case 'propertyId':
+        if (!value || value.trim() === '') return 'Propriedade é obrigatória';
+        return '';
+      case 'cultureName':
+        if (!value || value.trim() === '') return 'Cultura é obrigatória';
+        return '';
+      case 'cycle':
+        if (!value || value.trim() === '') return 'Ciclo é obrigatório';
+        if (isNaN(Number(value)) || Number(value) <= 0) return 'Ciclo deve ser um número positivo';
+        return '';
+      case 'plantingDate':
+        return validateDate(value);
+      case 'plantingArea':
+        if (!value || value.trim() === '') return 'Área de plantio é obrigatória';
+        if (isNaN(Number(value)) || Number(value) <= 0) return 'Área deve ser um número positivo';
+        return '';
+      default:
+        return '';
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const fieldName = name as keyof CultureFormData;
+
+    let processedValue = value;
+
+    // Aplica máscara apenas para o campo de data
+    if (fieldName === 'plantingDate') {
+      processedValue = dateMask(value);
+    }
+
+    setFormData(prev => {
+      const updatedFormData = { ...prev, [fieldName]: processedValue };
+
+      // Valida o campo se já foi tocado
+      if (touchedFields[fieldName]) {
+        const error = validateField(fieldName, processedValue);
+        setErrors(prevErrors => ({ ...prevErrors, [fieldName]: error }));
+      }
+
+      return updatedFormData;
+    });
+  };
+
+  const handleBlur = (fieldName: keyof CultureFormData) => {
+    setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
+
+    const currentValue = (formData[fieldName] || '').toString();
+    const error = validateField(fieldName, currentValue);
+
+    setErrors(prev => ({ ...prev, [fieldName]: error }));
   };
 
   const handleOriginChange = (value: 'organic' | 'conventional' | 'transgenic') => {
@@ -90,11 +186,52 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // Marca todos os campos obrigatórios como tocados
+    const requiredFields: (keyof CultureFormData)[] = [
+      'propertyId',
+      'cultureName',
+      'cycle',
+      'plantingDate',
+      'plantingArea'
+    ];
+
+    const newTouched: Record<string, boolean> = {};
+    const newErrors: Record<string, string> = {};
+
+    requiredFields.forEach(field => {
+      newTouched[field] = true;
+      const error = validateField(field, (formData[field] || '').toString());
+      if (error) {
+        newErrors[field] = error;
+      }
+    });
+
+    setTouchedFields(newTouched);
+    setErrors(newErrors);
+
+    // Se houver erros, não envia o formulário
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
+
+    // Converte a data para o formato de envio (YYYY-MM-DD)
+    const dataToSubmit = {
+      ...formData,
+      plantingDate: convertDateToSubmitFormat(formData.plantingDate),
+    };
+
+    onSubmit(dataToSubmit);
   };
 
   const handleCultureChange = (cultureName: string) => {
     setFormData(prev => ({ ...prev, cultureName }));
+
+    // Se o campo foi tocado, valida após a mudança
+    if (touchedFields.cultureName) {
+      const error = validateField('cultureName', cultureName);
+      setErrors(prev => ({ ...prev, cultureName: error }));
+    }
   };
 
   const handleAreaTypeChange = (type: 'hectares' | 'plot') => {
@@ -116,6 +253,24 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
     }));
   };
 
+  // Efeito para validar o formulário inteiro
+  useEffect(() => {
+    const requiredFields: (keyof CultureFormData)[] = [
+      'propertyId',
+      'cultureName',
+      'cycle',
+      'plantingDate',
+      'plantingArea'
+    ];
+
+    const hasErrors = requiredFields.some(field => {
+      const error = validateField(field, (formData[field] || '').toString());
+      return !!error;
+    });
+
+    setIsValid(!hasErrors);
+  }, [formData]);
+
   const submitText = isEditMode ? 'Salvar alterações' : 'Salvar cultura';
   const hasPlots = selectedProperty?.plots && selectedProperty.plots.length > 0;
 
@@ -136,8 +291,9 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
           <select
             name="propertyId"
             value={formData.propertyId}
-            onChange={(e) => setFormData(prev => ({ ...prev, propertyId: e.target.value }))}
-            className={styles.select}
+            onChange={handleChange}
+            onBlur={() => handleBlur('propertyId')}
+            className={`${styles.select} ${errors.propertyId ? styles.error : ''}`}
             required
           >
             <option value="">Selecione uma propriedade</option>
@@ -147,6 +303,9 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
               </option>
             ))}
           </select>
+          {touchedFields.propertyId && errors.propertyId && (
+            <span className={styles.errorMessage}>{errors.propertyId}</span>
+          )}
         </div>
 
         {/* Cultura */}
@@ -173,16 +332,20 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
 
         {/* Ciclo */}
         <div className={styles.section}>
-          <label className={styles.label}>Ciclo (em dias)</label>
+          <label className={styles.label}>Ciclo (em dias) <span style={{ color: 'red' }}>*</span></label>
           <input
             name="cycle"
             type="number"
             value={formData.cycle}
             onChange={handleChange}
+            onBlur={() => handleBlur('cycle')}
             placeholder="120"
-            className={styles.input}
+            className={`${styles.input} ${errors.cycle ? styles.error : ''}`}
             required
           />
+          {touchedFields.cycle && errors.cycle && (
+            <span className={styles.errorMessage}>{errors.cycle}</span>
+          )}
         </div>
 
         {/* Origem */}
@@ -227,21 +390,29 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
 
         {/* Data de plantio prevista ou realizada */}
         <div className={styles.section}>
-          <label className={styles.label}>Data de plantio prevista ou realizada</label>
+          <label className={styles.label}>
+            Data de plantio prevista ou realizada <span style={{ color: 'red' }}>*</span>
+          </label>
           <input
             name="plantingDate"
-            type="date"
+            type="text"
             value={formData.plantingDate}
             onChange={handleChange}
-            className={styles.input}
+            onBlur={() => handleBlur('plantingDate')}
+            placeholder="DD/MM/AAAA"
+            className={`${styles.input} ${errors.plantingDate ? styles.error : ''}`}
+            maxLength={10}
             required
           />
+          {touchedFields.plantingDate && errors.plantingDate && (
+            <span className={styles.errorMessage}>{errors.plantingDate}</span>
+          )}
         </div>
 
         {/* Área de plantio */}
         <div className={styles.section}>
-          <label className={styles.label}>Área de plantio</label>
-          
+          <label className={styles.label}>Área de plantio <span style={{ color: 'red' }}>*</span></label>
+
           {formData.propertyId && hasPlots && (
             <div className={styles.radioGroup} style={{ flexDirection: 'row', gap: '1.5rem', marginBottom: '0.75rem' }}>
               <Radio
@@ -268,16 +439,22 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
           )}
 
           {areaInputType === 'hectares' ? (
-            <input
-              name="plantingArea"
-              type="number"
-              step="0.01"
-              value={formData.plantingArea}
-              onChange={handleChange}
-              placeholder="Digite a área em hectares"
-              className={styles.input}
-              required
-            />
+            <>
+              <input
+                name="plantingArea"
+                type="number"
+                step="0.01"
+                value={formData.plantingArea}
+                onChange={handleChange}
+                onBlur={() => handleBlur('plantingArea')}
+                placeholder="Digite a área em hectares"
+                className={`${styles.input} ${errors.plantingArea ? styles.error : ''}`}
+                required
+              />
+              {touchedFields.plantingArea && errors.plantingArea && (
+                <span className={styles.errorMessage}>{errors.plantingArea}</span>
+              )}
+            </>
           ) : (
             <>
               {selectedProperty?.plots && selectedProperty.plots.length > 0 ? (
@@ -285,7 +462,8 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
                   name="plotName"
                   value={formData.plotName}
                   onChange={handlePlotChange}
-                  className={styles.select}
+                  onBlur={() => handleBlur('plantingArea')}
+                  className={`${styles.select} ${errors.plantingArea ? styles.error : ''}`}
                   required
                 >
                   <option value="">Selecione um talhão</option>
@@ -299,6 +477,9 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
                 <p style={{ fontSize: '0.9rem', color: '#d92d20', padding: '0.75rem', backgroundColor: '#fef3f2', borderRadius: '8px' }}>
                   Não há talhões cadastrados para esta propriedade.
                 </p>
+              )}
+              {touchedFields.plantingArea && errors.plantingArea && (
+                <span className={styles.errorMessage}>{errors.plantingArea}</span>
               )}
             </>
           )}
@@ -327,7 +508,11 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
           >
             Cancelar
           </Button>
-          <Button variant="primary" type="submit" disabled={isLoading}>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={!isValid || isLoading}
+          >
             {isLoading ? 'Salvando...' : submitText}
           </Button>
         </footer>
