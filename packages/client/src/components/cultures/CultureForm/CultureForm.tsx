@@ -1,13 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+// Mantendo os caminhos de importação originais (resolução de erros do ambiente)
 import styles from './CultureForm.module.css';
 import { Button } from '../../common/Button/Button';
 import { Radio } from '../../common/Radio/Radio';
+// Usando o caminho de `Button` como referência para o `Input`
+import { Input, SelectOption } from '../../common/Input/Input';
 import { CultureSearchSelect } from '../CultureSearchSelect/CultureSearchSelect';
 import { propertyService } from '../../../services/property.service';
-// Adicione estas importações
 import { isValidDate } from '../../../utils/validators';
 import { dateMask } from '../../../utils/masks';
+import { IoIosArrowDown } from 'react-icons/io';
+import { FiArrowLeft } from 'react-icons/fi';
 
 export type CultureFormData = {
   propertyId: string;
@@ -132,15 +136,30 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
       case 'cultureName':
         if (!value || value.trim() === '') return 'Cultura é obrigatória';
         return '';
+      case 'cultivar':
+        if (!value || value.trim() === '') return 'Cultivar/Variedade é obrigatório';
+        return '';
       case 'cycle':
         if (!value || value.trim() === '') return 'Ciclo é obrigatório';
-        if (isNaN(Number(value)) || Number(value) <= 0) return 'Ciclo deve ser um número positivo';
+        if (isNaN(Number(value)) || !Number.isInteger(Number(value))) {
+          return 'Ciclo deve ser um número inteiro';
+        }
+        if (Number(value) <= 0) return 'Ciclo deve ser maior que zero';
+        return '';
+      case 'origin':
+        if (!value || value.trim() === '') return 'Origem é obrigatória';
+        return '';
+      case 'supplier':
+        if (!value || value.trim() === '') return 'Fornecedor é obrigatório';
         return '';
       case 'plantingDate':
         return validateDate(value);
       case 'plantingArea':
-        if (!value || value.trim() === '') return 'Área de plantio é obrigatória';
-        if (isNaN(Number(value)) || Number(value) <= 0) return 'Área deve ser um número positivo';
+        // A validação de 'plantingArea' cobre tanto o input de hectares quanto o select de talhão
+        if (!value || value.trim() === '') return areaInputType === 'hectares' ? 'Área de plantio é obrigatória' : 'Seleção de talhão é obrigatória';
+        if (areaInputType === 'hectares' && (isNaN(Number(value)) || Number(value) <= 0)) {
+          return 'Área deve ser um número positivo';
+        }
         return '';
       default:
         return '';
@@ -182,20 +201,30 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
 
   const handleOriginChange = (value: 'organic' | 'conventional' | 'transgenic') => {
     setFormData(prev => ({ ...prev, origin: value }));
+
+    // Dispara a validação após a mudança, se o campo já foi tocado
+    if (touchedFields.origin) {
+      const error = validateField('origin', value);
+      setErrors(prev => ({ ...prev, origin: error }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Marca todos os campos obrigatórios como tocados
+    // Lista de campos obrigatórios
     const requiredFields: (keyof CultureFormData)[] = [
       'propertyId',
       'cultureName',
+      'cultivar',
       'cycle',
+      'origin',
+      'supplier',
       'plantingDate',
       'plantingArea'
     ];
 
+    // Marca todos os campos obrigatórios como tocados
     const newTouched: Record<string, boolean> = {};
     const newErrors: Record<string, string> = {};
 
@@ -237,20 +266,44 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
   const handleAreaTypeChange = (type: 'hectares' | 'plot') => {
     setAreaInputType(type);
     if (type === 'hectares') {
+      // Limpa a seleção de talhão
       setFormData(prev => ({ ...prev, plotName: '' }));
+      // Se houver valor em plantingArea (vindo do plot), limpa para forçar o usuário a digitar
+      if (formData.plantingArea && initialData?.plotName) {
+        setFormData(prev => ({ ...prev, plantingArea: '' }));
+      }
+      // Se o campo de área já foi tocado, valida para hectares
+      if (touchedFields.plantingArea) {
+        const error = validateField('plantingArea', formData.plantingArea);
+        setErrors(prev => ({ ...prev, plantingArea: error }));
+      }
     } else {
+      // Limpa a área em hectares
       setFormData(prev => ({ ...prev, plantingArea: '' }));
+      // Se o campo de área já foi tocado, valida para talhão
+      if (touchedFields.plantingArea) {
+        const error = validateField('plantingArea', formData.plotName || '');
+        setErrors(prev => ({ ...prev, plantingArea: error }));
+      }
     }
   };
 
   const handlePlotChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const plotName = e.target.value;
     const plot = selectedProperty?.plots?.find((p: any) => p.name === plotName);
+    const plantingArea = plot ? plot.area.toString() : '';
+
     setFormData(prev => ({
       ...prev,
       plotName,
-      plantingArea: plot ? plot.area.toString() : '',
+      plantingArea, // Atualiza a área com a área do talhão
     }));
+
+    // Valida o campo 'plantingArea' após a seleção do talhão
+    if (touchedFields.plantingArea) {
+      const error = validateField('plantingArea', plantingArea);
+      setErrors(prev => ({ ...prev, plantingArea: error }));
+    }
   };
 
   // Efeito para validar o formulário inteiro
@@ -258,99 +311,116 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
     const requiredFields: (keyof CultureFormData)[] = [
       'propertyId',
       'cultureName',
+      'cultivar',
       'cycle',
+      'origin',
+      'supplier',
       'plantingDate',
       'plantingArea'
     ];
 
     const hasErrors = requiredFields.some(field => {
-      const error = validateField(field, (formData[field] || '').toString());
+      const value = (field === 'plantingArea' && areaInputType === 'plot') ? (formData.plotName || '') : (formData[field] || '').toString();
+      const error = validateField(field, value);
       return !!error;
     });
 
     setIsValid(!hasErrors);
-  }, [formData]);
+  }, [formData, areaInputType]);
 
   const submitText = isEditMode ? 'Salvar alterações' : 'Salvar cultura';
   const hasPlots = selectedProperty?.plots && selectedProperty.plots.length > 0;
 
+  // --- PREPARAÇÃO DAS OPÇÕES PARA O COMPONENTE INPUT AS SELECT ---
+
+  const propertyOptions: SelectOption[] = useMemo(() => {
+    return properties.map(prop => ({
+      label: prop.name,
+      value: prop.id,
+    }));
+  }, [properties]);
+
+  const plotOptions: SelectOption[] = useMemo(() => {
+    return selectedProperty?.plots?.map((plot: any) => ({
+      label: `${plot.name} - ${plot.area} hectares`,
+      value: plot.name,
+    })) || [];
+  }, [selectedProperty]);
+
+  const title = isEditMode ? 'Editar cultura' : 'Nova cultura';
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>
-          {isEditMode ? 'Editar cultura' : 'Nova cultura'}
-        </h1>
+        <button onClick={() => navigate(-1)} className={styles.backButton}>
+          <FiArrowLeft size={20} />
+          <span>{title}</span>
+        </button>
       </header>
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        {/* Propriedade associada */}
+        {/* Propriedade associada (AGORA USANDO INPUT AS SELECT) */}
         <div className={styles.section}>
-          <label className={styles.label}>
-            Propriedade associada <span style={{ color: 'red' }}>*</span>
-          </label>
-          <select
+          <Input
+            as="select"
+            label="Propriedade associada"
             name="propertyId"
             value={formData.propertyId}
             onChange={handleChange}
             onBlur={() => handleBlur('propertyId')}
-            className={`${styles.select} ${errors.propertyId ? styles.error : ''}`}
+            options={propertyOptions}
             required
-          >
-            <option value="">Selecione uma propriedade</option>
-            {properties.map(prop => (
-              <option key={prop.id} value={prop.id}>
-                {prop.name}
-              </option>
-            ))}
-          </select>
-          {touchedFields.propertyId && errors.propertyId && (
-            <span className={styles.errorMessage}>{errors.propertyId}</span>
-          )}
+            icon={<IoIosArrowDown size={18} />}
+            error={errors.propertyId}
+            showError={touchedFields.propertyId && !!errors.propertyId}
+          />
         </div>
 
         {/* Cultura */}
         <div className={styles.section}>
-          <label className={styles.label}>Cultura</label>
+          <h3 className={styles.sectionTitle}>Cultura</h3>
           <CultureSearchSelect
             value={formData.cultureName}
             onChange={handleCultureChange}
             placeholder="Milho"
           />
-        </div>
+          {touchedFields.cultureName && errors.cultureName && (
+            <span className={styles.errorMessage}>{errors.cultureName}</span>
+          )}
 
-        {/* Nome do cultivar/variedade */}
-        <div className={styles.section}>
-          <label className={styles.label}>Nome do cultivar/variedade</label>
-          <input
+          {/* Nome do cultivar/variedade */}
+          <Input
+            label="Nome do cultivar/variedade"
             name="cultivar"
             value={formData.cultivar}
             onChange={handleChange}
+            onBlur={() => handleBlur('cultivar')}
             placeholder="AG 1051"
-            className={styles.input}
+            required
+            error={errors.cultivar}
+            showError={touchedFields.cultivar && !!errors.cultivar}
           />
-        </div>
 
-        {/* Ciclo */}
-        <div className={styles.section}>
-          <label className={styles.label}>Ciclo (em dias) <span style={{ color: 'red' }}>*</span></label>
-          <input
+          {/* Ciclo */}
+          <Input
+            label="Ciclo (em dias)"
             name="cycle"
             type="number"
             value={formData.cycle}
             onChange={handleChange}
             onBlur={() => handleBlur('cycle')}
             placeholder="120"
-            className={`${styles.input} ${errors.cycle ? styles.error : ''}`}
+            min="1"
+            step="1"
             required
+            error={errors.cycle}
+            showError={touchedFields.cycle && !!errors.cycle}
           />
-          {touchedFields.cycle && errors.cycle && (
-            <span className={styles.errorMessage}>{errors.cycle}</span>
-          )}
         </div>
 
         {/* Origem */}
         <div className={styles.section}>
-          <h3 className={styles.textTitle}>Origem</h3>
+          <h3 className={styles.sectionTitle}>Origem</h3>
           <div className={styles.radioGroup}>
             <Radio
               name="origin"
@@ -358,6 +428,7 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
               label="Orgânico"
               checked={formData.origin === 'organic'}
               onChange={() => handleOriginChange('organic')}
+              onBlur={() => handleBlur('origin')}
             />
             <Radio
               name="origin"
@@ -365,6 +436,7 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
               label="Convencional"
               checked={formData.origin === 'conventional'}
               onChange={() => handleOriginChange('conventional')}
+              onBlur={() => handleBlur('origin')}
             />
             <Radio
               name="origin"
@@ -372,47 +444,45 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
               label="Transgênico"
               checked={formData.origin === 'transgenic'}
               onChange={() => handleOriginChange('transgenic')}
+              onBlur={() => handleBlur('origin')}
             />
           </div>
-        </div>
+          {touchedFields.origin && errors.origin && (
+            <span className={styles.errorMessage}>{errors.origin}</span>
+          )}
 
-        {/* Fornecedor/empresa sementeira */}
-        <div className={styles.section}>
-          <label className={styles.label}>Fornecedor/empresa sementeira</label>
-          <input
+          {/* Fornecedor/empresa sementeira */}
+          <Input
+            label="Fornecedor/empresa sementeira"
             name="supplier"
             value={formData.supplier}
             onChange={handleChange}
+            onBlur={() => handleBlur('supplier')}
             placeholder="Lorem Ipsum"
-            className={styles.input}
+            required
+            error={errors.supplier}
+            showError={touchedFields.supplier && !!errors.supplier}
           />
         </div>
 
         {/* Data de plantio prevista ou realizada */}
         <div className={styles.section}>
-          <label className={styles.label}>
-            Data de plantio prevista ou realizada <span style={{ color: 'red' }}>*</span>
-          </label>
-          <input
+          <h3 className={styles.sectionTitle}>Plantio</h3>
+          <Input
+            label="Data de plantio prevista ou realizada"
             name="plantingDate"
             type="text"
             value={formData.plantingDate}
             onChange={handleChange}
             onBlur={() => handleBlur('plantingDate')}
             placeholder="DD/MM/AAAA"
-            className={`${styles.input} ${errors.plantingDate ? styles.error : ''}`}
             maxLength={10}
             required
+            error={errors.plantingDate}
+            showError={touchedFields.plantingDate && !!errors.plantingDate}
           />
-          {touchedFields.plantingDate && errors.plantingDate && (
-            <span className={styles.errorMessage}>{errors.plantingDate}</span>
-          )}
-        </div>
 
-        {/* Área de plantio */}
-        <div className={styles.section}>
-          <label className={styles.label}>Área de plantio <span style={{ color: 'red' }}>*</span></label>
-
+          {/* Área de plantio */}
           {formData.propertyId && hasPlots && (
             <div className={styles.radioGroup} style={{ flexDirection: 'row', gap: '1.5rem', marginBottom: '0.75rem' }}>
               <Radio
@@ -439,62 +509,58 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
           )}
 
           {areaInputType === 'hectares' ? (
-            <>
-              <input
-                name="plantingArea"
-                type="number"
-                step="0.01"
-                value={formData.plantingArea}
-                onChange={handleChange}
-                onBlur={() => handleBlur('plantingArea')}
-                placeholder="Digite a área em hectares"
-                className={`${styles.input} ${errors.plantingArea ? styles.error : ''}`}
-                required
-              />
-              {touchedFields.plantingArea && errors.plantingArea && (
-                <span className={styles.errorMessage}>{errors.plantingArea}</span>
-              )}
-            </>
+            <Input
+              label="Área de plantio em hectares"
+              name="plantingArea"
+              type="number"
+              step="0.01"
+              value={formData.plantingArea}
+              onChange={handleChange}
+              onBlur={() => handleBlur('plantingArea')}
+              placeholder="Digite a área em hectares"
+              required
+              error={errors.plantingArea}
+              showError={touchedFields.plantingArea && !!errors.plantingArea}
+            />
           ) : (
             <>
               {selectedProperty?.plots && selectedProperty.plots.length > 0 ? (
-                <select
+                // Talhão
+                <Input
+                  as="select"
+                  label="Selecione um Talhão"
                   name="plotName"
-                  value={formData.plotName}
+                  value={formData.plotName || ''}
                   onChange={handlePlotChange}
-                  onBlur={() => handleBlur('plantingArea')}
-                  className={`${styles.select} ${errors.plantingArea ? styles.error : ''}`}
+                  onBlur={() => handleBlur('plantingArea')} // Validação direcionada para plantingArea
+                  options={plotOptions}
                   required
-                >
-                  <option value="">Selecione um talhão</option>
-                  {selectedProperty.plots.map((plot: any) => (
-                    <option key={plot.name} value={plot.name}>
-                      {plot.name} - {plot.area} hectares
-                    </option>
-                  ))}
-                </select>
+                  icon={<IoIosArrowDown size={18} />}
+                  error={errors.plantingArea}
+                  showError={touchedFields.plantingArea && !!errors.plantingArea}
+                />
               ) : (
                 <p style={{ fontSize: '0.9rem', color: '#d92d20', padding: '0.75rem', backgroundColor: '#fef3f2', borderRadius: '8px' }}>
                   Não há talhões cadastrados para esta propriedade.
                 </p>
               )}
-              {touchedFields.plantingArea && errors.plantingArea && (
+              {/* Se a opção de talhão foi tocada e há erro (e não foi coberto pelo Input Select acima) */}
+              {areaInputType === 'plot' && touchedFields.plantingArea && errors.plantingArea && !selectedProperty?.plots?.length && (
                 <span className={styles.errorMessage}>{errors.plantingArea}</span>
               )}
             </>
           )}
-        </div>
 
-        {/* Observações adicionais */}
-        <div className={styles.section}>
-          <label className={styles.label}>Observações adicionais</label>
-          <textarea
+          {/* Observações adicionais */}
+          <Input
+            as="textarea"
+            label="Observações adicionais"
             name="observations"
             value={formData.observations}
             onChange={handleChange}
-            placeholder="Lorem Ipsum"
-            className={styles.textarea}
+            placeholder="Detalhes adicionais sobre a cultura ou o plantio."
             rows={4}
+          // Não é required, então não precisa de error/showError
           />
         </div>
 
