@@ -25,9 +25,13 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-primary);
+}
+
+.backButton:hover {
+  color: var(--color-primary);
 }
 
 .form {
