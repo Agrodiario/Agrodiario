@@ -1,7 +1,7 @@
 // src/components/properties/PropertyForm/PropertyForm.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Polygon, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { EditableMap } from '../../map/EditableMap';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -13,11 +13,11 @@ import { Button } from '../../common/Button/Button';
 import { FileInput } from '../../common/FileInput/FileInput';
 import { TagToggle } from '../../common/TagToggle/TagToggle';
 import { FiArrowLeft, FiUpload } from 'react-icons/fi';
-import { IoIosArrowDown } from 'react-icons/io';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { CultureSearchSelect } from '@/components/cultures/CultureSearchSelect/CultureSearchSelect';
 
 // --- Correção de ícones do Leaflet ---
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -106,7 +106,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     }
   };
 
-  const _onDeleted = (e: any) => {
+  const _onDeleted = (_e: any) => {
     console.log('Área apagada');
     setFormData(prev => ({ ...prev, talhaoPolygon: null }));
   };
@@ -125,51 +125,50 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        
+
         {/* === SEÇÃO 1: DADOS DA PROPRIEDADE === */}
         <div className={styles.section}>
           <h3 className={styles.blueTitle}>Dados da propriedade</h3>
-          
-          <Input 
-            label="Nome da propriedade" 
+
+          <Input
+            label="Nome da propriedade"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Ex: Sítio Oliveira" 
+            placeholder="Ex: Sítio Oliveira"
           />
-          <Input 
-            label="Endereço (estrada, município, estado)" 
+          <Input
+            label="Endereço (estrada, município, estado)"
             name="address"
             value={formData.address}
             onChange={handleChange}
-            placeholder="Estrada da Lavoura..." 
+            placeholder="Estrada da Lavoura..."
           />
-          
+
           <div className={styles.row}>
-            <Input 
-              label="Área total (hectares)" 
+            <Input
+              label="Área total (hectares)"
               name="areaTotal"
               value={formData.areaTotal}
               onChange={handleChange}
-              placeholder="10" 
+              placeholder="10"
             />
-            <Input 
-              label="Área de produção (hectares)" 
+            <Input
+              label="Área de produção (hectares)"
               name="areaProducao"
               value={formData.areaProducao}
               onChange={handleChange}
-              placeholder="2" 
+              placeholder="2"
             />
           </div>
-          
-          <Input 
-            label="Tipo de cultivo principal" 
-            name="cultivo"
-            value={formData.cultivo}
-            onChange={handleChange}
-            icon={<IoIosArrowDown />} 
-            placeholder="Selecione..." 
-          />
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Cultivo principal</label>
+            <CultureSearchSelect
+              value={formData.cultivo}
+              onChange={(selectedCrop) => setFormData(prev => ({ ...prev, cultivo: selectedCrop }))}
+              placeholder="Selecione o cultivo principal..."
+            />
+          </div>
         </div>
 
         {/* === SEÇÃO 2: CERTIFICAÇÕES === */}
@@ -183,7 +182,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Área da propriedade</h3>
           <p className={styles.subtitle}>Selecione no mapa a localização da propriedade.</p>
-          
+
           <div className={styles.mapContainer}>
             <MapContainer center={[-22.85, -50.65]} zoom={15} scrollWheelZoom={false} className={styles.map}>
               <TileLayer
@@ -198,54 +197,54 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         {/* === SEÇÃO 4: TALHÕES === */}
         <div className={styles.section}>
           <h3 className={styles.blueTitle}>Talhões</h3>
-          <Input 
-            label="Nome do talhão" 
+          <Input
+            label="Nome do talhão"
             name="talhaoName"
             value={formData.talhaoName}
             onChange={handleChange}
-            placeholder="Lorem ipsum" 
+            placeholder="Lorem ipsum"
           />
-          <Input 
-            label="Área" 
+          <Input
+            label="Área"
             name="talhaoArea"
             value={formData.talhaoArea}
             onChange={handleChange}
-            placeholder="1" 
+            placeholder="1"
           />
-          <Input 
-            label="Cultura atual" 
-            name="talhaoCultura"
-            value={formData.talhaoCultura}
-            onChange={handleChange}
-            icon={<IoIosArrowDown />} 
-            placeholder="Selecione..." 
-          />
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Cultura atual do talhão</label>
+            <CultureSearchSelect
+              value={formData.talhaoCultura}
+              onChange={(selectedCrop) => setFormData(prev => ({ ...prev, talhaoCultura: selectedCrop }))}
+              placeholder="Selecione a cultura atual..."
+            />
+          </div>
         </div>
 
         {/* === SEÇÃO 5: SITUAÇÃO === */}
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Situação</h3>
           <div className={styles.tagGroup}>
-            <TagToggle 
+            <TagToggle
               color="blue"
-              isActive={formData.situacao === 'producao'} 
-              onClick={() => setFormData(prev => ({...prev, situacao: 'producao'}))} 
+              isActive={formData.situacao === 'producao'}
+              onClick={() => setFormData(prev => ({ ...prev, situacao: 'producao' }))}
               type="button"
             >
               Em produção
             </TagToggle>
-            <TagToggle 
-              color="green" 
-              isActive={formData.situacao === 'preparo'} 
-              onClick={() => setFormData(prev => ({...prev, situacao: 'preparo'}))} 
+            <TagToggle
+              color="green"
+              isActive={formData.situacao === 'preparo'}
+              onClick={() => setFormData(prev => ({ ...prev, situacao: 'preparo' }))}
               type="button"
             >
               Em preparo
             </TagToggle>
-            <TagToggle 
-              color="orange" 
-              isActive={formData.situacao === 'pousio'} 
-              onClick={() => setFormData(prev => ({...prev, situacao: 'pousio'}))} 
+            <TagToggle
+              color="orange"
+              isActive={formData.situacao === 'pousio'}
+              onClick={() => setFormData(prev => ({ ...prev, situacao: 'pousio' }))}
               type="button"
             >
               Em pousio
@@ -257,7 +256,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Área do talhão</h3>
           <p className={styles.subtitle}>Desenhe no mapa a área do talhão.</p>
-          
+
           <div className={styles.mapContainer}>
             <MapContainer center={[-22.852, -50.651]} zoom={16} scrollWheelZoom={false} className={styles.map}>
               <TileLayer
@@ -282,7 +281,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
           </Button>
         </footer>
 
-      </form>
-    </div>
+      </form >
+    </div >
   );
 }
