@@ -52,6 +52,30 @@ const convertDateToSubmitFormat = (dateString: string): string => {
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 };
 
+const handleCycleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // Permite apenas: números, Backspace, Tab, Delete, setas, Home, End
+  const allowedKeys = [
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+    'Home', 'End'
+  ];
+
+  // Permite combinações de teclas de controle (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X)
+  if (e.ctrlKey || e.metaKey) {
+    return; // Permite todas as combinações com Ctrl/Cmd
+  }
+
+  // Permite Alt+ combinações (para acessibilidade)
+  if (e.altKey) {
+    return;
+  }
+
+  // Bloqueia teclas não permitidas
+  if (!allowedKeys.includes(e.key)) {
+    e.preventDefault();
+  }
+};
+
 // Função de validação de data
 const validateDate = (dateValue: string): string => {
   if (!dateValue || dateValue.trim() === '') {
@@ -139,13 +163,17 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
       case 'cultivar':
         if (!value || value.trim() === '') return 'Cultivar/Variedade é obrigatório';
         return '';
-      case 'cycle':
-        if (!value || value.trim() === '') return 'Ciclo é obrigatório';
-        if (isNaN(Number(value)) || !Number.isInteger(Number(value))) {
-          return 'Ciclo deve ser um número inteiro';
-        }
-        if (Number(value) <= 0) return 'Ciclo deve ser maior que zero';
+      case 'cycle': {
+        if (!value.trim()) return 'Ciclo é obrigatório';
+
+        // Remove tudo que não for número
+        const clean = value.replace(/\D/g, '');
+        const num = Number(clean);
+
+        if (!Number.isInteger(num)) return 'Ciclo deve ser um número inteiro';
+        if (num <= 0) return 'Ciclo deve ser maior que zero';
         return '';
+      }
       case 'origin':
         if (!value || value.trim() === '') return 'Origem é obrigatória';
         return '';
@@ -410,6 +438,7 @@ export function CultureForm({ initialData, onSubmit, isLoading = false }: Props)
             onChange={handleChange}
             onBlur={() => handleBlur('cycle')}
             placeholder="120"
+            onKeyDown={handleCycleKeyDown}
             min="1"
             step="1"
             required
