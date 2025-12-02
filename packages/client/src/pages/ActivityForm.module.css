@@ -160,3 +160,31 @@
   .deleteBtn:hover {
     background-color: #fecaca;
   }
+
+  /* Adicione estas classes */
+.errorText {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: #dc2626;
+  font-weight: 400;
+}
+
+.inputLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.inputLabel::after {
+  content: ' *';
+  color: #dc2626;
+}
+
+/* Para os campos obrigatórios do Input component */
+.inputLabel.required::after {
+  content: ' *';
+  color: #dc2626;
+}

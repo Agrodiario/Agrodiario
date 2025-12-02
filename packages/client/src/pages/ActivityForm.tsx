@@ -20,8 +20,10 @@ import { apiClient } from '../config/api.client';
 import { SearchableSelect } from '@/components/common/SearchableSelect/SearchableSelect';
 import { cultureService } from '../services/culture.service';
 import { propertyService } from '../services/property.service';
-import { isValidDate } from '@/utils/validators';
-import { dateMask } from '@/utils/masks';
+
+// IMPORTAÇÕES DOS UTILS:
+import { isValidDate, validateNumberField } from '@/utils/validators'; // Importado validateNumberField
+import { dateMask, numberMask } from '@/utils/masks';
 
 export type ActivityFormData = {
   date: string; // Agora será DD/MM/AAAA no frontend, mas será convertido para YYYY-MM-DD no submit
@@ -110,6 +112,8 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   const [existingFiles, setExistingFiles] = useState<string[]>(initialData?.anexos || []);
   const [removedFiles, setRemovedFiles] = useState<string[]>([]);
 
+  // --- LÓGICA DE VALIDAÇÃO ---
+
   // VALIDAÇÃO DO CAMPO DE DATA
   const validateDate = (dateValue: string): string => {
     if (!dateValue || dateValue.trim() === '') {
@@ -137,15 +141,51 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
     return '';
   };
 
+  // VALIDAÇÃO DOS OUTROS CAMPOS OBRIGATÓRIOS
+  const validateOtherFields = (fieldName: keyof ActivityFormData, value: string): string => {
+    switch (fieldName) {
+      case 'titulo':
+        if (!value || value.trim() === '') return 'Título da atividade é obrigatório';
+        return '';
+      case 'propriedade':
+        if (!value || value.trim() === '') return 'Propriedade é obrigatória';
+        return '';
+      case 'cultureId':
+        if (!value || value.trim() === '') return 'Cultura é obrigatória';
+        return '';
+      case 'descricao':
+        if (!value || value.trim() === '') return 'Descrição é obrigatória';
+        return '';
+      case 'responsavel':
+        if (!value || value.trim() === '') return 'Responsável é obrigatório';
+        return '';
+      case 'insumoNome':
+        if (showInsumos && (!value || value.trim() === '')) return 'Nome do produto/insumo é obrigatório';
+        return '';
+      case 'insumoQuantidade':
+        // Usa a função de validação de números
+        if (showInsumos) {
+          return validateNumberField(value, 'Quantidade utilizada');
+        }
+        return '';
+      default:
+        return '';
+    }
+  };
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     const fieldName = name as keyof ActivityFormData;
 
     let processedValue = value;
 
-    // Aplica máscara para o campo de data
     if (fieldName === 'date') {
       processedValue = dateMask(value);
+    }
+
+    if (fieldName === 'insumoQuantidade') {
+      processedValue = numberMask(value);
     }
 
     setFormData((prev) => {
@@ -156,6 +196,8 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
         let error = '';
         if (fieldName === 'date') {
           error = validateDate(processedValue);
+        } else {
+          error = validateOtherFields(fieldName, processedValue);
         }
         setErrors(prevErrors => ({ ...prevErrors, [fieldName]: error }));
       }
@@ -165,12 +207,22 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   };
 
   const handleBlur = (fieldName: keyof ActivityFormData) => {
+    if (
+      (fieldName === 'insumoNome' || fieldName === 'insumoQuantidade' || fieldName === 'insumoUnidade') &&
+      !showInsumos
+    ) {
+      return;
+    }
+
     setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
 
-    // Valida o campo específico
     let error = '';
+    const currentValue = (formData[fieldName] || '').toString();
+
     if (fieldName === 'date') {
-      error = validateDate(formData[fieldName] as string);
+      error = validateDate(currentValue);
+    } else {
+      error = validateOtherFields(fieldName, currentValue);
     }
 
     setErrors(prev => ({ ...prev, [fieldName]: error }));
@@ -180,7 +232,13 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
 
   const handleInsumoOption = (show: boolean) => {
     setShowInsumos(show);
-    if (!show) setFormData(prev => ({ ...prev, insumoNome: '', insumoQuantidade: '', insumoUnidade: '' }));
+    if (!show) {
+      setFormData(prev => ({ ...prev, insumoNome: '', insumoQuantidade: '', insumoUnidade: '' }));
+      setErrors(prev => {
+        const { insumoNome, insumoQuantidade, ...rest } = prev;
+        return rest;
+      });
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,10 +270,13 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Marca todos os campos como tocados para mostrar erros
-    const allFields = ['date', 'propriedade', 'cultureId', 'descricao', 'responsavel'] as const;
+    const allRequiredFields: (keyof ActivityFormData)[] = ['date', 'titulo', 'propriedade', 'cultureId', 'descricao', 'responsavel'];
+    if (showInsumos) {
+      allRequiredFields.push('insumoNome', 'insumoQuantidade');
+    }
+
     const newTouched: Record<string, boolean> = {};
-    allFields.forEach(field => {
+    allRequiredFields.forEach(field => {
       newTouched[field] = true;
     });
     setTouchedFields(newTouched);
@@ -225,10 +286,20 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
     const newErrors: Record<string, string> = {};
 
     if (dateError) newErrors.date = dateError;
+    if (!formData.titulo.trim()) newErrors.titulo = 'Título da atividade é obrigatório';
     if (!formData.propriedade.trim()) newErrors.propriedade = 'Propriedade é obrigatória';
     if (!formData.cultureId.trim()) newErrors.cultureId = 'Cultura é obrigatória';
     if (!formData.descricao.trim()) newErrors.descricao = 'Descrição é obrigatória';
     if (!formData.responsavel.trim()) newErrors.responsavel = 'Responsável é obrigatório';
+
+    // Validação de Insumos se estiverem ativos
+    if (showInsumos) {
+      const insumoNomeError = validateOtherFields('insumoNome', formData.insumoNome || '');
+      if (insumoNomeError) newErrors.insumoNome = insumoNomeError;
+
+      const insumoQuantidadeError = validateNumberField(formData.insumoQuantidade || '', 'Quantidade utilizada');
+      if (insumoQuantidadeError) newErrors.insumoQuantidade = insumoQuantidadeError;
+    }
 
     setErrors(newErrors);
 
@@ -254,6 +325,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
 
     const isBasicInfoValid =
       dateValid &&
+      formData.titulo.trim() !== '' &&
       formData.propriedade.trim() !== '' &&
       formData.cultureId.trim() !== '' &&
       formData.descricao.trim() !== '' &&
@@ -261,21 +333,24 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
 
     let isInsumoValid = true;
     if (showInsumos) {
-      isInsumoValid = (formData.insumoNome || "").trim() !== '';
+      const insumoNomeValid = (formData.insumoNome || "").trim() !== '';
+      const insumoQuantidadeError = validateNumberField(formData.insumoQuantidade || '', 'Quantidade utilizada');
+      const insumoQuantidadeValid = !insumoQuantidadeError;
+
+      isInsumoValid = insumoNomeValid && insumoQuantidadeValid;
     }
 
     setIsValid(isBasicInfoValid && isInsumoValid);
   }, [formData, showInsumos]);
+
+  // --- EFEITOS DE CARREGAMENTO DE DADOS (Mantidos) ---
 
   // EFEITO PARA BUSCAR PROPRIEDADES
   useEffect(() => {
     async function fetchProperties() {
       setIsLoadingProperties(true);
       try {
-        console.log('[ActivityForm] Buscando propriedades...');
         const response = await propertyService.findAll(1, 100);
-        console.log('[ActivityForm] Propriedades carregadas:', response.data);
-
         setAllProperties(response.data);
 
         const options = response.data.map(p => ({
@@ -297,15 +372,18 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   // EFEITO PARA BUSCAR CULTURAS DA PROPRIEDADE SELECIONADA
   useEffect(() => {
     async function fetchCulturesForProperty() {
-      console.log('[ActivityForm] fetchCulturesForProperty chamado');
-      console.log('[ActivityForm] formData.propriedade:', formData.propriedade);
-      console.log('[ActivityForm] allProperties length:', allProperties.length);
-
       if (!formData.propriedade || allProperties.length === 0) {
-        console.log('[ActivityForm] Sem propriedade selecionada, limpando culturas');
         setCulturesOptions([]);
-        setFormData(prev => ({ ...prev, cultureId: '' }));
-        setErrors(prev => ({ ...prev, cultureId: 'Selecione uma propriedade primeiro' }));
+        // Limpa o cultureId e define o erro se a propriedade for removida
+        if (formData.cultureId) {
+          setFormData(prev => ({ ...prev, cultureId: '' }));
+        }
+        if (formData.propriedade.trim() === '') {
+          setErrors(prev => ({ ...prev, cultureId: 'Selecione uma propriedade primeiro' }));
+        } else if (allProperties.length === 0) {
+          setErrors(prev => ({ ...prev, cultureId: 'Propriedades não carregadas' }));
+        }
+
         return;
       }
 
@@ -313,31 +391,24 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
 
       try {
         const selectedProperty = allProperties.find(p => p.name === formData.propriedade);
-        console.log('[ActivityForm] Propriedade selecionada:', selectedProperty);
 
         if (selectedProperty) {
-          console.log(`[ActivityForm] Buscando culturas para propertyId: ${selectedProperty.id}`);
-
           // Limpa o cultureId enquanto carrega novas culturas
           setFormData(prev => ({ ...prev, cultureId: '' }));
           setErrors(prev => ({ ...prev, cultureId: '' }));
 
           const cultures = await cultureService.findByProperty(selectedProperty.id);
-          console.log('[ActivityForm] Culturas retornadas:', cultures);
-
           const options = cultures.map(c => ({
             label: `${c.cultureName}${c.cultivar ? ` - ${c.cultivar}` : ''}`,
             value: c.id
           }));
 
-          console.log('[ActivityForm] Options geradas:', options);
           setCulturesOptions(options);
 
           // Se estiver editando e a cultura atual pertence a esta propriedade, mantém selecionada
           if (isEditMode && initialData?.cultureId) {
             const currentCultureExists = cultures.some(c => c.id === initialData.cultureId);
             if (currentCultureExists) {
-              console.log('[ActivityForm] Mantendo cultura atual:', initialData.cultureId);
               setFormData(prev => ({ ...prev, cultureId: initialData.cultureId! }));
               setErrors(prev => ({ ...prev, cultureId: '' }));
             }
@@ -351,7 +422,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             }));
           }
         } else {
-          console.log('[ActivityForm] Propriedade não encontrada no array');
           setCulturesOptions([]);
           setFormData(prev => ({ ...prev, cultureId: '' }));
           setErrors(prev => ({ ...prev, cultureId: 'Propriedade não encontrada' }));
@@ -395,6 +465,8 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
   const title = isEditMode ? 'Editar atividade' : 'Nova atividade';
   const submitText = isEditMode ? 'Salvar alterações' : 'Salvar atividade';
 
+  // --- RENDERIZAÇÃO ---
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -412,7 +484,11 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             name="titulo"
             value={formData.titulo}
             onChange={handleChange}
+            onBlur={() => handleBlur('titulo')}
             placeholder="Ex: Adubação do talhão 1"
+            required 
+            error={errors.titulo}
+            showError={touchedFields.titulo && !!errors.titulo}
           />
           <div className={styles.fieldGroup}>
             <Input
@@ -423,6 +499,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
               onBlur={() => handleBlur('date')}
               placeholder="DD/MM/AAAA"
               maxLength={10}
+              required
               error={errors.date}
               showError={touchedFields.date && !!errors.date}
             />
@@ -437,6 +514,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
               options={propertiesOptions}
               icon={<IoIosArrowDown size={18} />}
               disabled={isLoadingProperties}
+              required
               error={errors.propriedade}
               showError={touchedFields.propriedade && !!errors.propriedade}
             />
@@ -452,6 +530,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             options={culturesOptions}
             icon={<IoIosArrowDown size={18} />}
             disabled={!formData.propriedade || isLoadingCultures || culturesOptions.length === 0}
+            required
             error={errors.cultureId}
             showError={touchedFields.cultureId && !!errors.cultureId}
           />
@@ -489,6 +568,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             onChange={handleChange}
             onBlur={() => handleBlur('descricao')}
             rows={4}
+            required
             error={errors.descricao}
             showError={touchedFields.descricao && !!errors.descricao}
           />
@@ -498,6 +578,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             value={formData.responsavel}
             onChange={handleChange}
             onBlur={() => handleBlur('responsavel')}
+            required
             error={errors.responsavel}
             showError={touchedFields.responsavel && !!errors.responsavel}
           />
@@ -517,7 +598,7 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
               label="Não"
               name="insumo_opt"
               value="nao"
-              checked={showInsumos === false} 
+              checked={showInsumos === false}
               onChange={() => handleInsumoOption(false)}
             />
           </div>
@@ -527,13 +608,28 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
                 label="Nome do produto/insumo"
                 placeholder="Digite para buscar na Embrapa..."
                 value={formData.insumoNome}
-                onChange={(newValue) =>
-                  setFormData(prev => ({ ...prev, insumoNome: newValue }))
-                }
+                onChange={(newValue) => setFormData(prev => ({ ...prev, insumoNome: newValue }))}
               />
               <div className={styles.fieldGroup}>
-                <Input label="Quantidade utilizada" name="insumoQuantidade" value={formData.insumoQuantidade} onChange={handleChange} />
-                <Input as="select" label="Unidade" name="insumoUnidade" value={formData.insumoUnidade} onChange={handleChange} options={mockUnidades} icon={<IoIosArrowDown size={18} />} />
+                <Input
+                  label="Quantidade utilizada"
+                  name="insumoQuantidade"
+                  value={formData.insumoQuantidade}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('insumoQuantidade')}
+                  required
+                  error={errors.insumoQuantidade}
+                  showError={touchedFields.insumoQuantidade && !!errors.insumoQuantidade}
+                />
+                <Input
+                  as="select"
+                  label="Unidade"
+                  name="insumoUnidade"
+                  value={formData.insumoUnidade}
+                  onChange={handleChange}
+                  options={mockUnidades}
+                  icon={<IoIosArrowDown size={18} />}
+                />
               </div>
             </div>
           )}
