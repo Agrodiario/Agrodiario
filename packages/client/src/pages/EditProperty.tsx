@@ -1,92 +1,92 @@
-// src/pages/EditPropertyPage.tsx
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PropertyForm, PropertyFormData } from '../components/properties/PropertyForm/PropertyForm';
-
-// Dados de exemplo para simular um banco de dados
-const mockPropertiesDB: Record<string, Partial<PropertyFormData>> = {
-  '1': {
-    name: 'Sítio Oliveira',
-    address: 'Estrada da Lavoura, Florínea, SP',
-    areaTotal: '45',
-    areaProducao: '40',
-    cultivo: 'Soja',
-    situacao: 'producao',
-    // Coordenadas de exemplo para já vir com o pino no lugar certo
-    markerPosition: [-22.86, -50.66],
-    // Polígono de exemplo para já vir desenhado
-    talhaoPolygon: [[-22.861, -50.661], [-22.863, -50.662], [-22.864, -50.660]]
-  },
-  '2': {
-    name: 'Sítio Oliveira',
-    address: 'Estrada da Lavoura, Florínea, SP',
-    areaTotal: '45',
-    areaProducao: '40',
-    cultivo: 'Soja',
-    situacao: 'producao',
-    // Coordenadas de exemplo para já vir com o pino no lugar certo
-    markerPosition: [-22.86, -50.66],
-    // Polígono de exemplo para já vir desenhado
-    talhaoPolygon: [[-22.861, -50.661], [-22.863, -50.662], [-22.864, -50.660]]
-  },
-  '3': {
-    name: 'Sítio Oliveira',
-    address: 'Estrada da Lavoura, Florínea, SP',
-    areaTotal: '45',
-    areaProducao: '40',
-    cultivo: 'Soja',
-    situacao: 'producao',
-    // Coordenadas de exemplo para já vir com o pino no lugar certo
-    markerPosition: [-22.86, -50.66],
-    // Polígono de exemplo para já vir desenhado
-    talhaoPolygon: [[-22.861, -50.661], [-22.863, -50.662], [-22.864, -50.660]]
-  },
-  '4': {
-    name: 'Sítio Oliveira',
-    address: 'Estrada da Lavoura, Florínea, SP',
-    areaTotal: '45',
-    areaProducao: '40',
-    cultivo: 'Soja',
-    situacao: 'producao',
-    // Coordenadas de exemplo para já vir com o pino no lugar certo
-    markerPosition: [-22.86, -50.66],
-    // Polígono de exemplo para já vir desenhado
-    talhaoPolygon: [[-22.861, -50.661], [-22.863, -50.662], [-22.864, -50.660]]
-  },
-  '5': {
-    name: 'Sítio Oliveira',
-    address: 'Estrada da Lavoura, Florínea, SP',
-    areaTotal: '45',
-    areaProducao: '40',
-    cultivo: 'Soja',
-    situacao: 'producao',
-    // Coordenadas de exemplo para já vir com o pino no lugar certo
-    markerPosition: [-22.86, -50.66],
-    // Polígono de exemplo para já vir desenhado
-    talhaoPolygon: [[-22.861, -50.661], [-22.863, -50.662], [-22.864, -50.660]]
-  },
-};
+import { propertyService } from '../services/property.service';
+import { Property, UpdatePropertyDto } from '../types/property.types';
 
 export default function EditPropertyPage() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  
-  // Simula buscar os dados da propriedade pelo ID
-  const propertyToEdit = id ? mockPropertiesDB[id] : null;
+  const { id } = useParams<{ id: string }>();
 
-  const handleEdit = (data: PropertyFormData) => {
-    console.log(`EDITANDO PROPRIEDADE ${id}:`, data);
-    // Lógica de atualizar na API...
-    navigate('/properties');
+  // Estados
+  const [propertyToEdit, setPropertyToEdit] = useState<Partial<PropertyFormData> | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Efeito para carregar a propriedade ao montar
+  useEffect(() => {
+    async function loadProperty() {
+      if (!id) {
+        setIsLoadingData(false);
+        return;
+      }
+
+      try {
+        setIsLoadingData(true);
+        const data: Property = await propertyService.findOne(id);
+        const mappedData: Partial<PropertyFormData> = {
+          name: data.name,
+          address: data.address,
+          areaTotal: data.totalArea ? String(data.totalArea) : '0',
+          areaProducao: data.productionArea ? String(data.productionArea) : '0',
+          cultivo: data.mainCrop,
+        };
+
+        setPropertyToEdit(mappedData);
+      } catch (error) {
+        console.error('Erro ao carregar propriedade:', error);
+        alert('Não foi possível carregar os dados da propriedade.');
+        navigate('/properties');
+      } finally {
+        setIsLoadingData(false);
+      }
+    }
+
+    loadProperty();
+  }, [id, navigate]);
+
+  const handleEdit = async (data: PropertyFormData) => {
+    if (!id) return;
+
+    try {
+      setIsSaving(true);
+      const updateData: UpdatePropertyDto = {
+        name: data.name,
+        address: data.address,
+        totalArea: data.areaTotal ? parseFloat(data.areaTotal) : undefined,
+        productionArea: data.areaProducao ? parseFloat(data.areaProducao) : undefined,
+        mainCrop: data.cultivo,
+      };
+
+      await propertyService.update(id, updateData);
+
+      navigate('/properties');
+    } catch (error) {
+      console.error('Erro ao atualizar propriedade:', error);
+      alert('Erro ao salvar as alterações. Verifique os dados.');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  // Renderização de estados
+  if (isLoadingData) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+        <p>Carregando dados da propriedade...</p>
+      </div>
+    );
+  }
 
   if (!propertyToEdit) {
     return <div>Propriedade não encontrada.</div>;
   }
 
   return (
-    <PropertyForm 
-      initialData={propertyToEdit} 
-      onSubmit={handleEdit} 
+    <PropertyForm
+      initialData={propertyToEdit}
+      onSubmit={handleEdit}
+      isLoading={isSaving}
     />
   );
 }
