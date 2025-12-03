@@ -4,7 +4,7 @@ import styles from './Button.module.css';
 
 // Adicionamos 'variant' e 'leftIcon'
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'quaternary' | 'danger' | 'outlined';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'quaternary' | 'quinternary' | 'danger' | 'outlined';
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
 };

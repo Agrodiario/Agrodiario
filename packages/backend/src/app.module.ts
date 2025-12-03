@@ -13,6 +13,7 @@ import { EmbrapaModule } from './embrapa/embrapa.module';
 import { PropertiesModule } from '@modules/properties/properties.module';
 import { CulturesModule } from '@modules/cultures/cultures.module';
 import { EmailModule } from '@modules/email/email.module';
+import { ProductsModule } from '@modules/products/products.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { EmailModule } from '@modules/email/email.module';
     EmbrapaModule,
     PropertiesModule,
     CulturesModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,137 @@
+.page {
+  margin: 0 auto;
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-bg-white);
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.backButton:hover {
+  color: var(--color-primary);
+}
+
+.sectionTitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background-color: #e3f4e9;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #101828;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23667085' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+.insumoFields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eaecf0;
+}
+
+/*Products cards*/
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+
+.resultCard {
+  background: var(--color-bg-light);
+  border: none;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  box-shadow: rgba(0, 0, 0, 0.04) 0px 2px 4px;
+}
+
+.resultCard:hover {
+  background: #e3f4e9;
+  border-color: #b6d4ff;
+  transform: translateY(-3px);
+}
+
+.selectedCard {
+  border-color: #008542;
+  background: #e9f8ef;
+  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.25);
+}
+
+.status {
+  padding: 1px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.allowed {
+  color: var(--color-primary);
+  background-color: #B7F1BA;
+}
+
+.icon {
+  font-size: 1rem;
+}
+
+.denied {
+  color: #d92a2a;
+  background-color: #ffe8e8;
+}

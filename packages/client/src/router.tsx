@@ -14,7 +14,7 @@ import HomePage from './pages/Home';
 import DiaryPage from './pages/Diary';
 import PropertiesPage from './pages/Properties';
 import CulturesPage from './pages/Cultures';
-import ProductsPage from './pages/Products';
+import ProductApplicationsPage from './pages/ProductApplications.tsx';
 import DiaryLayout from './layouts/DiaryLayout';
 import NewActivity from './pages/NewActivity';
 import EditActivity from './pages/EditActivity';
@@ -25,6 +25,8 @@ import CulturesLayout from './layouts/CulturesLayout';
 import NewCulture from './pages/NewCulture';
 import EditCulture from './pages/EditCulture';
 import Landing from './pages/landing-page/Landing';
+import ProductApplicationsLayout from './layouts/ProductApplicationsLayout.tsx';
+import NewProductApplication from './pages/NewProductApplication.tsx';
 
 export const router = createBrowserRouter([
   /* --- ROTA RAIZ - Redirecionamento Inteligente --- */
@@ -102,8 +104,15 @@ export const router = createBrowserRouter([
         ],
       },
 
-      { path: 'products', element: <ProductsPage /> },
-      
+      {
+        path: 'products',
+        element: <ProductApplicationsLayout />,
+        children: [
+          { index: true, element: <ProductApplicationsPage />},
+          { path: 'new', element: <NewProductApplication />},
+        ],
+      },
+
       {
         path: '*',
         element: <Navigate to="/home" replace />,

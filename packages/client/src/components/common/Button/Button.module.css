@@ -67,6 +67,17 @@
     background-color: #d1ebd9;
   }
 
+  .button.quinternary {
+    color: #d92a2a;
+    /* Laranja escuro */
+    background-color: #ffe8e8;
+    /* Laranja claro (pêssego) */
+  }
+
+  .button.quinternary:hover {
+    background-color: #ffcccc;
+  }
+
   /* "Carregar mais" */
   .button.outlined {
     background-color: transparent;
@@ -157,6 +168,15 @@
 
 .button.quaternary:hover {
   background-color: #d1ebd9;
+}
+
+.button.quinternary {
+  color: #d92a2a;
+  background-color: #ffe8e8;
+}
+
+.button.quinternary:hover {
+  background-color: #ffcccc;
 }
 
 /* "Carregar mais" */

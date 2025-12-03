@@ -1,6 +1,5 @@
 // src/layouts/PropertiesLayout.tsx
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Button } from '../components/common/Button/Button';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import styles from './PropertiesLayout.module.css'; // Vamos criar este CSS
 import { FiPlus } from 'react-icons/fi';
 
