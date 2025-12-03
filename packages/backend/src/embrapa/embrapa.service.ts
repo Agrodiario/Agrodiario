@@ -23,7 +23,7 @@ export class EmbrapaService {
 
     const key = this.configService.get<string>('EMBRAPA_CONSUMER_KEY');
     const secret = this.configService.get<string>('EMBRAPA_CONSUMER_SECRET');
-    
+
     const authHeader = Buffer.from(`${key}:${secret}`).toString('base64');
 
     try {
