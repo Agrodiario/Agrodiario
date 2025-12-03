@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CulturesController } from './cultures.controller';
 import { CulturesService } from './cultures.service';
+import { PlantsApiService } from './services/plants-api.service';
 import { CreateCultureDto } from './dto/create-culture.dto';
 import { User } from '../users/entities/user.entity';
 import { CultureOrigin } from './enums/culture-origin.enum';
@@ -14,6 +15,13 @@ describe('CulturesController', () => {
     findAll: jest.fn(),
     findOne: jest.fn(),
     getUserProperties: jest.fn(),
+    findByProperty: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+  };
+
+  const mockPlantsApiService = {
+    searchCrops: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -23,6 +31,10 @@ describe('CulturesController', () => {
         {
           provide: CulturesService,
           useValue: mockCulturesService,
+        },
+        {
+          provide: PlantsApiService,
+          useValue: mockPlantsApiService,
         },
       ],
     }).compile();
@@ -103,6 +115,9 @@ describe('CulturesController', () => {
         mockUser.id,
         1,
         10,
+        undefined,
+        undefined,
+        undefined,
       );
       expect(result).toEqual(mockResult);
     });
@@ -127,6 +142,9 @@ describe('CulturesController', () => {
         mockUser.id,
         2,
         20,
+        undefined,
+        undefined,
+        undefined,
       );
       expect(result).toEqual(mockResult);
     });

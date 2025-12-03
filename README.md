@@ -139,6 +139,66 @@ yarn dev:client
 ```bash
 yarn dev:backend
 ```
+
+---
+
+## Testes
+
+O projeto possui **133 testes unitários** no backend utilizando **Jest**.
+
+### Executando os Testes
+
+```bash
+# Rodar todos os testes do backend
+cd packages/backend
+yarn test
+
+# Rodar testes em modo watch (re-executa ao salvar)
+yarn test:watch
+
+# Rodar testes com cobertura de código
+yarn test:cov
+```
+
+### Cobertura de Testes
+
+| Módulo | Arquivo | Testes | Descrição |
+|--------|---------|--------|-----------|
+| Auth | `auth.service.spec.ts` | 24 | Autenticação, registro, verificação de email, reset de senha |
+| Email | `email.service.spec.ts` | 11 | Envio de emails (reset de senha, verificação) |
+| Activities | `activities.controller.spec.ts` | 6 | Endpoints de atividades |
+| Activities | `activities.service.spec.ts` | 9 | Lógica de negócio de atividades |
+| Cultures | `cultures.controller.spec.ts` | 5 | Endpoints de culturas |
+| Cultures | `cultures.service.spec.ts` | 9 | Lógica de negócio de culturas |
+| Cultures | `create-culture.dto.spec.ts` | 65 | Validação de DTOs |
+| Embrapa | `embrapa.service.spec.ts` | 4 | Integração com API externa |
+
+---
+
+## CI/CD
+
+O projeto utiliza **GitHub Actions** para integração contínua.
+
+### Pipeline de Testes
+
+O workflow é executado automaticamente em:
+- Push para `main` ou `develop`
+- Pull requests para `main` ou `develop`
+
+### Jobs do Pipeline
+
+| Job | Descrição |
+|-----|-----------|
+| `test-backend` | Executa todos os 133 testes unitários com cobertura |
+| `test-frontend` | Verificação de tipos TypeScript |
+| `build` | Compilação do backend |
+
+### Arquivo de Configuração
+
+O workflow está definido em `.github/workflows/test.yml`.
+
+---
+
 ## Figma Design
 You can view the project’s design prototype on Figma:
 
