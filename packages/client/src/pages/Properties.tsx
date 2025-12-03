@@ -106,7 +106,7 @@ export default function PropertiesPage() {
 
   const handleDelete = async () => {
     if (!selectedProperty) return;
-    // await propertyService.remove(selectedProperty.id);
+    await propertyService.remove(selectedProperty.id);
     await fetchProperties(1, sortOrder, searchTerm);
     handleCloseDrawer();
   };
