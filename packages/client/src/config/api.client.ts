@@ -41,11 +41,9 @@ class ApiClient {
           // Server responded with error
           const { status, data } = error.response;
 
-          if (status === 401) {
-            // Unauthorized - clear token and redirect to login
+          if (status === 401 && !error.config?.url?.includes('/auth/login')) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
           }
 
           // Return formatted error

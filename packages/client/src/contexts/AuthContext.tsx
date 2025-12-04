@@ -57,9 +57,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       localStorage.setItem('token', response.accessToken);
       localStorage.setItem('user', JSON.stringify(response.user));
-    } catch (error) {
-      setIsLoading(false);
-      throw error;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || 'Erro ao fazer login';
+      const errorWithInfo = new Error(errorMessage);
+      (errorWithInfo as any).status = error.response?.status;
+      throw errorWithInfo;
     } finally {
       setIsLoading(false);
     }

@@ -1,7 +1,5 @@
-/* src/components/cultures/CultureForm/CultureForm.module.css */
 .page {
   margin: 0 auto;
-  max-width: 800px;
   width: 100%;
   padding: 1.5rem;
   border-radius: var(--border-radius-md);
@@ -10,6 +8,22 @@
 
 .header {
   margin-bottom: 2rem;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.backButton:hover {
+  color: var(--color-primary);
 }
 
 .title {
@@ -27,7 +41,22 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background-color: #e3f4e9;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.sectionSubtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-top: -0.5rem;
 }
 
 .label {
@@ -68,6 +97,31 @@
   outline: none;
   border-color: #008542;
   box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #101828;
+  background-color: #ffffff;
+  transition: all 0.2s;
+}
+
+.input:hover {
+  border-color: #008542;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #008542;
+  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
+}
+
+.input::placeholder {
+  color: #667085;
 }
 
 .inputWithIcon {

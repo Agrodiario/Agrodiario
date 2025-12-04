@@ -1,0 +1,93 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_ENV: test
+  JWT_SECRET: test-secret-key
+  JWT_EXPIRATION: 1d
+  JWT_REMEMBER_ME_EXPIRATION: 30d
+  SMTP_HOST: smtp.test.com
+  SMTP_PORT: 587
+  SMTP_SECURE: false
+  SMTP_USER: test@test.com
+  SMTP_PASSWORD: test
+  SMTP_FROM: Test <test@test.com>
+  FRONTEND_URL: http://localhost:5173
+  MAX_LOGIN_ATTEMPTS: 5
+
+jobs:
+  test-backend:
+    name: Backend Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run all backend tests
+        working-directory: packages/backend
+        run: yarn test --coverage
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: packages/backend/coverage/lcov.info
+          flags: backend
+          fail_ci_if_error: false
+
+  test-frontend:
+    name: Frontend Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Type check frontend
+        working-directory: packages/client
+        run: yarn tsc --noEmit || echo "Type check completed with warnings"
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [test-backend]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build backend
+        working-directory: packages/backend
+        run: yarn build

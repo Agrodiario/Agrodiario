@@ -1,91 +1,148 @@
-import { ComponentPropsWithoutRef, ReactNode } from 'react';
+import { ComponentPropsWithoutRef, ReactNode, useState } from 'react';
 import styles from './Input.module.css';
 
-// Definimos o tipo para as opções do select
 export type SelectOption = {
   label: string;
   value: string | number;
 };
 
-// Props agora aceitam 'select' e 'options'
-type InputProps = ComponentPropsWithoutRef<'input'> &
-  ComponentPropsWithoutRef<'textarea'> &
-  ComponentPropsWithoutRef<'select'> & {
-    as?: 'input' | 'textarea' | 'select';
-    label: string;
-    icon?: ReactNode;
-    onIconClick?: () => void;
-    options?: SelectOption[]; // Novo array de opções
+type InputBaseProps = {
+  label: string;
+  icon?: ReactNode;
+  onIconClick?: () => void;
+  className?: string;
+  error?: string;
+  showError?: boolean;
+};
+
+type InputAsInput = InputBaseProps &
+  ComponentPropsWithoutRef<'input'> & {
+    as?: 'input';
   };
+
+type InputAsTextarea = InputBaseProps &
+  ComponentPropsWithoutRef<'textarea'> & {
+    as: 'textarea';
+  };
+
+type InputAsSelect = InputBaseProps &
+  ComponentPropsWithoutRef<'select'> & {
+    as: 'select';
+    options: SelectOption[];
+  };
+
+type InputProps = InputAsInput | InputAsTextarea | InputAsSelect;
 
 export function Input({
   as = 'input',
   label,
   icon,
   onIconClick,
-  options,
   className,
+  error,
+  showError,
   ...props
 }: InputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Determina se o campo tem valor preenchido
+  const hasValue =
+    (props as any).value !== undefined &&
+    (props as any).value !== null &&
+    String((props as any).value).trim() !== '';
+
+  // Verifica se a prop 'required' está presente (para Input, Textarea e Select)
+  const isRequired = (props as any).required;
+
+  const wrapperClass = `${styles.inputWrapper} ${as === 'textarea' ? styles.textareaWrapper : ''
+    } ${error && showError ? styles.error : ''} ${className || ''}`;
+
+  const inputClass = `${styles.input} ${as === 'textarea' ? styles.textarea : ''
+    } ${as === 'select' ? styles.select : ''}`;
+
   let InputElement;
 
-  // Classes condicionais
-  const wrapperClass = `${styles.inputWrapper} ${
-    as === 'textarea' ? styles.textareaWrapper : ''
-  } ${className || ''}`;
+  const commonEvents = {
+    onFocus: () => setIsFocused(true),
+    onBlur: (e: any) => {
+      setIsFocused(false);
+      props.onBlur?.(e);
+    },
+  };
 
-  const inputClass = `${styles.input} ${
-    as === 'textarea' ? styles.textarea : ''
-  } ${as === 'select' ? styles.select : ''}`;
+  // INPUT
+  if (as === 'input') {
+    InputElement = (
+      <input
+        className={inputClass}
+        {...(props as ComponentPropsWithoutRef<'input'>)}
+        {...commonEvents}
+        placeholder={isFocused || hasValue ? '' : label}
+      />
+    );
+  }
 
-  // 1. Renderização condicional para TEXTAREA
-  if (as === 'textarea') {
+  // TEXTAREA
+  else if (as === 'textarea') {
     InputElement = (
       <textarea
         className={inputClass}
-        placeholder={label}
         {...(props as ComponentPropsWithoutRef<'textarea'>)}
-        rows={props.rows || 4}
+        {...commonEvents}
+        placeholder={isFocused || hasValue ? '' : label}
       />
     );
-  } 
-  // 2. Renderização condicional para SELECT (Novo)
-  else if (as === 'select') {
+  }
+
+  // SELECT
+  else {
+    const { options, ...rest } = props as InputAsSelect;
+
     InputElement = (
       <select
         className={inputClass}
-        // O value="" serve como placeholder no select
-        {...(props as ComponentPropsWithoutRef<'select'>)}
+        {...rest}
+        {...commonEvents}
+        value={(props as any).value || ''}
       >
+        {/* Remova o option placeholder e deixe apenas opções vazias se necessário */}
         <option value="" disabled hidden>
-          {label} {/* Usa o label como placeholder */}
+          {/* Label vazia ou um espaço para consistência */}
         </option>
-        {options?.map((opt) => (
+        {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}
       </select>
     );
-  } 
-  // 3. Padrão INPUT
-  else {
-    InputElement = (
-      <input
-        className={inputClass}
-        placeholder={label} // No type="date", o placeholder pode não aparecer em alguns browsers
-        {...(props as ComponentPropsWithoutRef<'input'>)}
-      />
-    );
   }
 
   return (
     <div className={wrapperClass}>
+      {/* Floating Label */}
+      <label
+        className={`${styles.inputLabel} ${isFocused || hasValue ? styles.floating : ''
+          } ${error && showError ? styles.errorLabel : ''}`}
+      >
+        {label}
+        {/* NOVO: Adiciona o asterisco vermelho se o campo for obrigatório */}
+        {isRequired && <span style={{ color: 'red', marginLeft: '2px' }}>*</span>}
+      </label>
+
       {InputElement}
+
       {icon && (
         <span onClick={onIconClick} className={styles.icon}>
           {icon}
         </span>
+      )}
+
+      {error && showError && (
+        <div className={styles.tooltip}>
+          {error}
+          <div className={styles.tooltipArrow}></div>
+        </div>
       )}
     </div>
   );

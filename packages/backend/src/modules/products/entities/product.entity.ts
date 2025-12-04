@@ -1,4 +1,4 @@
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../../database/entities/base.entity';
 
 /**
@@ -7,7 +7,6 @@ import { BaseEntity } from '../../../database/entities/base.entity';
 @Entity('products')
 export class Product extends BaseEntity {
   // Product registration number
-  @Index({ unique: true })
   @Column({ type: 'varchar', length: 50 })
   registrationNumber: string;
 

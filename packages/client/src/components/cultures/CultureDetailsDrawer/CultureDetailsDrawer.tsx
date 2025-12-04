@@ -27,6 +27,14 @@ export function CultureDetailsDrawer({ culture, onDelete }: Props) {
     setIsDeleteModalOpen(false);
   };
 
+  // Traduzir origem
+  const originMap: Record<string, string> = {
+    organic: 'Orgânico',
+    conventional: 'Convencional',
+    transgenic: 'Transgênico',
+  };
+  const translatedOrigin = culture.origin ? originMap[culture.origin] || culture.origin : 'N/A';
+
   // Formatar datas
   const formattedPlantingDate = culture.plantingDate
     ? format(new Date(culture.plantingDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
@@ -46,6 +54,7 @@ export function CultureDetailsDrawer({ culture, onDelete }: Props) {
           <InfoBlock label="Nome da cultura" value={culture.cultureName} />
           <InfoBlock label="Cultivar/Variedade" value={culture.cultivar || 'N/A'} />
           <InfoBlock label="Propriedade" value={culture.property?.name || 'N/A'} />
+          {culture.plotName && <InfoBlock label="Talhão" value={culture.plotName} />}
           <InfoBlock label="Área de plantio (hectares)" value={culture.plantingArea} />
           <InfoBlock label="Ciclo (dias)" value={culture.cycle} />
           <InfoBlock label="Status" value={culture.isActive ? 'Ativo' : 'Não ativo'} />
@@ -64,7 +73,7 @@ export function CultureDetailsDrawer({ culture, onDelete }: Props) {
             label="Dias restantes"
             value={culture.daysRemaining !== undefined ? culture.daysRemaining : 'N/A'}
           />
-          <InfoBlock label="Origem" value={culture.origin || 'N/A'} />
+          <InfoBlock label="Origem" value={translatedOrigin} />
           <InfoBlock label="Fornecedor" value={culture.supplier || 'N/A'} />
         </section>
 

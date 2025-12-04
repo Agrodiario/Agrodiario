@@ -47,12 +47,3 @@ export interface ProductApplicationsListResponse {
   page: number;
   lastPage: number;
 }
-
-export interface ProductSearchResult {
-  registrationNumber: string;
-  commercialNames: string[];
-  registrationHolder: string;
-  categories: string[];
-  activeIngredients: string[];
-  organicFarmingProduct: boolean;
-}

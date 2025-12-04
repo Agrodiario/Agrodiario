@@ -61,6 +61,14 @@ export class CulturesController {
     return this.culturesService.getUserProperties(user.id);
   }
 
+  @Get('by-property/:propertyId')
+  async getCulturesByProperty(
+    @Param('propertyId', ParseUUIDPipe) propertyId: string,
+    @CurrentUser() user: User
+  ) {
+    return this.culturesService.findByProperty(propertyId, user.id);
+  }
+
   @Get('search/culture-names')
   @HttpCode(HttpStatus.OK)
   async searchCultureNames(@Query('q') searchTerm?: string, @Query('limit') limit?: string) {

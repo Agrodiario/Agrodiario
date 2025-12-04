@@ -22,6 +22,6 @@ export function RootRedirector() {
   
   // Redireciona para a home se autenticado, para landing se não
   return isAuthenticated ? 
-    <Navigate to="/home" replace /> : 
+    <Navigate to="/diary" replace /> : 
     <Navigate to="/landing" replace />;
 }

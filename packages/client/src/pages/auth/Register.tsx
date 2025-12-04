@@ -1,25 +1,45 @@
-// src/pages/auth/Register.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-// Importa os componentes e utils
 import { Button } from '../../components/common/Button/Button';
 import { Input } from '../../components/common/Input/Input';
 import { cpfMask, dateMask, phoneMask } from '../../utils/masks';
 import { useAuth } from '../../contexts/AuthContext';
+import { validateCpf, isValidDate } from '@/utils/validators'; 
+
 import logo from '../../assets/logo.png';
 import styles from './Register.module.css';
 
-// Interface para o estado do formulário
 interface FormData {
-  nome: string;
+  name: string;
   cpf: string;
-  dataNascimento: string;
-  telefone: string;
+  birthDate: string;
+  phone: string;
   email: string;
-  senha: string;
-  confirmaSenha: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface ValidationErrors {
+  name?: string;
+  cpf?: string;
+  birthDate?: string;
+  phone?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  general?: string;
+}
+
+interface TouchedFields {
+  name: boolean;
+  cpf: boolean;
+  birthDate: boolean;
+  phone: boolean;
+  email: boolean;
+  password: boolean;
+  confirmPassword: boolean;
 }
 
 export default function RegisterPage() {
@@ -27,93 +47,197 @@ export default function RegisterPage() {
   const { register, isLoading } = useAuth();
 
   const [formData, setFormData] = useState<FormData>({
-    nome: '',
-    cpf: '',
-    dataNascimento: '',
-    telefone: '',
-    email: '',
-    senha: '',
-    confirmaSenha: '',
+    name: '', cpf: '', birthDate: '', phone: '',
+    email: '', password: '', confirmPassword: '',
   });
 
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState<TouchedFields>({
+    name: false, cpf: false, birthDate: false, phone: false,
+    email: false, password: false, confirmPassword: false,
+  });
 
-  // Efeito para validar o formulário
-  useEffect(() => {
-    // Verifica se todos os valores no objeto formData são preenchidos
-    const allFieldsFilled = Object.values(formData).every(
-      (value) => value.trim() !== ''
-    );
-    setIsButtonDisabled(!allFieldsFilled);
-  }, [formData]);
-
-  // Handler genérico para os inputs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-
-    // Aplica a máscara correta com base no 'name' do input
-    let maskedValue = value;
+  const validateField = (name: keyof FormData, value: string, currentFormData: FormData): string => {
     switch (name) {
+      case 'name':
+        if (!value.trim()) return 'Nome é obrigatório';
+        if (value.trim().length < 3) return 'Nome deve ter pelo menos 3 caracteres';
+        return '';
+
+      case 'cpf':
+        const cleanCpf = value.replace(/[^\d]/g, '');
+        if (!cleanCpf) return 'CPF é obrigatório';
+        if (cleanCpf.length < 11) return 'CPF incompleto';
+        if (!validateCpf(cleanCpf)) return 'CPF inválido'; 
+        return '';
+
+      case 'birthDate':
+        if (!value) return 'Data de nascimento é obrigatória';
+        if (value.length < 10) return 'Data incompleta (DD/MM/AAAA)';
+        
+        if (!isValidDate(value)) return 'Data inválida. Verifique o dia e o mês.'; 
+        
+        // Verificação de idade
+        const dateParts = value.split('/').map(Number);
+        const [day, month, year] = dateParts;
+        const birthDate = new Date(year, month - 1, day);
+        
+        const ageInYears = new Date().getFullYear() - birthDate.getFullYear();
+        const hasHadBirthday = new Date().getMonth() > birthDate.getMonth() || 
+                              (new Date().getMonth() === birthDate.getMonth() && new Date().getDate() >= birthDate.getDate());
+        
+        const age = hasHadBirthday ? ageInYears : ageInYears - 1;
+
+        if (age < 18) {
+             return 'Você deve ter pelo menos 18 anos';
+        }
+
+        return '';
+
+      case 'phone':
+        const cleanPhone = value.replace(/[^\d]/g, '');
+        if (!cleanPhone) return 'Telefone é obrigatório';
+        if (cleanPhone.length < 10) return 'Telefone incompleto (DDD + número)';
+        return '';
+        
+      case 'email':
+        if (!value) return 'E-mail é obrigatório';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'E-mail inválido';
+        return '';
+        
+      case 'password':
+        if (!value) return 'Senha é obrigatória';
+        if (value.length < 8) return 'Senha deve ter pelo menos 8 caracteres';
+        return '';
+        
+      case 'confirmPassword':
+        if (!value) return 'Confirmação de senha é obrigatória';
+        if (value !== currentFormData.password) return 'As senhas não conferem';
+        return '';
+        
+      default:
+        return '';
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {
+      name: validateField('name', formData.name, formData),
+      cpf: validateField('cpf', formData.cpf, formData),
+      birthDate: validateField('birthDate', formData.birthDate, formData),
+      phone: validateField('phone', formData.phone, formData),
+      email: validateField('email', formData.email, formData),
+      password: validateField('password', formData.password, formData),
+      confirmPassword: validateField('confirmPassword', formData.confirmPassword, formData),
+    };
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every(error => !error);
+  };
+
+  const handleBlur = (field: keyof FormData) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const error = validateField(field, formData[field], formData);
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const fieldName = name as keyof FormData;
+
+    let maskedValue = value;
+    switch (fieldName) {
       case 'cpf':
         maskedValue = cpfMask(value);
         break;
-      case 'dataNascimento':
+      case 'birthDate':
         maskedValue = dateMask(value);
         break;
-      case 'telefone':
+      case 'phone':
         maskedValue = phoneMask(value);
         break;
-      default:
-        maskedValue = value;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: maskedValue,
-    }));
+    setFormData((prev) => {
+      const updatedFormData = { ...prev, [fieldName]: maskedValue };
+
+      // Revalida o campo
+      const error = validateField(fieldName, maskedValue, updatedFormData);
+      
+      // Revalidação especial da confirmação de senha
+      let confirmPasswordError = errors.confirmPassword;
+      if (fieldName === 'password') {
+          confirmPasswordError = validateField('confirmPassword', updatedFormData.confirmPassword, updatedFormData);
+      }
+      
+      setErrors(prevErrors => ({ 
+        ...prevErrors, 
+        [fieldName]: error,
+        confirmPassword: confirmPasswordError,
+        general: errors.general ? '' : errors.general // Limpa erro geral na interação
+      }));
+
+      return updatedFormData;
+    });
   };
+
+  // Botão desabilitado se houver erros nos campos ou se estiver carregando, ou se algum campo estiver vazio
+  const isButtonDisabled = Object.values(errors).some(error => !!error) || isLoading || Object.values(formData).some(val => !val.trim());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isButtonDisabled || isLoading) return;
-
-    // Validação de senha
-    if (formData.senha !== formData.confirmaSenha) {
-      setError('As senhas não conferem!');
+    
+    setTouched({
+      name: true, cpf: true, birthDate: true, phone: true, 
+      email: true, password: true, confirmPassword: true
+    });
+    
+    if (!validateForm()) {
       return;
     }
-
-    // Validação de tamanho mínimo da senha
-    if (formData.senha.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres');
-      return;
-    }
-
-    setError(null);
 
     try {
       // Converte data do formato DD/MM/YYYY para ISO (YYYY-MM-DD)
-      const [day, month, year] = formData.dataNascimento.split('/');
-      const birthDate = `${year}-${month}-${day}`;
+      const [day, month, year] = formData.birthDate.split('/');
+      const isoBirthDate = `${year}-${month}-${day}`;
 
-      // Chama o método register do AuthContext
       await register({
-        name: formData.nome,
+        name: formData.name,
         email: formData.email,
-        password: formData.senha,
-        cpf: formData.cpf,
-        phone: formData.telefone,
-        birthDate,
+        password: formData.password,
+        cpf: formData.cpf, 
+        phone: formData.phone,
+        birthDate: isoBirthDate,
       });
 
-      // Se chegou aqui, o registro foi bem-sucedido (auto-login)
       navigate('/app');
     } catch (err: any) {
       console.error('Erro no registro:', err);
-      setError(err.message || 'Erro ao criar conta. Tente novamente.');
+      
+      let generalError: string = 'Erro ao criar conta. Tente novamente.';
+      let apiMessage: string = '';
+
+      // Tenta extrair a mensagem de erro do NestJS/Axios (status 409 Conflict)
+      if (err.response && err.response.data && err.response.data.message) {
+        apiMessage = Array.isArray(err.response.data.message) 
+                     ? err.response.data.message[0] 
+                     : err.response.data.message;
+      } else {
+        apiMessage = err.message || generalError;
+      }
+
+      // Mapeamento das mensagens específicas do back-end
+      if (apiMessage.includes('Email já registrado')) {
+        generalError = 'O e-mail informado já está cadastrado.';
+      } else if (apiMessage.includes('CPF já registrado')) {
+        generalError = 'O CPF informado já está cadastrado.';
+      } else {
+        generalError = apiMessage; 
+      }
+      
+      setErrors({ general: generalError });
     }
   };
 
@@ -130,87 +254,81 @@ export default function RegisterPage() {
         </p>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {error && (
+          {errors.general && (
             <div style={{
               padding: '12px',
-              backgroundColor: '#fee',
-              color: '#c33',
-              borderRadius: '4px',
+              backgroundColor: '#fed7d7', // Cor de erro
+              color: '#c53030', // Cor do texto
+              borderRadius: '8px',
               marginBottom: '16px',
-              fontSize: '14px'
+              fontSize: '14px',
+              border: '1px solid #feb2b2'
             }}>
-              {error}
+              {errors.general}
             </div>
           )}
 
+          {/* Nome */}
           <Input
-            label="Seu nome completo"
-            name="nome"
-            value={formData.nome}
-            onChange={handleChange}
-            placeholder="Ex: Maria da Silva"
-            required
-          />
-          <Input
-            label="CPF"
-            name="cpf"
-            value={formData.cpf}
-            onChange={handleChange}
-            placeholder="000.000.000-00"
-            maxLength={14}
-            required
-          />
-          <Input
-            label="Data de nascimento"
-            name="dataNascimento"
-            value={formData.dataNascimento}
-            onChange={handleChange}
-            placeholder="DD/MM/AAAA"
-            maxLength={10}
-            required
-          />
-          <Input
-            label="Seu número de telefone"
-            name="telefone"
-            value={formData.telefone}
-            onChange={handleChange}
-            placeholder="(00) 00000-0000"
-            maxLength={15}
-            required
-          />
-          <Input
-            label="Seu e-mail"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Ex: maria.silva@email.com"
-            required
-          />
-          <Input
-            label="Sua senha"
-            name="senha"
-            type={showPassword ? 'text' : 'password'}
-            value={formData.senha}
-            onChange={handleChange}
-            placeholder="Mínimo 8 caracteres"
-            icon={showPassword ? <FaEyeSlash /> : <FaEye />}
-            onIconClick={() => setShowPassword(!showPassword)}
-            required
-          />
-          <Input
-            label="Confirme sua senha"
-            name="confirmaSenha"
-            type={showConfirmPassword ? 'text' : 'password'}
-            value={formData.confirmaSenha}
-            onChange={handleChange}
-            placeholder="Repita sua senha"
-            icon={showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-            onIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            required
+            label="Seu nome completo" name="name" value={formData.name}
+            onChange={handleChange} onBlur={() => handleBlur('name')}
+            placeholder="Ex: Maria da Silva" required
+            error={errors.name} showError={touched.name && !!errors.name}
           />
 
-          <Button type="submit" disabled={isButtonDisabled || isLoading}>
+          {/* CPF */}
+          <Input
+            label="CPF" name="cpf" value={formData.cpf}
+            onChange={handleChange} onBlur={() => handleBlur('cpf')}
+            placeholder="000.000.000-00" maxLength={14} required
+            error={errors.cpf} showError={touched.cpf && !!errors.cpf}
+          />
+          
+          {/* Data de nascimento */}
+          <Input
+            label="Data de nascimento" name="birthDate" value={formData.birthDate}
+            onChange={handleChange} onBlur={() => handleBlur('birthDate')}
+            placeholder="DD/MM/AAAA" maxLength={10} required
+            error={errors.birthDate} showError={touched.birthDate && !!errors.birthDate}
+          />
+
+          {/* Telefone */}
+          <Input
+            label="Seu número de telefone" name="phone" value={formData.phone}
+            onChange={handleChange} onBlur={() => handleBlur('phone')}
+            placeholder="(00) 00000-0000" maxLength={15} required
+            error={errors.phone} showError={touched.phone && !!errors.phone}
+          />
+          
+          {/* E-mail */}
+          <Input
+            label="Seu e-mail" name="email" type="email" value={formData.email}
+            onChange={handleChange} onBlur={() => handleBlur('email')}
+            placeholder="Ex: maria.silva@email.com" required
+            error={errors.email} showError={touched.email && !!errors.email}
+          />
+
+          {/* Senha */}
+          <Input
+            label="Sua senha" name="password" type={showPassword ? 'text' : 'password'}
+            value={formData.password} onChange={handleChange} onBlur={() => handleBlur('password')}
+            placeholder="Mínimo 8 caracteres" required
+            icon={showPassword ? <FaEyeSlash /> : <FaEye />}
+            onIconClick={() => setShowPassword(!showPassword)}
+            error={errors.password} showError={touched.password && !!errors.password}
+          />
+
+          {/* Confirma Senha */}
+          <Input
+            label="Confirme sua senha" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'}
+            value={formData.confirmPassword} onChange={handleChange} onBlur={() => handleBlur('confirmPassword')}
+            placeholder="Repita sua senha" required
+            icon={showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            onIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            error={errors.confirmPassword} showError={touched.confirmPassword && !!errors.confirmPassword}
+          />
+
+          <Button type="submit" disabled={isButtonDisabled}>
             {isLoading ? 'Criando conta...' : 'Criar conta'}
           </Button>
         </form>

@@ -7,6 +7,7 @@ export interface Culture {
   supplier?: string;
   plantingDate: string;
   plantingArea: number;
+  plotName?: string;
   observations?: string;
   isActive: boolean;
   userId: string;
@@ -34,6 +35,7 @@ export interface CreateCultureDto {
   supplier?: string;
   plantingDate: string;
   plantingArea: number;
+  plotName?: string;
   observations?: string;
 }
 
@@ -45,6 +47,7 @@ export interface UpdateCultureDto {
   supplier?: string;
   plantingDate?: string;
   plantingArea?: number;
+  plotName?: string | null;
   observations?: string;
 }
 

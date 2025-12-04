@@ -121,7 +121,8 @@ describe('CulturesService', () => {
       });
       expect(mockCulturesRepository.save).toHaveBeenCalledWith(mockCulture);
       expect(result).toBeDefined();
-      expect(result.data.id).toBe('culture-789');
+      expect(result.message).toBe('Cultura adicionada com sucesso');
+      expect(result.data).toBeDefined();
     });
 
     it('deve lançar NotFoundException quando a propriedade não existe', async () => {

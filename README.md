@@ -1,41 +1,67 @@
 # 🌱 Agrodiário  
 
-Turn the hard work of your farm into real value.
+Transforme o trabalho da sua propriedade rural em valor real.
 
-<img src="https://i.imgur.com/8C3ba5b.jpeg" alt="Agrodiário Mockup" />
+<img src="https://i.imgur.com/8C3ba5b.jpeg" alt="Mockup Agrodiário" />
 
-**Agrodiário** is a digital diary designed for family farmers to record sustainable actions such as soil management practices, soil health, reforestation, and other environmental initiatives.  
-These records form an activity log that helps farmers qualify for **carbon credits** and other environmental certifications.
+Agrodiário é um diário digital criado para agricultores familiares registrarem ações sustentáveis, como práticas de manejo do solo, saúde do solo, reflorestamento e outras iniciativas ambientais.
+Esses registros formam um histórico de atividades que ajuda o produtor a se qualificar para créditos de carbono e outras certificações ambientais.
+
+## Sumário
+
+- [Pré-requisitos](#pré-requisitos)
+- [Configuração do Ambiente](#configuração-do-ambiente)
+  - [Criar o banco de dados](#criar-o-banco-de-dados)
+  - [Configurar o arquivo env](#configurar-o-arquivo-env)
+  - [Instalar dependências](#instalar-dependências)
+- [Configuração do serviço de email](#configuração-do-serviço-de-email)
+  - [Variáveis de Ambiente](#variáveis-de-ambiente)
+  - [Provedores de email suportados](#provedores-de-email-suportados)
+    - [SendGrid](#opção-1-sendgrid-recomendado-para-produção)
+    - [Gmail](#opção-2-gmail)
+  - [Testando a Configuração](#testando-a-configuração)
+  - [Troubleshooting](#troubleshooting)
+- [Executando o projeto](#executando-o-projeto)
+  - [Front-end](#front-end)
+  - [Back-end](#back-end)
+- [Testes](#testes)
+  - [Executando os Testes](#executando-os-testes)
+  - [Cobertura de Testes](#cobertura-de-testes)
+- [CI/CD](#cicd)
+  - [Pipeline de Testes](#pipeline-de-testes)
+  - [Jobs do Pipeline](#jobs-do-pipeline)
+- [Figma Design](#figma-design)
+- [Contribuições](#contribuições)
 
 ---
 
-## Prerequisites
-Before running the project, make sure you have installed:
+## Pré-requisitos
+Antes de executar o projeto, certifique-se de ter instalado:
 
-- **Node.js** (recommended version: 18+)
+- **Node.js** (versão recomendada: 18+)
 - **Yarn**
 - **PostgreSQL**
 
 ---
 
-## Environment setup
+## Configuração do Ambiente
 
-### Create the database
-Run the following command in PostgreSQL:
+### Criar o banco de dados
+No PostgreSQL, execute:
 
 ```sql
 CREATE DATABASE agrodiario;
 ```
 
-### Configure the ``.env`` file
+### Configurar o arquivo ``.env``
 
-Create a ``.env`` file in the backend following the ``.env.example`` template:
+Crie o arquivo ``.env`` no backend seguindo o modelo ``.env.example``:
 
 ```bash
 cp .env.example .env
 ```
 
-### Installing dependencies
+### Instalar dependências
 
 ```bash
 yarn install
@@ -43,7 +69,7 @@ yarn install
 
 ---
 
-## Configuração do Serviço de Email
+## Configuração do serviço de email
 
 O Agrodiário utiliza emails para funcionalidades de autenticação:
 - **Verificação de email** após o cadastro
@@ -66,7 +92,7 @@ SMTP_FROM=AgroDiario <noreply@seudominio.com>
 FRONTEND_URL=http://localhost:5173
 ```
 
-### Provedores de Email Suportados
+### Provedores de email suportados
 
 #### Opção 1: SendGrid (Recomendado para Produção)
 
@@ -129,7 +155,7 @@ Para verificar se o email está funcionando:
 
 ---
 
-## Running the project
+## Executando o projeto
 ### Front-end
 ```bash
 yarn dev:client
@@ -139,13 +165,71 @@ yarn dev:client
 ```bash
 yarn dev:backend
 ```
+
+---
+
+## Testes
+
+O projeto possui **133 testes unitários** no backend utilizando **Jest**.
+
+### Executando os Testes
+
+```bash
+# Rodar todos os testes do backend
+cd packages/backend
+yarn test
+
+# Rodar testes em modo watch (re-executa ao salvar)
+yarn test:watch
+
+# Rodar testes com cobertura de código
+yarn test:cov
+```
+
+### Cobertura de Testes
+
+| Módulo | Arquivo | Testes | Descrição |
+|--------|---------|--------|-----------|
+| Auth | `auth.service.spec.ts` | 24 | Autenticação, registro, verificação de email, reset de senha |
+| Email | `email.service.spec.ts` | 11 | Envio de emails (reset de senha, verificação) |
+| Activities | `activities.controller.spec.ts` | 6 | Endpoints de atividades |
+| Activities | `activities.service.spec.ts` | 9 | Lógica de negócio de atividades |
+| Cultures | `cultures.controller.spec.ts` | 5 | Endpoints de culturas |
+| Cultures | `cultures.service.spec.ts` | 9 | Lógica de negócio de culturas |
+| Cultures | `create-culture.dto.spec.ts` | 65 | Validação de DTOs |
+| Embrapa | `embrapa.service.spec.ts` | 4 | Integração com API externa |
+
+---
+
+## CI/CD
+
+O projeto utiliza **GitHub Actions** para integração contínua.
+
+### Pipeline de Testes
+
+O workflow é executado automaticamente em:
+- Push para `main` ou `develop`
+- Pull requests para `main` ou `develop`
+
+### Jobs do Pipeline
+
+| Job | Descrição |
+|-----|-----------|
+| `test-backend` | Executa todos os 133 testes unitários com cobertura |
+| `test-frontend` | Verificação de tipos TypeScript |
+| `build` | Compilação do backend |
+
+### Arquivo de Configuração
+
+O workflow está definido em `.github/workflows/test.yml`.
+
+---
+
 ## Figma Design
-You can view the project’s design prototype on Figma:
+Visualize o protótipo do design:
 
-🎨 **Figma Project:** https://www.figma.com/design/5mupDJvETRMmNdbwiLXuQ7/AgroDi%C3%A1rio?node-id=11-1833&t=xX2ODMRWWHwvqowm-1
+👉 **Figma:** https://www.figma.com/design/5mupDJvETRMmNdbwiLXuQ7/AgroDi%C3%A1rio?node-id=11-1833&t=xX2ODMRWWHwvqowm-1
 
+## Contribuições
 
-
-## Contributions
-
-Feel free to open issues, suggest improvements, or submit pull requests.
+Sinta-se à vontade para abrir issues, sugerir melhorias ou enviar pull requests.

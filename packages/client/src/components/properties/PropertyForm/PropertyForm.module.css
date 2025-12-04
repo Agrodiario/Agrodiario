@@ -1,109 +1,133 @@
 /* src/components/properties/PropertyForm/PropertyForm.module.css */
 .page {
-    margin: 0 auto; /* Centraliza */
-    width: 100%;
-    padding: 1.5rem;
-    border-radius: var(--border-radius-md);
-    background-color: var(--color-bg-white);
-  }
-  
-  .header {
-    margin-bottom: 2rem;
-  }
-  
-  .backButton {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-  }
-  
-  .form {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-  
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-  
-  /* Título com fundo azul (Dados da propriedade, Talhões) */
-  .blueTitle {
-    font-size: 0.95rem;
-    font-weight: 600;
-    background-color: #dbeafe; /* Azul claro */
-    color: #1e40af; /* Azul escuro */
-    padding: 10px 14px;
-    border-radius: 6px;
-  }
-  
-  /* Título simples (Certificações, Situação, Mapas) */
-  .textTitle {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: -0.5rem; /* Aproxima do subtítulo ou conteúdo */
-  }
-  
-  .subtitle {
-    font-size: 0.95rem;
-    color: var(--color-text-secondary);
-  }
-  
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-  }
-  
-  .tagGroup {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-  
-  /* --- Estilos do Mapa --- */
-  .mapContainer {
-    height: 300px;
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden; /* Garante que o mapa respeite as bordas arredondadas */
-    border: 1px solid var(--color-border);
-  }
-  
-  /* O componente MapContainer do React Leaflet gera uma div.
+  margin: 0 auto;
+  /* Centraliza */
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-bg-white);
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.backButton:hover {
+  color: var(--color-primary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Título com fundo azul (Dados da propriedade, Talhões) */
+.blueTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-color: #dbeafe;
+  /* Azul claro */
+  color: #1e40af;
+  /* Azul escuro */
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+
+/* Título simples (Certificações, Situação, Mapas) */
+.textTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: -0.5rem;
+  /* Aproxima do subtítulo ou conteúdo */
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.tagGroup {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* --- Estilos do Mapa --- */
+.mapContainer {
+  height: 300px;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  /* Garante que o mapa respeite as bordas arredondadas */
+  border: 1px solid var(--color-border);
+}
+
+/* O componente MapContainer do React Leaflet gera uma div.
      Precisamos garantir que ela ocupe 100% do container pai. */
-  .map {
-    height: 100%;
-    width: 100%;
+.map {
+  height: 100%;
+  width: 100%;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  /* Alinha botões à direita */
+  gap: 1rem;
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid #eaecf0;
+}
+
+/* Faz os botões terem largura fixa ou dividirem espaço em telas menores */
+.footer button {
+  min-width: 140px;
+}
+
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: 1fr;
   }
-  
-  .footer {
-    display: flex;
-    justify-content: flex-end; /* Alinha botões à direita */
-    gap: 1rem;
-    padding-top: 2rem;
-    margin-top: 2rem;
-    border-top: 1px solid #eaecf0;
-  }
-  /* Faz os botões terem largura fixa ou dividirem espaço em telas menores */
+
   .footer button {
-    min-width: 140px;
+    flex: 1;
   }
-  
-  @media (max-width: 600px) {
-    .row {
-      grid-template-columns: 1fr;
-    }
-    .footer button {
-      flex: 1;
-    }
-  }
+}

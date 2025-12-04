@@ -137,6 +137,7 @@ export class CulturesService {
     if (updateCultureDto.supplier !== undefined) culture.supplier = updateCultureDto.supplier;
     if (updateCultureDto.plantingDate !== undefined) culture.plantingDate = new Date(updateCultureDto.plantingDate);
     if (updateCultureDto.plantingArea !== undefined) culture.plantingArea = updateCultureDto.plantingArea;
+    if (updateCultureDto.plotName !== undefined) culture.plotName = updateCultureDto.plotName;
     if (updateCultureDto.observations !== undefined) culture.observations = updateCultureDto.observations;
 
     const updatedCulture = await this.culturesRepository.save(culture);
@@ -186,6 +187,16 @@ export class CulturesService {
     return properties;
   }
 
+  async findByProperty(propertyId: string, userId: string): Promise<any[]> {
+    const cultures = await this.culturesRepository.find({
+      where: { propertyId, userId, isActive: true },
+      select: ['id', 'cultureName', 'cultivar', 'cycle'],
+      order: { cultureName: 'ASC' },
+    });
+
+    return cultures;
+  }
+
   private mapToResponseDto(culture: Culture): CultureResponseDto {
     const plantingDate = culture.plantingDate instanceof Date 
       ? culture.plantingDate 
@@ -209,6 +220,7 @@ export class CulturesService {
       supplier: culture.supplier,
       plantingDate: plantingDate,
       plantingArea: culture.plantingArea,
+      plotName: culture.plotName,
       observations: culture.observations,
       isActive: culture.isActive,
       createdAt: culture.createdAt,

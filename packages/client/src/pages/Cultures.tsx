@@ -11,42 +11,54 @@ import { useState, useEffect } from 'react';
 import { Culture } from '@/types/culture.types';
 import { CultureDetailsDrawer } from '@/components/cultures/CultureDetailsDrawer/CultureDetailsDrawer';
 import { cultureService } from '../services/culture.service';
-import { useNavigate } from 'react-router-dom';
+import { generateCultureReport } from '@/utils/generatePDF';
+
+const ITEMS_PER_PAGE = 6; // Igual ao diary
 
 export default function CulturesPage() {
-  const navigate = useNavigate();
   const [cultures, setCultures] = useState<Culture[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [sortBy, setSortBy] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCulture, setSelectedCulture] = useState<Culture | null>(null);
 
-  // Fetch cultures from API
-  useEffect(() => {
-    fetchCultures();
-  }, [searchTerm, sortBy, sortOrder]);
-
-  const fetchCultures = async () => {
+  const fetchCultures = async (
+    pageToLoad: number, 
+    searchToLoad: string, 
+    sortByToLoad: string, 
+    orderToLoad: 'ASC' | 'DESC'
+  ) => {
     try {
-      setIsLoading(true);
+      if (pageToLoad === 1) setLoading(true);
+      else setLoadingMore(true);
+
       const response = await cultureService.findAll(
-        1,
-        100,
-        searchTerm || undefined,
-        sortBy || undefined,
-        sortOrder
+        pageToLoad,
+        ITEMS_PER_PAGE,
+        searchToLoad || undefined,
+        sortByToLoad || undefined,
+        orderToLoad
       );
-      setCultures(response.data);
+
+      if (pageToLoad === 1) {
+        setCultures(response.data);
+      } else {
+        setCultures((prev) => [...prev, ...response.data]);
+      }
+      setTotal(response.total || response.data.length);
     } catch (err: any) {
       console.error('Erro ao carregar culturas:', err);
-      setError(err.message || 'Erro ao carregar culturas');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -55,13 +67,14 @@ export default function CulturesPage() {
   };
 
   const handleSort = (field: string) => {
-    if (sortBy === field) {
-      // Toggle order if same field
-      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
-    } else {
-      setSortBy(field);
-      setSortOrder('ASC');
-    }
+    const newOrder = sortBy === field && sortOrder === 'ASC' ? 'DESC' : 'ASC';
+    
+    setSortBy(field);
+    setSortOrder(newOrder);
+    setPage(1);
+    setCultures([]);
+    
+    fetchCultures(1, searchTerm, field, newOrder);
   };
 
   const handleViewCulture = (culture: Culture) => {
@@ -80,19 +93,65 @@ export default function CulturesPage() {
     try {
       await cultureService.remove(selectedCulture.id);
       handleCloseDrawer();
-      fetchCultures(); // Refresh list
+      fetchCultures(1, searchTerm, sortBy, sortOrder);
     } catch (err: any) {
       console.error('Erro ao excluir cultura:', err);
       alert('Erro ao excluir cultura');
     }
   };
 
-  const handleNewCulture = () => {
-    navigate('/cultures/new');
+  const handleGenerateReport = async () => {
+    try {
+      setIsGeneratingReport(true);
+
+      const response = await cultureService.findAll(
+        1,
+        1000,
+        searchTerm || undefined,
+        sortBy || undefined,
+        sortOrder
+      );
+
+      const textoFiltro = searchTerm
+        ? `Busca por: "${searchTerm}"`
+        : sortBy
+          ? `Ordenado por: ${sortBy} (${sortOrder === 'ASC' ? 'Crescente' : 'Decrescente'})`
+          : 'Todas as culturas';
+
+      await generateCultureReport(response.data, textoFiltro);
+
+    } catch (error) {
+      console.error('Erro ao gerar relatório', error);
+      alert('Erro ao gerar o relatório. Tente novamente.');
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchCultures(nextPage, searchTerm, sortBy, sortOrder);
+  };
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      setPage(1);
+      setCultures([]);
+      fetchCultures(1, searchTerm, sortBy, sortOrder);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    fetchCultures(1, searchTerm, sortBy, sortOrder);
+  }, []);
+
+  const hasMore = cultures.length < total;
+
   return (
-    <>
+    <div className={styles.culturesPage}>
       <div className={styles.toolbar}>
         <div className={styles.searchWrapper}>
           <Input
@@ -101,19 +160,19 @@ export default function CulturesPage() {
             value={searchTerm}
             onChange={handleSearchChange}
             icon={<FiSearch size={18} />}
-            style={{ borderRadius: '128px', padding: '0.6rem 1rem', width: '95%' }}
           />
         </div>
+        
         <div className={styles.toolbarButtons}>
           <Dropdown
             trigger={
-              <Button
+              <Button 
                 variant="tertiary"
                 leftIcon={<FaRegCalendarPlus size={18} />}
                 rightIcon={<MdArrowDropDown size={18} />}
-                style={{ borderRadius: '16px', width: 'max-content' }}
+                className={styles.sortButton}
               >
-                Ordenar por
+                <span className={styles.buttonText}>Ordenar por</span>
               </Button>
             }
           >
@@ -121,77 +180,132 @@ export default function CulturesPage() {
               <button
                 onClick={() => handleSort('plantingDate')}
                 className={styles.dropdownItem}
+                style={{ 
+                  fontWeight: sortBy === 'plantingDate' ? 'bold' : 'normal',
+                  backgroundColor: sortBy === 'plantingDate' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
-                Data de plantio
+                Data de plantio {sortBy === 'plantingDate' && (sortOrder === 'ASC' ? '↑' : '↓')}
               </button>
               <button
                 onClick={() => handleSort('cultureName')}
                 className={styles.dropdownItem}
+                style={{ 
+                  fontWeight: sortBy === 'cultureName' ? 'bold' : 'normal',
+                  backgroundColor: sortBy === 'cultureName' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
-                Nome da cultura
+                Nome da cultura {sortBy === 'cultureName' && (sortOrder === 'ASC' ? '↑' : '↓')}
               </button>
               <button
                 onClick={() => handleSort('plantingArea')}
                 className={styles.dropdownItem}
+                style={{ 
+                  fontWeight: sortBy === 'plantingArea' ? 'bold' : 'normal',
+                  backgroundColor: sortBy === 'plantingArea' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
-                Área de plantio
+                Área de plantio {sortBy === 'plantingArea' && (sortOrder === 'ASC' ? '↑' : '↓')}
               </button>
               <button
                 onClick={() => handleSort('propertyName')}
                 className={styles.dropdownItem}
+                style={{ 
+                  fontWeight: sortBy === 'propertyName' ? 'bold' : 'normal',
+                  backgroundColor: sortBy === 'propertyName' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
-                Nome da propriedade
+                Nome da propriedade {sortBy === 'propertyName' && (sortOrder === 'ASC' ? '↑' : '↓')}
               </button>
               <button
                 onClick={() => handleSort('cycle')}
                 className={styles.dropdownItem}
+                style={{ 
+                  fontWeight: sortBy === 'cycle' ? 'bold' : 'normal',
+                  backgroundColor: sortBy === 'cycle' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
-                Ciclo
+                Ciclo {sortBy === 'cycle' && (sortOrder === 'ASC' ? '↑' : '↓')}
               </button>
               <button
                 onClick={() => handleSort('daysRemaining')}
                 className={styles.dropdownItem}
+                style={{ 
+                  fontWeight: sortBy === 'daysRemaining' ? 'bold' : 'normal',
+                  backgroundColor: sortBy === 'daysRemaining' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
-                Dias restantes
+                Dias restantes {sortBy === 'daysRemaining' && (sortOrder === 'ASC' ? '↑' : '↓')}
               </button>
               <button
                 onClick={() => handleSort('daysElapsed')}
                 className={styles.dropdownItem}
+                style={{ 
+                  fontWeight: sortBy === 'daysElapsed' ? 'bold' : 'normal',
+                  backgroundColor: sortBy === 'daysElapsed' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
-                Dias decorridos
+                Dias decorridos {sortBy === 'daysElapsed' && (sortOrder === 'ASC' ? '↑' : '↓')}
               </button>
             </div>
           </Dropdown>
-          <div></div>
+
           <Button
             variant="secondary"
             leftIcon={<FiDownload size={18} />}
-            style={{ borderRadius: '32px' }}
+            className={styles.reportButton}
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport}
           >
-            Gerar relatório
+            <span className={styles.buttonText}>
+              {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
+            </span>
           </Button>
         </div>
       </div>
 
+      {/* Estados de loading e empty state iguais ao diary */}
       <div className={styles.grid}>
-        {isLoading && <p>Carregando culturas...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {!isLoading && !error && cultures.length === 0 && (
-          <p>Nenhuma cultura cadastrada. Crie sua primeira cultura!</p>
-        )}
-        {!isLoading &&
-          !error &&
+        {loading && page === 1 ? (
+          <div className={styles.loadingContainer}>
+            <p>Carregando culturas...</p>
+          </div>
+        ) : cultures.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>Nenhuma cultura encontrada.</p>
+            {searchTerm && (
+              <p>Tente ajustar os termos da busca.</p>
+            )}
+          </div>
+        ) : (
           cultures.map((culture) => (
             <CultureCard
               key={culture.id}
               culture={culture}
               onView={() => handleViewCulture(culture)}
             />
-          ))}
+          ))
+        )}
       </div>
 
       <footer className={styles.footer}>
-        <Button variant="outlined">Carregar mais</Button>
+        {hasMore && (
+          <Button 
+            variant="quaternary" 
+            className={styles.loadMoreButton}
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? 'Carregando...' : 'Carregar mais'}
+          </Button>
+        )}
+        
+        {/* Mensagem quando acaba */}
+        {!hasMore && cultures.length > 0 && (
+          <span className={styles.endMessage}>
+            Você chegou ao fim da lista.
+          </span>
+        )}
       </footer>
 
       <Drawer
@@ -203,6 +317,6 @@ export default function CulturesPage() {
           <CultureDetailsDrawer culture={selectedCulture} onDelete={handleDelete} />
         )}
       </Drawer>
-    </>
+    </div>
   );
 }

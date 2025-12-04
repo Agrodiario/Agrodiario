@@ -1,4 +1,3 @@
-// src/pages/Diary.tsx
 import { FaRegCalendarPlus } from 'react-icons/fa';
 import { Button } from '../components/common/Button/Button';
 import { Input } from '../components/common/Input/Input';
@@ -155,14 +154,19 @@ export default function DiaryPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             name="search"
             icon={<FiSearch size={18} />}
-            style={{ borderRadius: '128px', padding: '0.6rem 1rem', width: '95%' }}
           />
         </div>
-        <div className={styles.toolbarButtons} >
+        
+        <div className={styles.toolbarButtons}>
           <Dropdown
             trigger={
-              <Button variant="tertiary" leftIcon={<FaRegCalendarPlus size={18} />} rightIcon={<MdArrowDropDown size={18} />} style={{ borderRadius: '16px', width: 'max-content' }} >
-                Ordenar por
+              <Button 
+                variant="tertiary" 
+                leftIcon={<FaRegCalendarPlus size={18} />} 
+                rightIcon={<MdArrowDropDown size={18} />} 
+                className={styles.sortButton}
+              >
+                <span className={styles.buttonText}>Ordenar por</span>
               </Button>
             }
           >
@@ -170,53 +174,69 @@ export default function DiaryPage() {
               <button 
                 className={styles.dropdownItem}
                 onClick={() => handleSortChange('DESC')}
-                style={{ fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal' }}
+                style={{ 
+                  fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal',
+                  backgroundColor: sortOrder === 'DESC' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
                 Mais recentes
               </button>
               <button 
                 className={styles.dropdownItem}
                 onClick={() => handleSortChange('ASC')}
-                style={{ fontWeight: sortOrder === 'ASC' ? 'bold' : 'normal' }}
+                style={{ 
+                  fontWeight: sortOrder === 'ASC' ? 'bold' : 'normal',
+                  backgroundColor: sortOrder === 'ASC' ? 'var(--color-bg-light)' : 'transparent'
+                }}
               >
                 Mais antigas
               </button>
             </div>
           </Dropdown>
-
-          <div></div>
           
           <Button 
             variant="secondary" 
             leftIcon={<FiDownload size={18} />} 
-            style={{ borderRadius: '32px' }}
+            className={styles.reportButton}
             onClick={handleGenerateReport}
             disabled={isGeneratingReport}
           >
-            {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
+            <span className={styles.buttonText}>
+              {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
+            </span>
           </Button>
         </div>
       </div>
 
+      {/* Melhorando os estados de loading e empty state */}
       <div className={styles.grid}>
         {loading && page === 1 ? (
-           <p>Carregando atividades...</p>
+          <div className={styles.loadingContainer}>
+            <p>Carregando atividades...</p>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>Nenhuma atividade encontrada.</p>
+            {searchTerm && (
+              <p>Tente ajustar os termos da busca.</p>
+            )}
+          </div>
         ) : (
-           activities.map((item) => (
-             <ActivityCard 
-                key={item.id} 
-                activity={item} 
-                onView={() => handleViewActivity(item)} 
-             />
-           ))
+          activities.map((item) => (
+            <ActivityCard 
+              key={item.id} 
+              activity={item} 
+              onView={() => handleViewActivity(item)} 
+            />
+          ))
         )}
       </div>
 
       <footer className={styles.footer}>
-        <Button variant="outlined">Carregar mais</Button>
         {hasMore && (
           <Button 
             variant="quaternary" 
+            className={styles.loadMoreButton}
             onClick={handleLoadMore}
             disabled={loadingMore}
           >
@@ -224,9 +244,9 @@ export default function DiaryPage() {
           </Button>
         )}
         
-        {/* Opcional: Mensagem quando acaba */}
+        {/* Mensagem quando acaba */}
         {!hasMore && activities.length > 0 && (
-          <span style={{ color: '#999', fontSize: '0.9rem' }}>
+          <span className={styles.endMessage}>
             Você chegou ao fim da lista.
           </span>
         )}
@@ -239,9 +259,7 @@ export default function DiaryPage() {
       >
         {selectedActivity && (
           <ActivityDetailsDrawer
-            activity={{
-              ...selectedActivity,
-            }}
+            activity={selectedActivity}
             onDelete={handleDelete}
           />
         )}

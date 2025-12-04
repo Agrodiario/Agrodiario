@@ -1,25 +1,23 @@
-import {useNavigate} from 'react-router-dom';
-import {useEffect, useState} from 'react';
-import {propertyService} from "@/services/property.service.ts";
-import {cultureService} from "@/services/culture.service.ts";
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { propertyService } from '../../services/property.service.ts';
+import { cultureService } from '../../services/culture.service.ts';
 import styles from './ProductApplicationForm.module.css'
-import {Input} from '../../components/common/Input/Input.tsx';
-import {SearchableSelect} from "@/components/common/SearchableSelect/SearchableSelect.tsx";
-import {FiArrowLeft, FiCheck, FiX} from "react-icons/fi";
-import {Button} from "@/components/common/Button/Button.tsx";
+import { Input } from '../../components/common/Input/Input.tsx';
+import { FiArrowLeft, FiCheck, FiX } from "react-icons/fi";
+import { Button } from '../../components/common/Button/Button.tsx';
+import { SearchableGrid } from 'src/components/common/SearchableGrid/SearchableGrid.tsx';
+import { Product } from "src/types/product.types.ts";
 
-export type ProductApplicationFormData = {
-  propertyId: string;
-  cultureId: string;
-  area: string;
-  productId: string;
-  productName: string;
-  dataAplication: string;
+export type ProductFormData = {
+  commercialNames: string[];
+  registrationHolder: string;
+  organicFarmingProduct: boolean;
 };
 
 type Props = {
-  initialData?: Partial<ProductApplicationFormData>;
-  onSubmit: (data: ProductApplicationFormData) => void;
+  initialData?: Partial<Product>;
+  onSubmit: (data: Product) => void;
   isLoading?: boolean;
 }
 
@@ -27,18 +25,20 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   const navigate = useNavigate();
   const isEditMode = !!initialData;
 
-  const [formData, setFormData] = useState<ProductApplicationFormData>({
-    propertyId: initialData?.propertyId || '',
-    cultureId: initialData?.cultureId || '',
-    area: initialData?.area || '',
-    productId: initialData?.productId || '',
-    productName: initialData?.productName || '',
-    dataAplication: initialData?.dataAplication || '',
+  const [formData, setFormData] = useState<Product>({
+    registrationNumber: initialData?.registrationNumber || '',
+    commercialNames: initialData?.commercialNames || [],
+    registrationHolder: initialData?.registrationHolder || '',
+    categories: initialData?.categories || [],
+    activeIngredients: initialData?.activeIngredients || [],
+    organicFarmingProduct: initialData?.organicFarmingProduct || false,
   });
 
-  const [isValid, setIsValid] = useState(false);
-
   const [properties, setProperties] = useState<any[]>([]);
+  const [cultures, setCultures] = useState<any[]>([]);
+
+  // NOVOS ESTADOS PARA VALIDAÇÃO
+  const [isValid, setIsValid] = useState(false);
 
   // Carrega propriedades do usuário
   useEffect(() => {
@@ -52,8 +52,6 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
     };
     fetchProperties();
   }, []);
-
-  const [cultures, setCultures] = useState<any[]>([]);
 
   // Carrega culturas do usuário
   useEffect(() => {
@@ -181,12 +179,12 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             <label className={styles.label}>
               Busque pelo nome do produto
             </label>
-            <SearchableSelect
+            <SearchableGrid
               label="Nome do produto/insumo"
               placeholder="Digite para buscar na Embrapa..."
               value={formData.productName}
               onChange={(newValue) =>
-                setFormData(prev => ({ ...prev, productName: newValue }))
+                setFormData(prev => ({ ...prev, product: newValue }))
               }
             />
           </div>

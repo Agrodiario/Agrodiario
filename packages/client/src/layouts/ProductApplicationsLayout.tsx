@@ -15,7 +15,7 @@ export default function ProductApplicationsLayout() {
         <h1 className={styles.title}>Aplicações de produtos</h1>
         <div className={styles.actions}>
           {!hideButton && (
-            <Link to="new" className={styles.linkButton}>
+            <Link to="new" className={styles.primaryButton}>
               <FiPlus size={18} />
               <span>Nova aplicação</span>
             </Link>

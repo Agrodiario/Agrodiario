@@ -25,6 +25,9 @@ export class Property extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ type: 'jsonb', nullable: true })
+  plots: { name: string; area: number }[];
+
   // Relationship to User (owner)
   @ManyToOne(() => User, (user) => user.properties, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

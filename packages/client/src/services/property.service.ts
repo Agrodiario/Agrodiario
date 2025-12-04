@@ -1,3 +1,4 @@
+// src/services/property.service.ts
 import { apiClient } from '../config/api.client';
 import {
   Property,
@@ -12,9 +13,20 @@ class PropertyService {
     return response.data;
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<PropertiesListResponse> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    order: 'ASC' | 'DESC' = 'DESC',
+    search: string = ''
+  ): Promise<PropertiesListResponse> {
+
     const response = await apiClient.get<PropertiesListResponse>('/properties', {
-      params: { page, limit },
+      params: {
+        page,
+        limit,
+        order,
+        search: encodeURIComponent(search),
+      },
     });
     return response.data;
   }

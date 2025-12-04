@@ -30,6 +30,16 @@ export function CultureCard({ culture, onView }: CultureCardProps) {
     ? format(new Date(culture.plantingDate), "dd/MM/yy", { locale: ptBR })
     : 'N/A';
 
+  // Formatar previsão de colheita
+  const formattedHarvest = culture.expectedHarvestDate
+    ? format(new Date(culture.expectedHarvestDate), "dd/MM/yy", { locale: ptBR })
+    : 'N/A';
+
+  // Determinar o que exibir na linha de propriedade/área
+  const propertyLine = culture.plotName 
+    ? `${culture.property?.name || 'Propriedade'} - ${culture.plotName}`
+    : `${culture.property?.name || 'Propriedade'} - ${culture.plantingArea} ha`;
+
   return (
     <div className={styles.card}>
       {/* Cabeçalho com emoji e nome */}
@@ -51,7 +61,7 @@ export function CultureCard({ culture, onView }: CultureCardProps) {
       <div className={styles.content}>
         <InfoItem
           icon={<PiPlantFill />}
-          title={culture.property?.name || 'Propriedade'}
+          title={propertyLine}
           text={culture.cultivar || 'N/A'}
         />
         <InfoItem
@@ -63,6 +73,11 @@ export function CultureCard({ culture, onView }: CultureCardProps) {
           icon={<FiCalendar />}
           title="Data de plantio"
           text={formattedDate}
+        />
+        <InfoItem
+          icon={<FiCalendar />}
+          title="Previsão de colheita"
+          text={formattedHarvest}
         />
       </div>
 

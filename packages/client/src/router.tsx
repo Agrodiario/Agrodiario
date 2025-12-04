@@ -10,7 +10,6 @@ import LoginPage from './pages/auth/Login';
 import RegisterPage from './pages/auth/Register';
 import ForgotPasswordPage from './pages/auth/ForgotPassword';
 import ResetPasswordPage from './pages/auth/ResetPassword';
-import HomePage from './pages/Home';
 import DiaryPage from './pages/Diary';
 import PropertiesPage from './pages/Properties';
 import CulturesPage from './pages/Cultures';
@@ -69,11 +68,6 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path: 'home',
-        element: <HomePage />,
-      },
-
-      {
         path: 'diary',
         element: <DiaryLayout />,
         children: [
@@ -115,7 +109,7 @@ export const router = createBrowserRouter([
 
       {
         path: '*',
-        element: <Navigate to="/home" replace />,
+        element: <Navigate to="/diary" replace />,
       },
     ],
   },

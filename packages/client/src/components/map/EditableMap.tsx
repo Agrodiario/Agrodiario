@@ -12,7 +12,7 @@ interface EditableMapProps {
 export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableMapProps) {
   const map = useMap();
   const featureGroupRef = useRef<L.FeatureGroup | null>(null);
-  const drawControlRef = useRef<L.Control.Draw | null>(null);
+  const drawControlRef = useRef<any>(null);
 
   useEffect(() => {
     if (!map) return;
@@ -23,7 +23,7 @@ export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableM
     featureGroupRef.current = featureGroup;
 
     // Configura o controle de desenho
-    const drawControl = new L.Control.Draw({
+    const drawControl = new (L.Control as any).Draw({
       position: 'topright',
       draw: {
         rectangle: false,
@@ -51,8 +51,8 @@ export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableM
     drawControlRef.current = drawControl;
 
     // Event listeners
-    map.on(L.Draw.Event.CREATED, onCreated);
-    map.on(L.Draw.Event.DELETED, onDeleted);
+    map.on((L as any).Draw.Event.CREATED, onCreated);
+    map.on((L as any).Draw.Event.DELETED, onDeleted);
 
     // Se houver polígono existente, adiciona ao mapa
     if (existingPolygon) {
@@ -68,8 +68,8 @@ export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableM
       if (featureGroupRef.current) {
         map.removeLayer(featureGroupRef.current);
       }
-      map.off(L.Draw.Event.CREATED, onCreated);
-      map.off(L.Draw.Event.DELETED, onDeleted);
+      map.off((L as any).Draw.Event.CREATED, onCreated);
+      map.off((L as any).Draw.Event.DELETED, onDeleted);
     };
   }, [map]);
 

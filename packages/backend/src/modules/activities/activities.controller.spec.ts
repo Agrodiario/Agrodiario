@@ -59,6 +59,7 @@ describe('ActivityController', () => {
       const createDto: CreateActivityDto = {
         date: '2025-11-20',
         propriedade: 'Fazenda Teste',
+        cultureId: 'a1b2c3d4-e5f6-4789-a012-3456789abcde',
         tipo: ActivityType.PREPARO,
         descricao: 'Teste',
         responsavel: 'João',
