@@ -32,6 +32,15 @@ export interface CreateProductApplicationDto {
   applicationDate: string;
 }
 
+export interface ProductApplicationFormData {
+  propertyId: string;
+  cultureId: string;
+  area: string;
+  productId: string;
+  productName: string;
+  date: string;
+}
+
 export interface UpdateProductApplicationDto {
   propertyId?: string;
   cultureId?: string;

@@ -26,7 +26,7 @@ export class ProductApplicationsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  creat(
+  create(
     @Body() createProductApplicationDto: CreateProductApplicationDto,
     @CurrentUser() user: User,
   ) {

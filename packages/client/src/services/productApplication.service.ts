@@ -1,12 +1,13 @@
 import {
   CreateProductApplicationDto,
   ProductApplication,
-  ProductApplicationsListResponse, ProductSearchResult, UpdateProductApplicationDto
+  ProductApplicationFormData,
+  ProductApplicationsListResponse
 } from "../types/productApplication.types.ts";
-import {apiClient} from "@/config/api.client.ts";
+import { apiClient } from "@/config/api.client.ts";
 
 class ProductApplicationService {
-  async create(data: CreateProductApplicationDto): Promise<ProductApplication> {
+  async create(data: ProductApplicationFormData): Promise<CreateProductApplicationDto> {
     const response = await apiClient.post<ProductApplication>('/product-applications', data);
     return response.data
   }
@@ -22,7 +23,7 @@ class ProductApplicationService {
     return response.data;
   }
 
-  async update(id: string, data: UpdateProductApplicationDto): Promise<ProductApplication> {
+  async update(id: string, data: ProductApplicationFormData): Promise<ProductApplication> {
     const response = await apiClient.patch<ProductApplication>(`/product-applications/${id}`, data);
     return response.data;
   }

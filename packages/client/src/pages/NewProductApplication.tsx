@@ -1,30 +1,47 @@
-import {CreateProductApplicationDto} from '../types/productApplication.types.ts';
-import {
-  ProductApplicationForm,
-  ProductApplicationFormData
-} from '../components/productApplications/ProductApplicationForm.tsx';
-import {productApplicationService} from '../services/productApplication.service.ts';
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import { ProductApplicationFormData } from '../types/productApplication.types.ts';
+import { ProductApplicationForm } from '../components/productApplications/ProductApplicationForm.tsx';
+import { productApplicationService } from '../services/productApplication.service.ts';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ProductFormData } from '../types/product.types.ts';
+import { productService } from '../services/product.service.ts';
 
 export default function NewProductApplication() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = async (data: ProductApplicationFormData)=> {
+  const handleCreate = async (product: ProductFormData, data: ProductApplicationFormData)=> {
     setIsLoading(true);
     setError(null);
 
     try {
-      const productApplicationDto: CreateProductApplicationDto = {
+      const productDto: ProductFormData = {
+        registrationNumber: product.registrationNumber,
+        commercialNames: product.commercialNames,
+        registrationHolder: product.registrationHolder,
+        categories: product.categories,
+        activeIngredients: product.activeIngredients,
+        organicFarmingProduct: product.organicFarmingProduct,
+      };
+
+      const createdProduct = await productService.create(productDto);
+
+      if (!createdProduct?.id) {
+        setError("Erro ao salvar o produto");
+        setIsLoading(false);
+        return;
+      }
+
+      const productApplicationDto: ProductApplicationFormData = {
         propertyId: data.propertyId,
         cultureId: data.cultureId,
         area: data.area,
-        productId: data.productId,
+        productId: createdProduct.id,
         productName: data.productName,
-        applicationDate: data.dataAplication,
+        date: data.date,
       };
+
 
       if (
         !productApplicationDto.propertyId ||
@@ -32,7 +49,7 @@ export default function NewProductApplication() {
         !productApplicationDto.area ||
         !productApplicationDto.productId ||
         !productApplicationDto.productName ||
-        !productApplicationDto.applicationDate)
+        !productApplicationDto.date)
       {
         setError('Preencha todos os campos obrigatórios');
         setIsLoading(false);

@@ -83,6 +83,81 @@ export class ProductsService {
   }
 
   async searchByCommercialName(search?: string) {
+    return [
+      {
+        registrationNumber: '17621',
+        commercialNames: ['Flexstar GT'],
+        registrationHolder: 'Syngenta Proteção de Cultivos Ltda.',
+        categories: ['Herbicida'],
+        activeIngredients: [
+          'fomesafem (éter difenílico) (67.7 g/L)',
+          'glifosato (glicina substituída) (271.1 g/L)',
+        ],
+        organicFarmingProduct: false,
+      },
+      {
+        registrationNumber: '8008',
+        commercialNames: ['Gamit Star'],
+        registrationHolder: 'FMC Química do Brasil Ltda.',
+        categories: ['Herbicida'],
+        activeIngredients: [
+          'clomazona (isoxazolidinona) (800 g/L)',
+        ],
+        organicFarmingProduct: false,
+      },
+      {
+        registrationNumber: '39524',
+        commercialNames: ['Geministar'],
+        registrationHolder: 'Rainbow Defensivos Agrícolas Ltda.',
+        categories: ['Fungicida'],
+        activeIngredients: [
+          'trifloxistrobina (estrobilurina) (500 g/kg)',
+        ],
+        organicFarmingProduct: false,
+      },
+      {
+        registrationNumber: '7516',
+        commercialNames: ['Gemstar LC', 'Diplomata K'],
+        registrationHolder: 'Mitsui & Co (Brasil) S.A.',
+        categories: ['Inseticida Microbiológico'],
+        activeIngredients: [
+          'VPN-HzSNPV (Produto Microbiológico) (6.4 g/L)',
+        ],
+        organicFarmingProduct: false,
+      },
+      {
+        registrationNumber: '7115',
+        commercialNames: ['Gemstar-Max'],
+        registrationHolder: 'Mitsui & Co (Brasil) S.A.',
+        categories: ['Inseticida Microbiológico'],
+        activeIngredients: [
+          'VPN-HzSNPV (Produto Microbiológico) (32 g/L)',
+        ],
+        organicFarmingProduct: false,
+      },
+      {
+        registrationNumber: '225',
+        commercialNames: ['Glufos Bestar'],
+        registrationHolder: 'Proregistros Registros de Produtos Ltda',
+        categories: ['Herbicida'],
+        activeIngredients: [
+          'Glufosinato - sal de amônio (homoalanina substituída) (880 g/kg)',
+        ],
+        organicFarmingProduct: false,
+      },
+      {
+        registrationNumber: '22724',
+        commercialNames: ['Glufos Bestar SL'],
+        registrationHolder: 'Wynca do Brasil Ltda',
+        categories: ['Herbicida'],
+        activeIngredients: [
+          'Glufosinato - sal de amônio (homoalanina substituída) (200 g/L)',
+        ],
+        organicFarmingProduct: false,
+      },
+    ];
+
+
     try {
       const apiResponse = await this.embrapaService.getAllProdutoFormuladoByMarcaComercial(search);
       const result: ProductResponseDto[] = [];

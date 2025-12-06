@@ -43,7 +43,7 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.25rem;
 }
 
 .label {
@@ -69,69 +69,10 @@
   padding-right: 40px;
 }
 
-.insumoFields {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  animation: fadeIn 0.3s ease;
-}
-
 .footer {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
   padding-top: 1.5rem;
   border-top: 1px solid #eaecf0;
-}
-
-/*Products cards*/
-.resultsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.2rem;
-  margin-top: 1.2rem;
-}
-
-.resultCard {
-  background: var(--color-bg-light);
-  border: none;
-  padding: 1rem 1.2rem;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-  box-shadow: rgba(0, 0, 0, 0.04) 0px 2px 4px;
-}
-
-.resultCard:hover {
-  background: #e3f4e9;
-  border-color: #b6d4ff;
-  transform: translateY(-3px);
-}
-
-.selectedCard {
-  border-color: #008542;
-  background: #e9f8ef;
-  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.25);
-}
-
-.status {
-  padding: 1px 14px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.allowed {
-  color: var(--color-primary);
-  background-color: #B7F1BA;
-}
-
-.icon {
-  font-size: 1rem;
-}
-
-.denied {
-  color: #d92a2a;
-  background-color: #ffe8e8;
 }

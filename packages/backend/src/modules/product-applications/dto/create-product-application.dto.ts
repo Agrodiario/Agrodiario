@@ -1,4 +1,4 @@
-import { IsDateString, IsInt, IsNotEmpty, IsString, IsUUID, Min } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class CreateProductApplicationDto {
   @IsNotEmpty({ message: 'Propriedade associada é obrigatória' })

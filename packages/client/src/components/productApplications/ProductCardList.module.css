@@ -1,0 +1,61 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+
+.emptyMessage {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 1rem;
+  color: var(--color-outline);
+  opacity: 0.8;
+}
+
+.card {
+  background: var(--color-bg-light);
+  border: none;
+  padding: 1rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  box-shadow: rgba(0, 0, 0, 0.04) 0px 2px 4px;
+}
+
+.card:hover {
+  background: #e3f4e9;
+  border-color: var(--color-primary-container);
+  transform: translateY(-3px);
+}
+
+.selected {
+  background: #e3f4e9;
+  /*border: 3px solid var(--color-primary-dark);*/
+  border-color: var(--color-primary-container);
+  /*box-shadow: rgba(0, 0, 0, 0.04) 0px 2px 4px;*/
+  box-shadow: 0 4px 12px var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+.status {
+  padding: 1px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.allowed {
+  color: var(--color-primary);
+  background-color: #B7F1BA;
+}
+
+.icon {
+  font-size: 1rem;
+}
+
+.denied {
+  color: #d92a2a;
+  background-color: #ffe8e8;
+}

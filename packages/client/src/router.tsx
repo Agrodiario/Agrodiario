@@ -26,6 +26,7 @@ import EditCulture from './pages/EditCulture';
 import Landing from './pages/landing-page/Landing';
 import ProductApplicationsLayout from './layouts/ProductApplicationsLayout.tsx';
 import NewProductApplication from './pages/NewProductApplication.tsx';
+import EditProductApplications from './pages/EditProductApplications.tsx';
 
 export const router = createBrowserRouter([
   /* --- ROTA RAIZ - Redirecionamento Inteligente --- */
@@ -104,6 +105,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <ProductApplicationsPage />},
           { path: 'new', element: <NewProductApplication />},
+          { path: 'edit/:id', element: <EditProductApplications /> },
         ],
       },
 
