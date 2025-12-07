@@ -142,7 +142,7 @@ describe('AuthService', () => {
 
       // Act & Assert
       await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
-      await expect(service.register(registerDto)).rejects.toThrow('Email already registered');
+      await expect(service.register(registerDto)).rejects.toThrow('Email já registrado');
     });
 
     it('deve enviar email de verificação após registro', async () => {
@@ -209,7 +209,7 @@ describe('AuthService', () => {
 
       // Act & Assert
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.login(loginDto)).rejects.toThrow('Invalid credentials');
+      await expect(service.login(loginDto)).rejects.toThrow('Credenciais incorretas');
     });
 
     it('deve lançar UnauthorizedException se conta estiver inativa', async () => {
@@ -218,7 +218,7 @@ describe('AuthService', () => {
 
       // Act & Assert
       await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.login(loginDto)).rejects.toThrow('Account is inactive');
+      await expect(service.login(loginDto)).rejects.toThrow('Esta conta está inativa');
     });
 
     it('deve lançar HttpException TOO_MANY_REQUESTS se exceder tentativas', async () => {
@@ -290,7 +290,7 @@ describe('AuthService', () => {
       const result = await service.verifyEmail('valid-token');
 
       // Assert
-      expect(result).toEqual({ message: 'Email verified successfully' });
+      expect(result).toEqual({ message: 'Email verificado com sucesso' });
       expect(mockUserRepository.update).toHaveBeenCalledWith(mockUser.id, {
         emailVerified: true,
         emailVerificationToken: null,
@@ -304,7 +304,7 @@ describe('AuthService', () => {
       // Act & Assert
       await expect(service.verifyEmail('invalid-token')).rejects.toThrow(BadRequestException);
       await expect(service.verifyEmail('invalid-token')).rejects.toThrow(
-        'Invalid verification token',
+        'Token de verificação inválido',
       );
     });
   });
@@ -321,7 +321,7 @@ describe('AuthService', () => {
       const result = await service.resendVerification(mockUser.email);
 
       // Assert
-      expect(result).toEqual({ message: 'Verification email sent successfully' });
+      expect(result).toEqual({ message: 'Email de verificação enviado com sucesso' });
       expect(mockUserRepository.update).toHaveBeenCalled();
       await new Promise((resolve) => setImmediate(resolve));
       expect(mockEmailService.sendVerificationEmail).toHaveBeenCalled();
@@ -336,7 +336,7 @@ describe('AuthService', () => {
 
       // Assert
       expect(result).toEqual({
-        message: 'If your email is registered, you will receive a verification link',
+        message: 'Se seu email estiver registrado, você receberá um link de verificação',
       });
       expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
@@ -348,7 +348,7 @@ describe('AuthService', () => {
       // Act & Assert
       await expect(service.resendVerification(mockUser.email)).rejects.toThrow(BadRequestException);
       await expect(service.resendVerification(mockUser.email)).rejects.toThrow(
-        'Email already verified',
+        'Email já foi verificado',
       );
     });
   });
@@ -368,7 +368,7 @@ describe('AuthService', () => {
 
       // Assert
       expect(result).toEqual({
-        message: 'If your email is registered, you will receive a password reset link',
+        message: 'Se seu email estiver registrado, você receberá um link para redefinição de senha',
       });
       expect(mockUserRepository.update).toHaveBeenCalledWith(
         mockUser.id,
@@ -393,7 +393,7 @@ describe('AuthService', () => {
 
       // Assert
       expect(result).toEqual({
-        message: 'If your email is registered, you will receive a password reset link',
+        message: 'Se seu email estiver registrado, você receberá um link para redefinição de senha',
       });
       expect(mockEmailService.sendPasswordResetEmail).not.toHaveBeenCalled();
     });
@@ -440,7 +440,7 @@ describe('AuthService', () => {
       const result = await service.resetPassword(resetPasswordDto);
 
       // Assert
-      expect(result).toEqual({ message: 'Password reset successfully' });
+      expect(result).toEqual({ message: 'Senha redefinida com sucesso' });
       expect(mockUserRepository.update).toHaveBeenCalledWith(
         userWithToken.id,
         expect.objectContaining({
@@ -459,7 +459,7 @@ describe('AuthService', () => {
       // Act & Assert
       await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(BadRequestException);
       await expect(service.resetPassword(resetPasswordDto)).rejects.toThrow(
-        'Invalid or expired reset token',
+        'Token de redefinição inválido ou expirado',
       );
     });
 
@@ -478,7 +478,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(BadRequestException);
       await expect(
         service.resetPassword({ ...resetPasswordDto, token: 'expired-token' }),
-      ).rejects.toThrow('Reset token has expired');
+      ).rejects.toThrow('O token de redefinição expirou');
     });
 
     it('deve resetar contador de tentativas falhas ao redefinir senha', async () => {
