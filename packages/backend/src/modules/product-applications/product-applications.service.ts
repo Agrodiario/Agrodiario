@@ -74,11 +74,11 @@ export class ProductApplicationsService {
   }
 
   async findAll(
-    userId?: string,
     page: number = 1,
     limit: number = 10,
     order: 'ASC' | 'DESC' = 'DESC',
     search?: string,
+    userId?: string,
   ): Promise<{
     data: ProductApplicationResponseDto[];
     total: number;
@@ -91,7 +91,8 @@ export class ProductApplicationsService {
       where: { userId },
       skip,
       take: limit,
-      order: { createdAt: 'DESC' },
+      order: { createdAt: order },
+      relations: ['product', 'property', 'culture'],
     });
 
     const data = productApplications.map(
@@ -109,6 +110,7 @@ export class ProductApplicationsService {
   async findOne(id: string, userId: string): Promise<ProductApplicationResponseDto> {
     const productApplication = await this.productApplicationsRepository.findOne({
       where: { id },
+      relations: ['product', 'property', 'culture'],
     });
 
     if (!productApplication) {

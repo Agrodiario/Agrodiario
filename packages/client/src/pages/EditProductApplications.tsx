@@ -4,24 +4,28 @@ import { productApplicationService } from '../services/productApplication.servic
 import { ProductApplicationFormData } from '../types/productApplication.types.ts';
 import { ProductApplicationForm } from '../components/productApplications/ProductApplicationForm.tsx';
 import { ProductFormData } from '../types/product.types.ts';
-import { productService } from '../services/product.service.ts';
 
 export default function EditProductApplications() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [productApplicationToEdit, setProductApplicationToEdit] = useState<Partial<ProductApplicationFormData> | null>(null);
+  const [productToEdit, setProductToEdit] = useState<Partial<ProductFormData> | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function loadProductApplication() {
-      if (!id) return;
+      if (!id) {
+        navigate('/products');
+        return;
+      }
 
       try {
         setIsLoadingData(true);
         const data = await productApplicationService.findOne(id);
 
         setProductApplicationToEdit(data);
+        setProductToEdit(data.product);
       } catch (error) {
         console.error('Erro ao carregar aplicação:', error);
         alert('Não foi possível carregar os dados da aplicação.');
@@ -34,23 +38,8 @@ export default function EditProductApplications() {
     loadProductApplication();
   }, [id, navigate]);
 
-  const handleEdit = async (product: ProductFormData, data: ProductApplicationFormData) => {
+  const handleEdit = async (data: ProductApplicationFormData) => {
     if (!id) return;
-
-    let createdProduct;
-    try {
-      createdProduct = await productService.create(product);
-    } catch (e) {
-      console.error('Erro ao criar o produto:', e);
-      alert('Não foi possível salvar o produto.');
-      return;
-    }
-
-    // Validação simples do produto
-    if (!createdProduct?.id) {
-      alert('Erro ao salvar o produto. Verifique os dados.');
-      return;
-    }
 
     try {
       setIsSaving(true);
@@ -58,14 +47,14 @@ export default function EditProductApplications() {
         propertyId: data.propertyId,
         cultureId: data.cultureId,
         area: data.area,
-        productId: createdProduct.id,
+        productId: data.productId,
         productName: data.productName,
-        date: data.date,
+        applicationDate: data.applicationDate,
       }
 
       await productApplicationService.update(id, updateData);
 
-      navigate('/product');
+      navigate('/products');
     } catch (error) {
       console.error('Erro ao atualizar aplicação:', error);
       alert('Erro ao salvar as alterações. Verifique os dados.');

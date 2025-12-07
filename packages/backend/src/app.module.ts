@@ -14,6 +14,7 @@ import { PropertiesModule } from '@modules/properties/properties.module';
 import { CulturesModule } from '@modules/cultures/cultures.module';
 import { EmailModule } from '@modules/email/email.module';
 import { ProductsModule } from '@modules/products/products.module';
+import { ProductApplicationsModule } from './modules/product-applications/product-applications.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ProductsModule } from '@modules/products/products.module';
     PropertiesModule,
     CulturesModule,
     ProductsModule,
+    ProductApplicationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

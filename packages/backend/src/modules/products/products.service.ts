@@ -90,8 +90,8 @@ export class ProductsService {
         registrationHolder: 'Syngenta Proteção de Cultivos Ltda.',
         categories: ['Herbicida'],
         activeIngredients: [
-          'fomesafem (éter difenílico) (67.7 g/L)',
-          'glifosato (glicina substituída) (271.1 g/L)',
+          'fomesafem',
+          'glifosato',
         ],
         organicFarmingProduct: false,
       },
@@ -101,7 +101,7 @@ export class ProductsService {
         registrationHolder: 'FMC Química do Brasil Ltda.',
         categories: ['Herbicida'],
         activeIngredients: [
-          'clomazona (isoxazolidinona) (800 g/L)',
+          'clomazona',
         ],
         organicFarmingProduct: false,
       },
@@ -111,7 +111,7 @@ export class ProductsService {
         registrationHolder: 'Rainbow Defensivos Agrícolas Ltda.',
         categories: ['Fungicida'],
         activeIngredients: [
-          'trifloxistrobina (estrobilurina) (500 g/kg)',
+          'trifloxistrobina',
         ],
         organicFarmingProduct: false,
       },
@@ -121,9 +121,9 @@ export class ProductsService {
         registrationHolder: 'Mitsui & Co (Brasil) S.A.',
         categories: ['Inseticida Microbiológico'],
         activeIngredients: [
-          'VPN-HzSNPV (Produto Microbiológico) (6.4 g/L)',
+          'VPN-HzSNPV',
         ],
-        organicFarmingProduct: false,
+        organicFarmingProduct: true,
       },
       {
         registrationNumber: '7115',
@@ -131,9 +131,9 @@ export class ProductsService {
         registrationHolder: 'Mitsui & Co (Brasil) S.A.',
         categories: ['Inseticida Microbiológico'],
         activeIngredients: [
-          'VPN-HzSNPV (Produto Microbiológico) (32 g/L)',
+          'VPN-HzSNPV',
         ],
-        organicFarmingProduct: false,
+        organicFarmingProduct: true,
       },
       {
         registrationNumber: '225',
@@ -141,7 +141,7 @@ export class ProductsService {
         registrationHolder: 'Proregistros Registros de Produtos Ltda',
         categories: ['Herbicida'],
         activeIngredients: [
-          'Glufosinato - sal de amônio (homoalanina substituída) (880 g/kg)',
+          'Glufosinato - sal de amônio',
         ],
         organicFarmingProduct: false,
       },
@@ -151,12 +151,11 @@ export class ProductsService {
         registrationHolder: 'Wynca do Brasil Ltda',
         categories: ['Herbicida'],
         activeIngredients: [
-          'Glufosinato - sal de amônio (homoalanina substituída) (200 g/L)',
+          'Glufosinato - sal de amônio',
         ],
-        organicFarmingProduct: false,
+        organicFarmingProduct: true,
       },
     ];
-
 
     try {
       const apiResponse = await this.embrapaService.getAllProdutoFormuladoByMarcaComercial(search);
@@ -164,31 +163,13 @@ export class ProductsService {
 
       for (const item of apiResponse.data) {
         const orderedNames = this.reorderBySimilarity(item.marca_comercial, search);
-        let ingredienteAtivo = item.ingrediente_ativo;
-
-        // If the array is null or empty
-        if (
-          !ingredienteAtivo ||
-          ingredienteAtivo.length === 0 ||
-          ingredienteAtivo.every((i) => !i.trim())
-        ) {
-          // Constrói a lista usando informações de ingrediente_ativo_detalhado(iad)
-          ingredienteAtivo =
-            // Adiciona a concentração e a medida ao ingrediente ativo se estiver informado
-            item.ingrediente_ativo_detalhado?.map((iad) => {
-              const concentracao = iad.concentracao
-                ? ` (${iad.concentracao} ${iad.unidade_medida})`
-                : '';
-              return `${iad.ingrediente_ativo}${concentracao}`;
-            }) ?? []; // Se ingrediente_ativo_detalhado estiver vazia retorna vazio
-        }
 
         result.push({
           registrationNumber: item.numero_registro,
           commercialNames: orderedNames,
           registrationHolder: item.titular_registro,
           categories: item.classe_categoria_agronomica,
-          activeIngredients: ingredienteAtivo,
+          activeIngredients: item.ingrediente_ativo_detalhado.map(det => det.ingrediente_ativo),
           organicFarmingProduct: item.produto_agricultura_organica,
         });
       }

@@ -1,7 +1,7 @@
 import styles from './ProductApplications.module.css'
 import { Input } from '../components/common/Input/Input';
-import { useState } from 'react';
-import {FiDownload, FiEdit, FiSearch, FiTrash2} from 'react-icons/fi';
+import { useEffect, useState } from 'react';
+import { FiDownload, FiEdit, FiSearch, FiTrash2 } from 'react-icons/fi';
 import { Dropdown } from '../components/common/Dropdown/Dropdown';
 import { Button } from '../components/common/Button/Button';
 import { FaRegCalendarPlus } from 'react-icons/fa';
@@ -9,20 +9,34 @@ import { MdArrowDropDown } from 'react-icons/md';
 import { ProductApplication } from '../types/productApplication.types.ts';
 import { useNavigate } from 'react-router-dom';
 import { productApplicationService } from '../services/productApplication.service.ts';
-import {propertyService} from "@/services/property.service.ts";
-import {generatePropertyReport} from "@/utils/generatePDF.ts";
+import { ConfirmationModal } from '../components/common/ConfirmationModal/ConfirmationModal.tsx';
+
+type Props = {
+  product: ProductApplication;
+  onDelete: () => void;
+}
+
+export interface PaginatedProductApplications {
+  data: ProductApplication[];
+  page: number;
+}
 
 export default function ProductApplicationsPage() {
   const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
   const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const pageNumbers = Array.from({ length: lastPage }, (_, i) => i + 1);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const [productApplications, setProductApplicarions] = useState<any[]>([]);
+  const [productApplications, setProductApplications] = useState<any>([]);
   const [selectedProductApplication, setSelectedProductApplication] = useState<ProductApplication | null>(
     null
   )
@@ -30,35 +44,69 @@ export default function ProductApplicationsPage() {
   const handleGenerateReport = async () => {
     try {
       setIsGeneratingReport(true);
-      const response = await propertyService.findAll(1, 1000, sortOrder, searchTerm);
+
+      const response = await productApplicationService.findAll(
+        1,
+        1000,
+        // sortOrder,
+        // searchTerm
+      );
       const textoFiltro = searchTerm ? `Busca por: "${searchTerm}"` : 'Todos os registros';
-      generatePropertyReport(response.data, textoFiltro);
+      // generateReport(response.data, textoFiltro);
     } catch (error) {
-      console.error('Erro ao gerar relatório de propriedades', error);
+      console.error('Erro ao gerar relatório', error);
       alert('Erro ao gerar o relatório. Tente novamente.');
     } finally {
       setIsGeneratingReport(false);
     }
   };
 
-  const handleSortChange = (newOrder: 'ASC' | 'DESC') => {
-    if (newOrder === sortOrder) return;
-    setSortOrder(newOrder);
+  const handleSortChange = (order: 'ASC' | 'DESC') => {
+    setSortOrder(order);
     setPage(1);
-    setProductApplicarions([]);
-    fetchProperties(1, newOrder, searchTerm);
+    fetchProductApplications(1, order); // 1 = primeira página
   };
 
-  const handleEdit = () => {
-    navigate(`/cultures/edit/${selectedProductApplication?.id}`);
+  // EDITAR
+  const handleEdit = (id: string) => {
+    console.log("Aqui!!")
+    console.log(selectedProductApplication);
+    navigate(`/products/edit/${id}`);
   }
 
+  // DELETAR
+  const handleConfirmDelete = (item: ProductApplication) => {
+    setSelectedProductApplication(item);          // guarda o ID do item da linha
+    setIsDeleteModalOpen(true); // abre o modal
+  };
+
   const handleDelete = async () => {
-    if(!selectedProductApplication) return;
-    await productApplicationService.remove(selectedProductApplication.id);
-    await loadProductApplications(1, sortOrder, searchTerm);
-    handleCloseDrawer();
+    if (!selectedProductApplication) return;
+
+    try {
+      await productApplicationService.remove(selectedProductApplication.id); // chama o backend
+      setProductApplications(prev =>
+        prev.filter(item => item.id !== selectedProductApplication.id)
+      );// remove do frontend
+      setSelectedProductApplication(null);
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
+      alert('Erro ao excluir');
+    }
   }
+
+  // BUSCA LISTA PAGINADA DE APLICAÇÕES
+  useEffect(() => {
+    fetchProductApplications(page, sortOrder);
+  }, [page]);
+
+  const fetchProductApplications = async (page: number, order: 'ASC' | 'DESC') => {
+    const response = await productApplicationService.findAll(page, 5, order, '');
+    setProductApplications(response.data);
+    setPage(response.page);
+    setLastPage(response.lastPage);
+  };
 
   return (
     <div className={styles.applicationPage}>
@@ -133,7 +181,7 @@ export default function ProductApplicationsPage() {
             </tr>
           </thead>
           <tbody>
-            {productApplications.map((item: any) => (
+            {productApplications.map((item: ProductApplication) => (
               <tr key={item.id} className={styles.row}>
                 <td className={styles.cell}>{item.productName}</td>
                 <td className={styles.cell}>{item.product.activeIngredients[0]}</td>
@@ -146,12 +194,14 @@ export default function ProductApplicationsPage() {
                     {item.product.organicFarmingProduct ? "Permitido" : "Proibido"}
                   </div>
                 </td>
-                <td className={styles.cell}>{item.applicationDate}</td>
+                <td className={styles.cell}>
+                  {new Date(item.applicationDate).toLocaleDateString("pt-BR")}
+                </td>
                 <td className={styles.buttonGroup}>
                   <Button
                     variant={"secondary"}
                     leftIcon={<FiEdit size={18}/>}
-                    onClick={() => handleEdit()}
+                    onClick={() => handleEdit(item.id)}
                     style={{
                       width: "40px",
                       height: "40px",
@@ -162,7 +212,7 @@ export default function ProductApplicationsPage() {
                   <Button
                     variant={"quinternary"}
                     rightIcon={<FiTrash2 size={18}/>}
-                    onClick={() => handleDelete()}
+                    onClick={() => handleConfirmDelete(item)}
                     style={{
                       width: "40px",
                       height: "40px",
@@ -170,12 +220,33 @@ export default function ProductApplicationsPage() {
                       borderRadius: "50%", // deixa redondo
                     }}
                   ></Button>
+                  <ConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    onConfirm={handleDelete}
+                    title="Excluir cultura"
+                  >
+                    Tem certeza de que deseja excluir esse registro?
+                  </ConfirmationModal>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className={styles.counter}>Mostrando 5 de 5 entradas</div>
+        <div className={styles.pagination}>
+          <div className={styles.pagination}>
+            {pageNumbers.map((num) => (
+              <button
+                key={num}
+                onClick={() => setPage(num)}
+                className={num === page ? styles.activePage : ''}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+
+        </div>
         <div></div>
       </div>
     </div>

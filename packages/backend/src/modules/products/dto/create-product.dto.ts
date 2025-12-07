@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsString } from 'class-validator';
 import { Optional } from '@nestjs/common';
 
 export class CreateProductDto {
@@ -25,5 +25,7 @@ export class CreateProductDto {
   @IsString({ each: true, message: 'Cada ingrediente ativo deve ser um texto' })
   activeIngredients: string[];
 
+  @Optional()
+  @IsBoolean()
   organicFarmingProduct: boolean;
 }

@@ -5,10 +5,10 @@ import { cultureService } from '../../services/culture.service.ts';
 import styles from './ProductApplicationForm.module.css'
 import { Input } from '../common/Input/Input.tsx';
 import { Button } from '../common/Button/Button.tsx';
-import { FiArrowLeft } from 'react-icons/fi';
+import { FiArrowLeft, FiCheck, FiX } from 'react-icons/fi';
 import { ProductApplicationFormData } from '../../types/productApplication.types.ts';
 import { ProductCardList } from './ProductCardList.tsx';
-import { CreateProductDto, ProductFormData } from '../../types/product.types.ts';
+import { ProductFormData } from '../../types/product.types.ts';
 import { SearchBar } from '../common/SearchableBar/SearchableBar.tsx';
 import { IoIosArrowDown } from 'react-icons/io';
 import { isValidDate } from '../../utils/validators.ts';
@@ -17,11 +17,21 @@ import { productService } from '../../services/product.service.ts';
 
 type Props = {
   initialData?: Partial<ProductApplicationFormData>;
-  onSubmit: (product: CreateProductDto, data: ProductApplicationFormData) => void;
+  onSubmit: (data: ProductApplicationFormData) => void;
   isLoading?: boolean;
+  initialProduct?: Partial<ProductFormData>;
 }
 
-export function ProductApplicationForm({ initialData, onSubmit, isLoading = false }: Props)  {
+const REQUIRED_FIELDS: (keyof ProductApplicationFormData)[] = [
+  "propertyId",
+  "cultureId",
+  "area",
+  "productName",
+  // "date",
+];
+
+
+export function ProductApplicationForm({ initialData, onSubmit, isLoading = false, initialProduct }: Props)  {
   const navigate = useNavigate();
   const isEditMode = !!initialData;
 
@@ -31,7 +41,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
     area: initialData?.area || '',
     productId: initialData?.productId || '',
     productName: initialData?.productName || '',
-    date: initialData?.date || '',
+    applicationDate: initialData?.applicationDate || '',
   });
 
   // ESTADOS PARA PROPRIEDADES
@@ -45,7 +55,14 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   const [isLoadingCultures, setIsLoadingCultures] = useState(false);
 
   // ESTADOS PARA PRODUTO
-  const [product, setProduct] = useState<ProductFormData | null>(null);
+  const [product, setProduct] = useState<ProductFormData>({
+    registrationNumber: initialProduct?.registrationNumber || '',
+    commercialNames: initialProduct?.commercialNames || [],
+    registrationHolder: initialProduct?.registrationHolder || '',
+    categories: initialProduct?.categories || [],
+    activeIngredients: initialProduct?.activeIngredients || [],
+    organicFarmingProduct: initialProduct?.organicFarmingProduct || false,
+  });
   const [productsOptions, setProductsOptions] = useState<ProductFormData[]>([]);
 
   // ESTADOS PARA VALIDAÇÃO
@@ -148,7 +165,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   }, [formData.propertyId, allProperties, isEditMode]);
 
   // VALIDAÇÃO DO CAMPO DE DATA
-  const validateDate = (dateValue: string): string => {
+  const validateDate = (dateValue: string): string | null => {
     if (!dateValue || dateValue.trim() === '') {
       return 'Data da aplicação é obrigatória';
     }
@@ -161,7 +178,6 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
       return 'Data inválida. Verifique o dia e o mês.';
     }
 
-    // Verifica se a data não é futura (opcional - dependendo da regra de negócio)
     const [day, month, year] = dateValue.split('/').map(Number);
     const selectedDate = new Date(year, month - 1, day);
     const today = new Date();
@@ -171,40 +187,52 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
       return 'Data não pode ser futura';
     }
 
-    return '';
+    return null; // <-- quando não há erro
   };
 
   // VALIDAÇÃO DOS OUTROS CAMPOS OBRIGATÓRIOS
-  const validateOtherFields = (fieldName: keyof ProductApplicationFormData, value: string): string => {
+  const validateFields = (
+    fieldName: keyof ProductApplicationFormData,
+    value: string
+  ): string | null => {
+    if (fieldName === "applicationDate") return validateDate(value);
+
     switch (fieldName) {
       case 'propertyId':
         if (!value || value.trim() === '') return 'Propriedade é obrigatória';
-        return '';
+        return null;
       case 'cultureId':
         if (!value || value.trim() === '') return 'Cultura é obrigatória';
-        return '';
+        return null;
       case 'area':
         if (!value || value.trim() === '') return 'Área da aplicação é obrigatório';
-        return '';
+        return null;
       case 'productId':
         if (!value || value.trim() === '') return 'Produto é obrigatória';
-        return '';
+        return null;
+      case 'productName':
+        if (!value || value.trim() === '') return 'Produto é obrigatória';
+        return null;
       default:
-        return '';
+        return null;
     }
   };
+
+  useEffect(() => {
+    const hasError = REQUIRED_FIELDS.some(field => {
+      const value = (formData[field] || '').toString();
+      const error = validateFields(field, value);
+      return !!error;
+    });
+
+    setIsValid(!hasError);
+  }, [formData]);
 
   const handleBlur = (fieldName: keyof ProductApplicationFormData) => {
     setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
 
-    let error = '';
-    const currentValue = (formData[fieldName] || '').toString();
-
-    if (fieldName === 'date') {
-      error = validateDate(currentValue);
-    } else {
-      error = validateOtherFields(fieldName, currentValue);
-    }
+    const value = (formData[fieldName] || "").toString();
+    const error = validateFields(fieldName, value);
 
     setErrors(prev => ({ ...prev, [fieldName]: error }));
   };
@@ -215,7 +243,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
 
     let processedValue = value;
 
-    if (fieldName === 'date') {
+    if (fieldName === 'applicationDate') {
       processedValue = dateMask(value);
     }
 
@@ -224,65 +252,59 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
 
       // Valida o campo se já foi tocado
       if (touchedFields[fieldName]) {
-        let error = '';
-        if (fieldName === 'date') {
-          error = validateDate(processedValue);
-        } else {
-          error = validateOtherFields(fieldName, processedValue);
-        }
-        setErrors(prevErrors => ({ ...prevErrors, [fieldName]: error }));
+        const error = validateFields(fieldName, processedValue);
+        setErrors(prev => ({ ...prev, [fieldName]: error }));
       }
 
       return updatedFormData;
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Aqui você insere a data atual
-    setFormData(prev => ({
-      ...prev,
-      applicationDate: new Date().toISOString().split("T")[0],
-    })); // "YYYY-MM-DD"
+    console.log(product)
+    // 1) Criar produto se necessário
+    let finalProductId = formData.productId;
 
-
-    // Lista de campos obrigatórios
-    const requiredFields: (keyof ProductApplicationFormData)[] = [
-      'propertyId',
-      'cultureId',
-      'area',
-      'productId',
-      'productName',
-      'date',
-    ];
-
-    if (!product) {
-      setErrors(prev => ({ ...prev, product: 'Produto não selecionado' }));
-      return;
+    if (!finalProductId && product) {
+      const createdProduct = await productService.create(product);
+      if (!createdProduct?.id) {
+        console.error("Produto criado sem ID");
+        return;
+      }
+      finalProductId = createdProduct.id;
     }
 
-    // Marca todos os campos obrigatórios como tocados
-    const newTouched: Record<string, boolean> = {};
-    const newErrors: Record<string, string> = {};
+    // 2) Criar cópia atualizada
+    const updatedForm: ProductApplicationFormData = {
+      ...formData,
+      productId: finalProductId,
+      applicationDate: new Date().toISOString().split("T")[0],
+    };
 
-    requiredFields.forEach(field => {
+    // 3) Validar updatedForm
+    const newErrors: Record<string, string> = {};
+    const newTouched: Record<string, boolean> = {};
+
+    REQUIRED_FIELDS.forEach(field => {
+      const value = (updatedForm[field] || "").toString();
       newTouched[field] = true;
-      const error = validateOtherFields(field, (formData[field] || '').toString());
-      if (error) {
-        newErrors[field] = error;
-      }
+
+      const error = validateFields(field, value);
+      if (error) newErrors[field] = error;
     });
 
     setTouchedFields(newTouched);
     setErrors(newErrors);
 
-    // Se houver erros, não envia o formulário
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
+    // 4) Se houver erro, não envia
+    if (Object.keys(newErrors).length > 0) return;
 
-    onSubmit(product, formData);
+    // 5) Atualiza state e envia
+    setFormData(updatedForm);
+    console.log("Chamou onSubmit");
+    onSubmit(updatedForm);
   };
 
   const handleSearchProducts = async (query: string) => {
@@ -299,6 +321,15 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
       productName: prod.commercialNames[0] || "" // ou outro campo que representa o nome
     }));
   };
+
+  // useEffect(() => {
+  //   async function load() {
+  //     const data = await productApplicationService.getById(id);
+  //     setFormData(data);
+  //   }
+  //   load();
+  // }, [id]);
+
 
   const title = isEditMode ? 'Editar aplicação de produto' : 'Nova aplicação de produto';
   const submitText = isEditMode ? 'Salvar alterações' : 'Salvar aplicação'
@@ -354,6 +385,19 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             error={errors.area}
             showError={touchedFields.area && !!errors.area}
           />
+          {/*<Input*/}
+          {/*  label="Data da aplicação do produto"*/}
+          {/*  name="date"*/}
+          {/*  type="text"*/}
+          {/*  value={formData.applicationDate}*/}
+          {/*  onChange={handleChange}*/}
+          {/*  onBlur={() => handleBlur('applicationDate')}*/}
+          {/*  placeholder="DD/MM/AAAA"*/}
+          {/*  maxLength={10}*/}
+          {/*  required*/}
+          {/*  error={errors.applicationDate}*/}
+          {/*  showError={touchedFields.applicationDate && !!errors.applicationDate}*/}
+          {/*/>*/}
         </div>
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Buscar na base EMBRAPA</h3>
@@ -362,6 +406,36 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
               placeholder={"Digite para buscar na Embrapa"}
               onSearch={handleSearchProducts}
             />
+            <div className={styles.card}>
+              {!product ? (
+                <div className={styles.emptyMessage}>Nenhum produto selecionado</div>
+              ) : (
+                <>
+                  <h3 className={styles.title}>Produto selecionado</h3>
+                  <p><strong>Registro:</strong> {product.registrationNumber}</p>
+                  <p><strong>Comercial:</strong> {product.commercialNames?.join(", ")}</p>
+                  <p><strong>Titular:</strong> {product.registrationHolder}</p>
+                  <p><strong>Categorias:</strong> {product.categories?.join(", ")}</p>
+                  <div
+                    className={
+                      product.organicFarmingProduct ? styles.allowed : styles.denied
+                    }
+                    >
+                    {product.organicFarmingProduct ? (
+                      <>
+                        <FiCheck className={styles.icon} />
+                        Permitido em sistemas orgânicos
+                      </>
+                    ) : (
+                      <>
+                        <FiX className={styles.icon} />
+                        Não permitido em sistemas orgânicos
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
             <ProductCardList
               products={productsOptions}
               value={product?.registrationNumber}

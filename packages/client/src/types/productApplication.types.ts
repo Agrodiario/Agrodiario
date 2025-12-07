@@ -1,18 +1,10 @@
 export interface ProductApplication {
   id: string;
   propertyId: string;
-  property?: {
-    id: string;
-    name: string;
-  };
   cultureId: string;
-  culture?: {
-    id: string;
-    name: string;
-  };
   area: string;
   productId: string;
-  product?: {
+  product: {
     id: string;
     commercialNames: string[];
     activeIngredients: string[];
@@ -23,31 +15,13 @@ export interface ProductApplication {
   applicationDate: string;
 }
 
-export interface CreateProductApplicationDto {
-  propertyId: string;
-  cultureId: string;
-  area: string;
-  productId: string;
-  productName: string;
-  applicationDate: string;
-}
-
 export interface ProductApplicationFormData {
   propertyId: string;
   cultureId: string;
   area: string;
   productId: string;
   productName: string;
-  date: string;
-}
-
-export interface UpdateProductApplicationDto {
-  propertyId?: string;
-  cultureId?: string;
-  area?: string;
-  productId?: string;
-  productName?: string;
-  applicationDate?: string;
+  applicationDate: string;
 }
 
 export interface ProductApplicationsListResponse {

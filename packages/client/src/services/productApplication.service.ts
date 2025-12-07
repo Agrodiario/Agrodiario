@@ -1,5 +1,4 @@
 import {
-  CreateProductApplicationDto,
   ProductApplication,
   ProductApplicationFormData,
   ProductApplicationsListResponse
@@ -7,13 +6,18 @@ import {
 import { apiClient } from "@/config/api.client.ts";
 
 class ProductApplicationService {
-  async create(data: ProductApplicationFormData): Promise<CreateProductApplicationDto> {
+  async create(data: ProductApplicationFormData): Promise<ProductApplicationFormData> {
     const response = await apiClient.post<ProductApplication>('/product-applications', data);
     return response.data
   }
-  async findAll(page: number = 1, limit: number = 10): Promise<ProductApplicationsListResponse> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    order: 'ASC' | 'DESC' = 'DESC',
+    search: string = ''
+  ): Promise<ProductApplicationsListResponse> {
     const response = await apiClient.get<ProductApplicationsListResponse>('/product-applications', {
-      params: { page, limit },
+      params: { page, limit, order, search },
     });
     return response.data
   }

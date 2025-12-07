@@ -57,6 +57,7 @@
   transition: background-color 0.1s ease;
 }
 
+/*COMPONENTES DA TABELA*/
 .tableWrapper {
   width: 100%;
   background: var(--color-bg-white);
@@ -123,4 +124,28 @@
   padding: 12px;
   justify-content: center;
   align-items: center;
+}
+
+/*COMPONENTES DA PAGINAÇÃO*/
+.pagination {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background: #ddd;
+}
+
+.pagination .activePage {
+  background: #007bff;
+  color: white;
 }

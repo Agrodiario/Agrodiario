@@ -1,15 +1,15 @@
 import {
   Body,
-  Controller,
+  Controller, DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param,
+  Param, ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
-  Query,
+  Query, Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -34,11 +34,16 @@ export class ProductApplicationsController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: User, @Query('page') page?: string, @Query('limit') limit?: string) {
-    const pageNumer = page ? parseInt(page, 10) : 1;
-    const limitNumber = limit ? parseInt(limit, 10) : 10;
-
-    return this.productApplicationsService.findAll(user.id, pageNumer, limitNumber);
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('order') order: string,
+    @Req() req: any,
+    @Query('search') search?: string,
+  ) {
+    const sortOrder = order?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const userId = req.user.id;
+    return this.productApplicationsService.findAll(page, limit, sortOrder, search, userId);
   }
 
   @Get(':id')

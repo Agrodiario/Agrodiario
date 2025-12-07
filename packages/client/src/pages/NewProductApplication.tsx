@@ -3,45 +3,25 @@ import { ProductApplicationForm } from '../components/productApplications/Produc
 import { productApplicationService } from '../services/productApplication.service.ts';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ProductFormData } from '../types/product.types.ts';
-import { productService } from '../services/product.service.ts';
 
 export default function NewProductApplication() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = async (product: ProductFormData, data: ProductApplicationFormData)=> {
+  const handleCreate = async (data: ProductApplicationFormData)=> {
     setIsLoading(true);
     setError(null);
 
     try {
-      const productDto: ProductFormData = {
-        registrationNumber: product.registrationNumber,
-        commercialNames: product.commercialNames,
-        registrationHolder: product.registrationHolder,
-        categories: product.categories,
-        activeIngredients: product.activeIngredients,
-        organicFarmingProduct: product.organicFarmingProduct,
-      };
-
-      const createdProduct = await productService.create(productDto);
-
-      if (!createdProduct?.id) {
-        setError("Erro ao salvar o produto");
-        setIsLoading(false);
-        return;
-      }
-
       const productApplicationDto: ProductApplicationFormData = {
         propertyId: data.propertyId,
         cultureId: data.cultureId,
         area: data.area,
-        productId: createdProduct.id,
+        productId: data.productId,
         productName: data.productName,
-        date: data.date,
+        applicationDate: data.applicationDate,
       };
-
 
       if (
         !productApplicationDto.propertyId ||
@@ -49,7 +29,7 @@ export default function NewProductApplication() {
         !productApplicationDto.area ||
         !productApplicationDto.productId ||
         !productApplicationDto.productName ||
-        !productApplicationDto.date)
+        !productApplicationDto.applicationDate)
       {
         setError('Preencha todos os campos obrigatórios');
         setIsLoading(false);
@@ -59,9 +39,9 @@ export default function NewProductApplication() {
       await productApplicationService.create(productApplicationDto);
 
       navigate('/product');
-    } catch (err: any) {
-      console.error('Erro ao criar aplicação de produto', err);
-      setError(err.message || 'Erro ao criar aplicação de produto. Tente novamente');
+    } catch (e) {
+      console.error('Erro ao criar aplicação de produto', e);
+      setError(e.message || 'Erro ao criar aplicação de produto. Tente novamente');
     } finally {
       setIsLoading(false);
     }

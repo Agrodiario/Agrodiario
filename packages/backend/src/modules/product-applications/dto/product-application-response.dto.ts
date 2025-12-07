@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { ProductResponseDto } from '../../products/dto/product-response.dto';
 
 export class ProductApplicationResponseDto {
   @Expose()
@@ -24,6 +25,8 @@ export class ProductApplicationResponseDto {
 
   @Expose()
   applicationDate: Date;
+
+  product: ProductResponseDto;
 
   constructor(partial: Partial<ProductApplicationResponseDto>) {
     Object.assign(this, partial);
