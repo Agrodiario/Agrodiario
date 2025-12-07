@@ -58,7 +58,7 @@ test.describe('Culture Form - New Culture', () => {
     // First go to cultures list, then navigate to new form (creates history)
     await culturesPage.goto();
     await culturesPage.waitForCulturesToLoad();
-    await page.locator('button', { hasText: 'Nova cultura' }).click();
+    await page.locator('a', { hasText: 'Nova cultura' }).click();
     await page.waitForURL('**/cultures/new');
 
     // Now click cancel
@@ -72,7 +72,7 @@ test.describe('Culture Form - New Culture', () => {
     // First go to cultures list, then navigate to new form (creates history)
     await culturesPage.goto();
     await culturesPage.waitForCulturesToLoad();
-    await page.locator('button', { hasText: 'Nova cultura' }).click();
+    await page.locator('a', { hasText: 'Nova cultura' }).click();
     await page.waitForURL('**/cultures/new');
 
     // Now click back

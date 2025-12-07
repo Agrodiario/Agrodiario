@@ -72,7 +72,7 @@ test.describe('Activity Form - New Activity', () => {
     // First go to diary list, then navigate to new form (creates history)
     await diaryPage.goto();
     await diaryPage.waitForActivitiesToLoad();
-    await page.locator('button', { hasText: 'Nova atividade' }).click();
+    await page.locator('a', { hasText: 'Nova atividade' }).click();
     await page.waitForURL('**/diary/new');
 
     // Now click cancel
@@ -86,7 +86,7 @@ test.describe('Activity Form - New Activity', () => {
     // First go to diary list, then navigate to new form (creates history)
     await diaryPage.goto();
     await diaryPage.waitForActivitiesToLoad();
-    await page.locator('button', { hasText: 'Nova atividade' }).click();
+    await page.locator('a', { hasText: 'Nova atividade' }).click();
     await page.waitForURL('**/diary/new');
 
     // Now click back

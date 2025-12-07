@@ -61,7 +61,7 @@ test.describe('Property Form - New Property', () => {
     // First go to properties list, then navigate to new form (creates history)
     await propertiesPage.goto();
     await propertiesPage.waitForPropertiesToLoad();
-    await page.locator('button', { hasText: 'Nova propriedade' }).click();
+    await page.locator('a', { hasText: 'Nova propriedade' }).click();
     await page.waitForURL('**/properties/new');
 
     // Now click cancel
@@ -75,7 +75,7 @@ test.describe('Property Form - New Property', () => {
     // First go to properties list, then navigate to new form (creates history)
     await propertiesPage.goto();
     await propertiesPage.waitForPropertiesToLoad();
-    await page.locator('button', { hasText: 'Nova propriedade' }).click();
+    await page.locator('a', { hasText: 'Nova propriedade' }).click();
     await page.waitForURL('**/properties/new');
 
     // Now click back
