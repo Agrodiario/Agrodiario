@@ -30,7 +30,6 @@ const REQUIRED_FIELDS: (keyof ProductApplicationFormData)[] = [
   // "date",
 ];
 
-
 export function ProductApplicationForm({ initialData, onSubmit, isLoading = false, initialProduct }: Props)  {
   const navigate = useNavigate();
   const isEditMode = !!initialData;
@@ -55,19 +54,20 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   const [isLoadingCultures, setIsLoadingCultures] = useState(false);
 
   // ESTADOS PARA PRODUTO
-  const [product, setProduct] = useState<ProductFormData>({
+  const [product, setProduct] = useState<ProductFormData | null>(initialProduct ? {
     registrationNumber: initialProduct?.registrationNumber || '',
     commercialNames: initialProduct?.commercialNames || [],
     registrationHolder: initialProduct?.registrationHolder || '',
     categories: initialProduct?.categories || [],
     activeIngredients: initialProduct?.activeIngredients || [],
     organicFarmingProduct: initialProduct?.organicFarmingProduct || false,
-  });
+  } : null);
+
   const [productsOptions, setProductsOptions] = useState<ProductFormData[]>([]);
 
-  // ESTADOS PARA VALIDAÇÃO
+  // ESTADOS PARA VALIDAÇÃO - MUDE O TIPO PARA PERMITIR NULL
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string | null>>({}); // Permitir null
   const [isValid, setIsValid] = useState(false);
 
   // Carrega propriedades do usuário
@@ -120,7 +120,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
         if (selectedProperty) {
           // Limpa o cultureId enquanto carrega novas culturas
           setFormData(prev => ({ ...prev, cultureId: '' }));
-          setErrors(prev => ({ ...prev, cultureId: '' }));
+          setErrors(prev => ({ ...prev, cultureId: null })); // Use null para limpar
 
           const cultures = await cultureService.findByProperty(selectedProperty.id);
           const options = cultures.map(c => ({
@@ -135,7 +135,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             const currentCultureExists = cultures.some(c => c.id === initialData.cultureId);
             if (currentCultureExists) {
               setFormData(prev => ({ ...prev, cultureId: initialData.cultureId! }));
-              setErrors(prev => ({ ...prev, cultureId: '' }));
+              setErrors(prev => ({ ...prev, cultureId: null })); // Use null para limpar
             }
           }
 
@@ -263,22 +263,35 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1) Criar produto se necessário
-    const createdProduct = await productService.create(product);
-    if (!createdProduct?.id) {
-      console.error("Produto criado sem ID");
+    // Verifica se há produto selecionado
+    if (!product?.registrationNumber) {
+      setErrors(prev => ({ ...prev, productName: 'Selecione um produto da lista' }));
+      setTouchedFields(prev => ({ ...prev, productName: true }));
       return;
+    }
+
+    // 1) Criar produto se necessário (só se for um novo produto)
+    let productId = formData.productId;
+    if (!productId || productId.trim() === '') {
+      const createdProduct = await productService.create(product);
+      if (!createdProduct?.id) {
+        console.error("Produto criado sem ID");
+        setErrors(prev => ({ ...prev, productName: 'Erro ao criar produto' }));
+        return;
+      }
+      productId = createdProduct.id;
     }
 
     // 2) Criar cópia atualizada
     const updatedForm: ProductApplicationFormData = {
       ...formData,
-      productId: createdProduct.id,
-      applicationDate: new Date().toISOString().split("T")[0],
+      productId,
+      productName: product.commercialNames[0] || "",
+      applicationDate: formData.applicationDate || new Date().toISOString().split("T")[0],
     };
 
     // 3) Validar updatedForm
-    const newErrors: Record<string, string> = {};
+    const newErrors: Record<string, string | null> = {};
     const newTouched: Record<string, boolean> = {};
 
     REQUIRED_FIELDS.forEach(field => {
@@ -293,8 +306,10 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
     setErrors(newErrors);
 
     // 4) Se houver erro, não envia
-    if (Object.keys(newErrors).length > 0) return;
-    console.log(updatedForm)
+    const hasErrors = Object.values(newErrors).some(error => error !== null);
+    if (hasErrors) return;
+
+    console.log(updatedForm);
 
     // 5) Atualiza state e envia
     setFormData(updatedForm);
@@ -302,7 +317,6 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   };
 
   const handleSearchProducts = async (query: string) => {
-    // const results = await searchProducts(query);
     const results = await productService.searchProductsByName(query);
     setProductsOptions(results);
   };
@@ -312,13 +326,12 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
 
     setFormData(prev => ({
       ...prev,
-      productName: prod.commercialNames[0] || "" // ou outro campo que representa o nome
+      productName: prod.commercialNames[0] || ""
     }));
   };
 
-
   const title = isEditMode ? 'Editar aplicação de produto' : 'Nova aplicação de produto';
-  const submitText = isEditMode ? 'Salvar alterações' : 'Salvar aplicação'
+  const submitText = isEditMode ? 'Salvar alterações' : 'Salvar aplicação';
 
   return (
     <div className={styles.page}>
@@ -343,7 +356,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             icon={<IoIosArrowDown size={18} />}
             disabled={isLoadingProperties}
             required
-            error={errors.propertyId}
+            error={errors.propertyId || undefined} // Converter null para undefined
             showError={touchedFields.propertyId && !!errors.propertyId}
           />
           <Input
@@ -357,7 +370,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             icon={<IoIosArrowDown size={18} />}
             disabled={isLoadingCultures}
             required
-            error={errors.cultureId}
+            error={errors.cultureId || undefined} // Converter null para undefined
             showError={touchedFields.cultureId && !!errors.cultureId}
           />
           <Input
@@ -368,22 +381,9 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             onChange={handleChange}
             onBlur={() => handleBlur('area')}
             required
-            error={errors.area}
+            error={errors.area || undefined} // Converter null para undefined
             showError={touchedFields.area && !!errors.area}
           />
-          {/*<Input*/}
-          {/*  label="Data da aplicação do produto"*/}
-          {/*  name="date"*/}
-          {/*  type="text"*/}
-          {/*  value={formData.applicationDate}*/}
-          {/*  onChange={handleChange}*/}
-          {/*  onBlur={() => handleBlur('applicationDate')}*/}
-          {/*  placeholder="DD/MM/AAAA"*/}
-          {/*  maxLength={10}*/}
-          {/*  required*/}
-          {/*  error={errors.applicationDate}*/}
-          {/*  showError={touchedFields.applicationDate && !!errors.applicationDate}*/}
-          {/*/>*/}
         </div>
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Buscar na base EMBRAPA</h3>
@@ -435,5 +435,5 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
         </footer>
       </form>
     </div>
-  )
+  );
 }
