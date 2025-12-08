@@ -9,7 +9,7 @@ export default function NewProductApplication() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = async (data: ProductApplicationFormData)=> {
+  const handleCreate = async (data: ProductApplicationFormData) => {
     setIsLoading(true);
     setError(null);
 
@@ -29,8 +29,8 @@ export default function NewProductApplication() {
         !productApplicationDto.area ||
         !productApplicationDto.productId ||
         !productApplicationDto.productName ||
-        !productApplicationDto.applicationDate)
-      {
+        !productApplicationDto.applicationDate
+      ) {
         setError('Preencha todos os campos obrigatórios');
         setIsLoading(false);
         return;
@@ -41,11 +41,39 @@ export default function NewProductApplication() {
       navigate('/product');
     } catch (e) {
       console.error('Erro ao criar aplicação de produto', e);
-      setError(e.message || 'Erro ao criar aplicação de produto. Tente novamente');
+
+      // Solução 1: Tipar o erro explicitamente
+      if (e instanceof Error) {
+        setError(e.message || 'Erro ao criar aplicação de produto. Tente novamente');
+      } else {
+        setError('Erro ao criar aplicação de produto. Tente novamente');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  return (
+    <div>
+      {error && (
+        <div
+          style={{
+            padding: '12px',
+            backgroundColor: '#fee',
+            color: '#c33',
+            borderRadius: '4px',
+            marginBottom: '16px',
+            fontSize: '14px',
+            maxWidth: '800px',
+            margin: '0 auto 16px',
+          }}
+        >
+          {error}
+        </div>
+      )}
+      <ProductApplicationForm onSubmit={handleCreate} isLoading={isLoading} />
+    </div>
+  );
 
   return (
     <div>
