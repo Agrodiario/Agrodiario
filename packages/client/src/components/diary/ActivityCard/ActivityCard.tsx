@@ -1,4 +1,3 @@
-// src/components/diary/ActivityCard/ActivityCard.tsx
 import styles from './ActivityCard.module.css';
 import { Button } from '../../common/Button/Button';
 import {
@@ -46,8 +45,6 @@ function InfoItem({ icon, title, text }: any) {
   export function ActivityCard({ activity, onView }: ActivityCardProps) {
 
     const formattedDate = new Date(activity.date).toLocaleDateString('pt-BR');
-
-    const tipoTexto = activity.operacao || activity.tipo.charAt(0).toUpperCase() + activity.tipo.slice(1);
 
     const insumoTexto = `${activity.insumoNome} ${activity.insumoQuantidade ? `(${activity.insumoQuantidade} ${activity.insumoUnidade})` : ''}`;
 
