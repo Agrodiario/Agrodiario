@@ -1,6 +1,6 @@
 import styles from './ProductApplications.module.css'
 import { Input } from '../components/common/Input/Input';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { FiDownload, FiEdit, FiSearch, FiTrash2 } from 'react-icons/fi';
 import { Dropdown } from '../components/common/Dropdown/Dropdown';
 import { Button } from '../components/common/Button/Button';
@@ -14,6 +14,7 @@ import { ConfirmationModal } from '../components/common/ConfirmationModal/Confir
 export interface PaginatedProductApplications {
   data: ProductApplication[];
   page: number;
+  lastPage: number;
 }
 
 export default function ProductApplicationsPage() {
@@ -21,7 +22,7 @@ export default function ProductApplicationsPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  // const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
@@ -29,11 +30,13 @@ export default function ProductApplicationsPage() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const [productApplications, setProductApplications] = useState<any>([]);
+  const [productApplications, setProductApplications] = useState<ProductApplication[]>([]);
   const [selectedProductApplication, setSelectedProductApplication] = useState<ProductApplication | null>(
     null
-  )
+  );
 
+  // Se não está usando a função, remova ou comente
+  /*
   const handleGenerateReport = async () => {
     try {
       setIsGeneratingReport(true);
@@ -53,11 +56,19 @@ export default function ProductApplicationsPage() {
       setIsGeneratingReport(false);
     }
   };
+  */
+
+  const fetchProductApplications = useCallback(async (page: number, order: 'ASC' | 'DESC') => {
+    const response = await productApplicationService.findAll(page, 5, order, '');
+    setProductApplications(response.data);
+    setPage(response.page);
+    setLastPage(response.lastPage);
+  }, []);
 
   const handleSortChange = (order: 'ASC' | 'DESC') => {
     setSortOrder(order);
     setPage(1);
-    fetchProductApplications(1, order); // 1 = primeira página
+    fetchProductApplications(1, order);
   };
 
   // EDITAR
@@ -69,18 +80,19 @@ export default function ProductApplicationsPage() {
 
   // DELETAR
   const handleConfirmDelete = (item: ProductApplication) => {
-    setSelectedProductApplication(item);          // guarda o ID do item da linha
-    setIsDeleteModalOpen(true); // abre o modal
+    setSelectedProductApplication(item);
+    setIsDeleteModalOpen(true);
   };
 
   const handleDelete = async () => {
     if (!selectedProductApplication) return;
 
     try {
-      await productApplicationService.remove(selectedProductApplication.id); // chama o backend
-      setProductApplications(prev =>
-        prev.filter(item => item.id !== selectedProductApplication.id)
-      );// remove do frontend
+      await productApplicationService.remove(selectedProductApplication.id);
+      // Defina tipos explicitamente para os parâmetros
+      setProductApplications(prev => 
+        prev.filter((item: ProductApplication) => item.id !== selectedProductApplication.id)
+      );
       setSelectedProductApplication(null);
       setIsDeleteModalOpen(false);
     } catch (error) {
@@ -92,14 +104,7 @@ export default function ProductApplicationsPage() {
   // BUSCA LISTA PAGINADA DE APLICAÇÕES
   useEffect(() => {
     fetchProductApplications(page, sortOrder);
-  }, [page]);
-
-  const fetchProductApplications = async (page: number, order: 'ASC' | 'DESC') => {
-    const response = await productApplicationService.findAll(page, 5, order, '');
-    setProductApplications(response.data);
-    setPage(response.page);
-    setLastPage(response.lastPage);
-  };
+  }, [page, fetchProductApplications, sortOrder]);
 
   return (
     <div className={styles.applicationPage}>
@@ -151,10 +156,12 @@ export default function ProductApplicationsPage() {
             </div>
           </Dropdown>
 
+          {/* Botão de relatório - adicione onClick se for usar */}
           <Button
             variant="secondary"
             leftIcon={<FiDownload size={18} />}
             className={styles.reportButton}
+            // onClick={handleGenerateReport} // Descomente se for usar
             >
             Gerar relatório
           </Button>
@@ -199,7 +206,7 @@ export default function ProductApplicationsPage() {
                       width: "40px",
                       height: "40px",
                       padding: 0,
-                      borderRadius: "50%", // deixa redondo
+                      borderRadius: "50%",
                     }}
                   ></Button>
                   <Button
@@ -210,37 +217,36 @@ export default function ProductApplicationsPage() {
                       width: "40px",
                       height: "40px",
                       padding: 0,
-                      borderRadius: "50%", // deixa redondo
+                      borderRadius: "50%",
                     }}
                   ></Button>
-                  <ConfirmationModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onConfirm={handleDelete}
-                    title="Excluir cultura"
-                  >
-                    Tem certeza de que deseja excluir esse registro?
-                  </ConfirmationModal>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        
+        {/* MODAL DE CONFIRMAÇÃO FORA DO MAP */}
+        <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDelete}
+          title="Excluir cultura"
+        >
+          Tem certeza de que deseja excluir esse registro?
+        </ConfirmationModal>
+        
         <div className={styles.pagination}>
-          <div className={styles.pagination}>
-            {pageNumbers.map((num) => (
-              <button
-                key={num}
-                onClick={() => setPage(num)}
-                className={num === page ? styles.activePage : ''}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
-
+          {pageNumbers.map((num) => (
+            <button
+              key={num}
+              onClick={() => setPage(num)}
+              className={num === page ? styles.activePage : ''}
+            >
+              {num}
+            </button>
+          ))}
         </div>
-        <div></div>
       </div>
     </div>
   )

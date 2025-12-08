@@ -1,5 +1,3 @@
-// src/components/properties/PropertyCard.tsx
-import { Link } from 'react-router-dom';
 import styles from './PropertyCard.module.css';
 import { Button } from '../common/Button/Button';
 import {
