@@ -1,6 +1,6 @@
 import { Product } from 'src/types/product.types.ts';
 import { FiCheck, FiX } from 'react-icons/fi';
-import styles from './productCardList.module.css';
+import styles from './ProductCardList.module.css';
 
 interface ProductCardListProps {
   products: Product[];
