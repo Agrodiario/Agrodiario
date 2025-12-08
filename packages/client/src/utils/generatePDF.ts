@@ -1,9 +1,7 @@
-// src/utils/generatePDF.ts
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { ActivityDTO } from '../services/activityService';
 import { Property as PropertyResponseDTO } from '../types/property.types';
-
 import logo from '@/assets/logo-grande.png';
 import { Culture } from '@/types/culture.types';
 
@@ -48,12 +46,10 @@ export const generateActivityReport = async (
 ) => {
   const doc = new jsPDF('landscape', 'mm', 'a4');
 
-  // 🔹 Carregar logo proporcional
   const { base64, width, height } = await loadImageAsBase64(logo);
   const targetWidth = 28; // ajuste aqui
   const targetHeight = (height / width) * targetWidth;
 
-  // 🔹 Inserir logo no canto superior direito
   doc.addImage(base64, 'PNG', 255, 5, targetWidth, targetHeight);
 
   const colorPrimary = '#008542';
@@ -158,12 +154,10 @@ export const generatePropertyReport = async (
 ) => {
   const doc = new jsPDF('landscape', 'mm', 'a4');
 
-  // 🔹 Carregar logo proporcional
   const { base64, width, height } = await loadImageAsBase64(logo);
   const targetWidth = 28; // ajuste aqui
   const targetHeight = (height / width) * targetWidth;
 
-  // 🔹 Inserir logo
   doc.addImage(base64, 'PNG', 255, 5, targetWidth, targetHeight);
 
   const colorPrimary = '#008542';
@@ -268,12 +262,10 @@ export const generateCultureReport = async (
 ) => {
   const doc = new jsPDF('landscape', 'mm', 'a4');
 
-  // 🔹 Carregar logo proporcional
   const { base64, width, height } = await loadImageAsBase64(logo);
   const targetWidth = 28;
   const targetHeight = (height / width) * targetWidth;
 
-  // 🔹 Inserir logo no canto superior direito
   doc.addImage(base64, 'PNG', 255, 5, targetWidth, targetHeight);
 
   const colorPrimary = '#008542';
@@ -315,15 +307,12 @@ export const generateCultureReport = async (
 
     // Calcular status baseado no ciclo
     let status = 'Ativa';
-    let statusColor = colorPrimary;
 
     if (item.daysRemaining !== undefined) {
       if (item.daysRemaining <= 0) {
         status = 'Colheita';
-        statusColor = '#ff6b6b';
       } else if (item.daysRemaining <= 30) {
         status = 'Próxima Colheita';
-        statusColor = '#ffa500';
       }
     }
 
@@ -373,7 +362,6 @@ export const generateCultureReport = async (
       } // Status
     },
     didParseCell: (data) => {
-      // Colorir a coluna de status
       if (data.section === 'body' && data.column.index === 8) {
         const status = data.cell.raw as string;
         if (status === 'Colheita') {
