@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductApplication } from '../product-applications/entities/product-application.entity';
 import { Repository } from 'typeorm';
@@ -129,16 +134,29 @@ export class ProductApplicationsService {
     updateProductApplicationDto: UpdateProductApplicationDto,
     userId: string,
   ): Promise<ProductApplicationResponseDto> {
-    const productApplication = await this.productApplicationsRepository.findOne({
-      where: { id, userId },
-    });
+    if (!id) {
+      throw new BadRequestException('Application ID is required');
+    }
+
+    const productApplication = await this.productApplicationsRepository.findOneBy({ id });
 
     if (!productApplication) {
       throw new NotFoundException('Aplicação não encontrada');
     }
 
-    const updateProductApplication = await this.productApplicationsRepository.save(productApplication);
-    return new ProductApplicationResponseDto(updateProductApplication);
+    if (productApplication.userId !== userId) {
+      throw new ForbiddenException('Você não tem acesso a essa registro');
+    }
+
+    // Date formatting treatment
+    if (updateProductApplicationDto.applicationDate) {
+      productApplication.applicationDate = new Date(updateProductApplicationDto.applicationDate);
+    }
+
+    this.productApplicationsRepository.merge(productApplication, updateProductApplicationDto);
+    const savedProductApplication =
+      await this.productApplicationsRepository.save(productApplication);
+    return new ProductApplicationResponseDto(savedProductApplication);
   }
 
   async remove(id: string, userId: string): Promise<{ message: string }> {

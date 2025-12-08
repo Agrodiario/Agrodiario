@@ -27,7 +27,7 @@ class ProductApplicationService {
     return response.data;
   }
 
-  async update(id: string, data: ProductApplicationFormData): Promise<ProductApplication> {
+  async update(id: string, data: ProductApplicationFormData): Promise<ProductApplicationFormData> {
     const response = await apiClient.patch<ProductApplication>(`/product-applications/${id}`, data);
     return response.data;
   }

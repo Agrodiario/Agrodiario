@@ -51,7 +51,6 @@ export default function EditProductApplications() {
         productName: data.productName,
         applicationDate: data.applicationDate,
       }
-
       await productApplicationService.update(id, updateData);
 
       navigate('/products');
@@ -75,12 +74,16 @@ export default function EditProductApplications() {
   if (!productApplicationToEdit) {
     return <div>Aplicação não encontrada.</div>;
   }
+  if (!productToEdit) {
+    return <div>Produto não encontrado</div>
+  }
 
   return (
     <ProductApplicationForm
       initialData={productApplicationToEdit}
       onSubmit={handleEdit}
       isLoading={isSaving}
+      initialProduct={productToEdit}
     />
   );
 }

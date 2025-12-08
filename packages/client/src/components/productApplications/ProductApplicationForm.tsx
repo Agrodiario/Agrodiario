@@ -263,23 +263,17 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log(product)
     // 1) Criar produto se necessário
-    let finalProductId = formData.productId;
-
-    if (!finalProductId && product) {
-      const createdProduct = await productService.create(product);
-      if (!createdProduct?.id) {
-        console.error("Produto criado sem ID");
-        return;
-      }
-      finalProductId = createdProduct.id;
+    const createdProduct = await productService.create(product);
+    if (!createdProduct?.id) {
+      console.error("Produto criado sem ID");
+      return;
     }
 
     // 2) Criar cópia atualizada
     const updatedForm: ProductApplicationFormData = {
       ...formData,
-      productId: finalProductId,
+      productId: createdProduct.id,
       applicationDate: new Date().toISOString().split("T")[0],
     };
 
@@ -300,10 +294,10 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
 
     // 4) Se houver erro, não envia
     if (Object.keys(newErrors).length > 0) return;
+    console.log(updatedForm)
 
     // 5) Atualiza state e envia
     setFormData(updatedForm);
-    console.log("Chamou onSubmit");
     onSubmit(updatedForm);
   };
 
@@ -321,14 +315,6 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
       productName: prod.commercialNames[0] || "" // ou outro campo que representa o nome
     }));
   };
-
-  // useEffect(() => {
-  //   async function load() {
-  //     const data = await productApplicationService.getById(id);
-  //     setFormData(data);
-  //   }
-  //   load();
-  // }, [id]);
 
 
   const title = isEditMode ? 'Editar aplicação de produto' : 'Nova aplicação de produto';
@@ -407,7 +393,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
               onSearch={handleSearchProducts}
             />
             <div className={styles.card}>
-              {!product ? (
+              {!product || !product.registrationNumber ? (
                 <div className={styles.emptyMessage}>Nenhum produto selecionado</div>
               ) : (
                 <>

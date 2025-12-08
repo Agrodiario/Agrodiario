@@ -11,11 +11,6 @@ import { useNavigate } from 'react-router-dom';
 import { productApplicationService } from '../services/productApplication.service.ts';
 import { ConfirmationModal } from '../components/common/ConfirmationModal/ConfirmationModal.tsx';
 
-type Props = {
-  product: ProductApplication;
-  onDelete: () => void;
-}
-
 export interface PaginatedProductApplications {
   data: ProductApplication[];
   page: number;
@@ -32,8 +27,6 @@ export default function ProductApplicationsPage() {
   const [lastPage, setLastPage] = useState(1);
   const pageNumbers = Array.from({ length: lastPage }, (_, i) => i + 1);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [productApplications, setProductApplications] = useState<any>([]);

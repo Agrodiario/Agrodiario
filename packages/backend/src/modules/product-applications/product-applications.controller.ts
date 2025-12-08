@@ -57,6 +57,7 @@ export class ProductApplicationsController {
     @Body() updateProductApplicationDto: UpdateProductApplicationDto,
     @CurrentUser() user: User,
   ) {
+    console.log("Chegou aqui");
     return this.productApplicationsService.update(id, updateProductApplicationDto, user.id);
   }
 
