@@ -126,4 +126,67 @@ describe('EmbrapaService', () => {
       await expect(service.getInsumos()).rejects.toThrow(InternalServerErrorException);
     });
   });
+
+  describe('getAllProdutoFormuladoByMarcaComercial', () => {
+    it('should authenticate, fetch data, and return formatted options', async () => {
+      jest.spyOn(httpService, 'post').mockReturnValue(of(mockAuthResponse));
+      jest.spyOn(httpService, 'get').mockReturnValue(of(mockProductsResponse));
+
+      const result = await service.getInsumos('search_term');
+
+      expect(configService.get).toHaveBeenCalledWith('EMBRAPA_CONSUMER_KEY');
+      expect(httpService.post).toHaveBeenCalledWith(
+        'https://api.cnptia.embrapa.br/token',
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: expect.stringContaining('Basic'),
+          }),
+        }),
+      );
+
+      expect(httpService.get).toHaveBeenCalledWith(
+        'https://api.cnptia.embrapa.br/agrofit/v1/search/produtos-formulados',
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer fake_token' },
+          params: expect.objectContaining({ marca_comercial: 'search_term' }),
+        }),
+      );
+
+      expect(result).toHaveLength(2);
+      expect(result).toEqual([
+        { label: 'Produto A', value: 'Produto A' },
+        { label: 'Produto B', value: 'Produto B' },
+      ]);
+    });
+
+    it('should reuse the access token if it is still valid', async () => {
+      jest.spyOn(httpService, 'post').mockReturnValue(of(mockAuthResponse));
+      jest.spyOn(httpService, 'get').mockReturnValue(of(mockProductsResponse));
+
+      await service.getInsumos();
+
+      await service.getInsumos();
+
+      expect(httpService.post).toHaveBeenCalledTimes(1);
+      expect(httpService.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return an empty array if the fetch request fails', async () => {
+      jest.spyOn(httpService, 'post').mockReturnValue(of(mockAuthResponse));
+      jest.spyOn(httpService, 'get').mockReturnValue(throwError(() => new Error('API Error')));
+
+      const result = await service.getInsumos();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should throw InternalServerErrorException if authentication fails', async () => {
+      jest.spyOn(httpService, 'post').mockReturnValue(throwError(() => ({
+        response: { data: 'Auth Failed' },
+      })));
+
+      await expect(service.getInsumos()).rejects.toThrow(InternalServerErrorException);
+    });
+  })
 });

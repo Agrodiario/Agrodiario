@@ -7,5 +7,6 @@ import { EmbrapaController } from './embrapa.controller';
   imports: [HttpModule], 
   controllers: [EmbrapaController],
   providers: [EmbrapaService],
+  exports: [EmbrapaService],
 })
 export class EmbrapaModule {}

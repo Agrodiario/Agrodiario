@@ -1,0 +1,153 @@
+.applicationPage {
+  width: 100%;
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.searchWrapper {
+  flex: 1;
+  min-width: 200px;
+}
+
+.toolbarButtons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+
+.sortButton,
+.reportButton {
+  border-radius: 16px;
+  white-space: nowrap;
+}
+
+.reportButton {
+  border-radius: 32px;
+}
+
+.buttonText {
+  display: inline;
+}
+
+.dropdownMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dropdownItem {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px; /* Borda interna suave */
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+/*COMPONENTES DA TABELA*/
+.tableWrapper {
+  width: 100%;
+  background: var(--color-bg-white);
+  padding: 1rem;
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+
+}
+
+.table {
+  padding: 10px;
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.headerRow {
+  border-bottom: 2px solid var(--color-border);
+}
+
+.headerCell {
+  padding: 12px;
+  font-weight: bold;
+}
+
+.row {
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px;
+}
+
+.row:hover {
+  background-color: var(--color-bg-light);
+}
+
+.cell {
+  padding: 12px;
+}
+
+.status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  /*text-transform: uppercase;*/
+  display: inline-block;
+}
+
+.allowed {
+  color: var(--color-primary);
+  background-color: #B7F1BA;
+}
+
+.denied {
+  color: #d92a2a;
+  background-color: #ffe8e8;
+}
+
+.buttonGroup {
+  display: flex;
+  padding: 12px;
+  gap: 10px;
+  align-items: center;
+}
+
+.counter {
+  display: flex;
+  padding: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+/*COMPONENTES DA PAGINAÇÃO*/
+.pagination {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background: #eee;
+  cursor: pointer;
+}
+
+.pagination button:hover {
+  background: #ddd;
+}
+
+.pagination .activePage {
+  background: #007bff;
+  color: white;
+}

@@ -1,5 +1,4 @@
-/* src/layouts/PropertiesLayout.module.css */
-.propertiesLayout {
+.productApplicationsLayout {
   width: 100%;
 }
 
@@ -11,13 +10,13 @@
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: 600;
+  front-size: 2rem;
+  front-weight: 600;
   color: var(--color-text-primary);
   margin: 20px;
 }
 
-.actions {
+.action {
   display: flex;
   gap: 1rem;
 }
@@ -37,7 +36,6 @@
   transition: all 0.2s ease;
   cursor: pointer;
 
-  /* Estilos do botão primary */
   color: var(--color-text-on-primary);
   background-color: var(--color-primary);
 }
@@ -55,17 +53,15 @@
 
 /* Responsividade */
 @media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .actions {
-    width: 100%;
-  }
-
-  .actions>a {
-    flex: 1;
-  }
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .actions {
+        width: 100%;
+    }
+    .actions > a {
+        flex: 1;
+    }
 }

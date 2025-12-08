@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { ProdutoFormuladoResponseDto } from './dto/produto-formulado-response.dto';
 
 @Injectable()
 export class EmbrapaService {
@@ -22,7 +23,7 @@ export class EmbrapaService {
 
     const key = this.configService.get<string>('EMBRAPA_CONSUMER_KEY');
     const secret = this.configService.get<string>('EMBRAPA_CONSUMER_SECRET');
-    
+
     const authHeader = Buffer.from(`${key}:${secret}`).toString('base64');
 
     try {
@@ -42,7 +43,7 @@ export class EmbrapaService {
       this.accessToken = response.data.access_token;
       console.log("Token Embrapa obtido:", this.accessToken);
       this.tokenExpiration = now + (response.data.expires_in * 1000);
-      
+
       return this.accessToken;
     } catch (error) {
       console.error('Erro ao autenticar na Embrapa', error.response?.data || error.message);
@@ -51,41 +52,68 @@ export class EmbrapaService {
   }
 
   async getInsumos(search?: string) {
-    const token = await this.getAccessToken(); 
+    const token = await this.getAccessToken();
     try {
-        const params: any = { 
-            itens: 50,
-            pagina: 1,
-            marca_comercial: search 
-          };
-        
-        const response = await firstValueFrom(
-            this.httpService.get(
-                'https://api.cnptia.embrapa.br/agrofit/v1/search/produtos-formulados', 
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    params: params
-                },
-            ),
-        );
-        const uniqueBrands = new Set();
-        const options = [];
+      const params: any = {
+        itens: 50,
+        pagina: 1,
+        marca_comercial: search
+      };
 
-        for (const item of response.data) {
-            if (!uniqueBrands.has(item.marca_comercial[0])) {
-            uniqueBrands.add(item.marca_comercial[0]);
-            options.push({
-                label: item.marca_comercial[0], 
-                value: item.marca_comercial[0],
-            });
-            }
+      const response = await firstValueFrom(
+        this.httpService.get(
+          'https://api.cnptia.embrapa.br/agrofit/v1/search/produtos-formulados',
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: params
+          },
+        ),
+      );
+      const uniqueBrands = new Set();
+      const options = [];
+
+      for (const item of response.data) {
+        if (!uniqueBrands.has(item.marca_comercial[0])) {
+          uniqueBrands.add(item.marca_comercial[0]);
+          options.push({
+            label: item.marca_comercial[0],
+            value: item.marca_comercial[0],
+          });
         }
+      }
 
-        return options;
+      return options;
 
     } catch (error) {
       console.error('Erro ao buscar insumos', error);
       return [];
+    }
+  }
+
+
+  async getAllProdutoFormuladoByMarcaComercial(search?: string) {
+    const token = await this.getAccessToken();
+
+    try {
+      const params: any = {
+        itens: 50,
+        pagina: 1,
+        marca_comercial: search,
+      };
+
+      const response = await firstValueFrom(
+        this.httpService.get<ProdutoFormuladoResponseDto[]>(
+          'https://api.cnptia.embrapa.br/agrofit/v1/search/produtos-formulados',
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            params: params,
+          },
+        ),
+      );
+
+      return response;
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao buscar insumos', error);
     }
   }
 }
