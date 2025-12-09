@@ -16,14 +16,13 @@ export default function NewPropertyPage() {
     setError(null);
 
     try {
-      // Transform form data to match backend DTO
       const propertyDto: CreatePropertyDto = {
         name: data.name,
         address: data.address,
         totalArea: parseFloat(data.areaTotal),
         productionArea: parseFloat(data.areaProducao),
         mainCrop: data.cultivo,
-        certifications: '', // Optional field - can be empty for now
+        certifications: '', 
       };
 
       // Validate data
