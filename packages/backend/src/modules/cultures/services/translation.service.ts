@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-const translate = require('translate-google');
+import translate from 'translate-google';
 
 @Injectable()
 export class TranslationService {
@@ -29,9 +29,7 @@ export class TranslationService {
    */
   async translateBatch(texts: string[]): Promise<string[]> {
     try {
-      const translations = await Promise.all(
-        texts.map(text => this.translateToPortuguese(text))
-      );
+      const translations = await Promise.all(texts.map((text) => this.translateToPortuguese(text)));
       return translations;
     } catch (error) {
       this.logger.error(`Batch translation error: ${error.message}`);
