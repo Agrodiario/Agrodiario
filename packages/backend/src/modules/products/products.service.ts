@@ -59,6 +59,7 @@ export class ProductsService {
 
   // Organize the vector by order of similarity to the search string
   private reorderBySimilarity(names: string[], search: string): string[] {
+    if (!names) return [];
     if (!search || names.length <= 1) return names;
 
     const term = search.toLowerCase();
@@ -83,96 +84,35 @@ export class ProductsService {
   }
 
   async searchByCommercialName(search?: string) {
-    return [
-      {
-        registrationNumber: '17621',
-        commercialNames: ['Flexstar GT'],
-        registrationHolder: 'Syngenta Proteção de Cultivos Ltda.',
-        categories: ['Herbicida'],
-        activeIngredients: [
-          'fomesafem',
-          'glifosato',
-        ],
-        organicFarmingProduct: false,
-      },
-      {
-        registrationNumber: '8008',
-        commercialNames: ['Gamit Star'],
-        registrationHolder: 'FMC Química do Brasil Ltda.',
-        categories: ['Herbicida'],
-        activeIngredients: [
-          'clomazona',
-        ],
-        organicFarmingProduct: false,
-      },
-      {
-        registrationNumber: '39524',
-        commercialNames: ['Geministar'],
-        registrationHolder: 'Rainbow Defensivos Agrícolas Ltda.',
-        categories: ['Fungicida'],
-        activeIngredients: [
-          'trifloxistrobina',
-        ],
-        organicFarmingProduct: false,
-      },
-      {
-        registrationNumber: '7516',
-        commercialNames: ['Gemstar LC', 'Diplomata K'],
-        registrationHolder: 'Mitsui & Co (Brasil) S.A.',
-        categories: ['Inseticida Microbiológico'],
-        activeIngredients: [
-          'VPN-HzSNPV',
-        ],
-        organicFarmingProduct: true,
-      },
-      {
-        registrationNumber: '7115',
-        commercialNames: ['Gemstar-Max'],
-        registrationHolder: 'Mitsui & Co (Brasil) S.A.',
-        categories: ['Inseticida Microbiológico'],
-        activeIngredients: [
-          'VPN-HzSNPV',
-        ],
-        organicFarmingProduct: true,
-      },
-      {
-        registrationNumber: '225',
-        commercialNames: ['Glufos Bestar'],
-        registrationHolder: 'Proregistros Registros de Produtos Ltda',
-        categories: ['Herbicida'],
-        activeIngredients: [
-          'Glufosinato - sal de amônio',
-        ],
-        organicFarmingProduct: false,
-      },
-      {
-        registrationNumber: '22724',
-        commercialNames: ['Glufos Bestar SL'],
-        registrationHolder: 'Wynca do Brasil Ltda',
-        categories: ['Herbicida'],
-        activeIngredients: [
-          'Glufosinato - sal de amônio',
-        ],
-        organicFarmingProduct: true,
-      },
-    ];
-
     try {
       const apiResponse = await this.embrapaService.getAllProdutoFormuladoByMarcaComercial(search);
       const result: ProductResponseDto[] = [];
 
       for (const item of apiResponse.data) {
         const orderedNames = this.reorderBySimilarity(item.marca_comercial, search);
+        let ingredienteAtivo: string[];
+
+        if (
+          Array.isArray(item?.ingrediente_ativo_detalhado) &&
+          item.ingrediente_ativo_detalhado.length > 0
+        ) {
+          ingredienteAtivo = item.ingrediente_ativo_detalhado.map((det) => det.ingrediente_ativo);
+        } else if (Array.isArray(item?.ingrediente_ativo) && item.ingrediente_ativo.length > 0) {
+          ingredienteAtivo = item.ingrediente_ativo.map((det) => det?.split('(')[0].trim() || '');
+        } else {
+          ingredienteAtivo = [];
+        }
 
         result.push({
-          registrationNumber: item.numero_registro,
+          registrationNumber: item.numero_registro ? item.numero_registro.toString() : '',
           commercialNames: orderedNames,
-          registrationHolder: item.titular_registro,
-          categories: item.classe_categoria_agronomica,
-          activeIngredients: item.ingrediente_ativo_detalhado.map(det => det.ingrediente_ativo),
+          registrationHolder: item.titular_registro ? item.titular_registro.toString() : '',
+          categories: item.classe_categoria_agronomica ? item.classe_categoria_agronomica : [],
+          activeIngredients: ingredienteAtivo,
           organicFarmingProduct: item.produto_agricultura_organica,
         });
       }
+
       return result;
     } catch (error) {
       console.error(error);

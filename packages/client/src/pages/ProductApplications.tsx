@@ -62,7 +62,6 @@ export default function ProductApplicationsPage() {
 
   // EDITAR
   const handleEdit = (id: string) => {
-    console.log("Aqui!!")
     console.log(selectedProductApplication);
     navigate(`/products/edit/${id}`);
   }

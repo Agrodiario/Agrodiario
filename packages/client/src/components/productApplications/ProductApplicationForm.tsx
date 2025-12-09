@@ -302,7 +302,6 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
   };
 
   const handleSearchProducts = async (query: string) => {
-    // const results = await searchProducts(query);
     const results = await productService.searchProductsByName(query);
     setProductsOptions(results);
   };
