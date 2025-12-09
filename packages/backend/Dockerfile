@@ -29,6 +29,10 @@ COPY --from=builder /app/packages/backend/package.json ./
 # Copy node_modules from builder
 COPY --from=builder /app/node_modules ./node_modules
 
+# Copy startup script
+COPY packages/backend/start.sh ./start.sh
+RUN chmod +x ./start.sh
+
 # Create uploads directory
 RUN mkdir -p uploads
 
@@ -38,5 +42,5 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "dist/main.js"]
+# Start the application with migrations
+CMD ["./start.sh"]

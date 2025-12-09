@@ -10,7 +10,7 @@ COPY packages/client/package.json ./packages/client/
 # Install dependencies
 RUN yarn install --frozen-lockfile --production=false
 
-# Copy client source code
+# Copy client source code (includes nginx.conf)
 COPY packages/client ./packages/client
 
 # Build arguments for environment variables
@@ -24,8 +24,8 @@ RUN yarn build
 # Production stage - using nginx to serve static files
 FROM nginx:alpine AS runner
 
-# Copy custom nginx config
-COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx config from builder stage
+COPY --from=builder /app/packages/client/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built static files
 COPY --from=builder /app/packages/client/dist /usr/share/nginx/html
