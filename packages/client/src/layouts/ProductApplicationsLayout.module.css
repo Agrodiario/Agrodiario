@@ -10,18 +10,17 @@
 }
 
 .title {
-  front-size: 2rem;
-  front-weight: 600;
+  font-size: 2rem;
+  font-weight: 600;
   color: var(--color-text-primary);
   margin: 20px;
 }
 
-.action {
+.actions {
   display: flex;
   gap: 1rem;
 }
 
-/* Estilo do botão de Link (copiado do Diary.module.css) */
 .primaryButton {
   display: inline-flex;
   align-items: center;
@@ -36,32 +35,24 @@
   transition: all 0.2s ease;
   cursor: pointer;
 
+  /* Estilos do botão primary */
   color: var(--color-text-on-primary);
   background-color: var(--color-primary);
 }
 
-.primaryButton:hover {
-  background-color: var(--color-primary-dark);
-  color: var(--color-text-on-primary);
-  text-decoration: none;
-}
-
-.primaryButton:focus {
-  outline: 2px solid var(--color-primary-light);
-  outline-offset: 2px;
-}
-
 /* Responsividade */
 @media (max-width: 768px) {
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-    .actions {
-        width: 100%;
-    }
-    .actions > a {
-        flex: 1;
-    }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .actions>a {
+    flex: 1;
+  }
 }

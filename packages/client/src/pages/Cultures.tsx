@@ -155,7 +155,7 @@ export default function CulturesPage() {
       <div className={styles.toolbar}>
         <div className={styles.searchWrapper}>
           <Input
-            label="Busque por cultura, variedade ou propriedade"
+            label="Busque por cultura ou variedade"
             name="search"
             value={searchTerm}
             onChange={handleSearchChange}

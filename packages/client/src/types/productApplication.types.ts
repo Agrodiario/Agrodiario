@@ -13,6 +13,13 @@ export interface ProductApplication {
   };
   productName: string;
   applicationDate: string;
+  propertyName?: string;
+  cultureName?: string;
+}
+
+export interface ProductApplicationWithDetails extends ProductApplication {
+  propertyName: string;
+  cultureName: string;
 }
 
 export interface ProductApplicationFormData {
