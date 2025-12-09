@@ -187,17 +187,23 @@ export default function ProductApplicationsPage() {
           <tbody>
             {productApplications.map((item: ProductApplication) => (
               <tr key={item.id} className={styles.row}>
-                <td className={styles.cell}>{item.productName}</td>
-                <td className={styles.cell}>{item.product.activeIngredients[0]}</td>
-                <td className={styles.cell}>{item.product.categories[0]}</td>
-                <td>
+                <td className={styles.cell} data-label="Produto">
+                  {item.productName}
+                </td>
+                <td className={styles.cell} data-label="Princípio Ativo">
+                  {item.product.activeIngredients[0]}
+                </td>
+                <td className={styles.cell} data-label="Tipo">
+                  {item.product.categories[0]}
+                </td>
+                <td className={styles.cell} data-label="Status">
                   <div
                     className={`${styles.status} ${item.product.organicFarmingProduct ? styles.allowed : styles.denied
                       }`}>
                     {item.product.organicFarmingProduct ? "Permitido" : "Proibido"}
                   </div>
                 </td>
-                <td className={styles.cell}>
+                <td className={styles.cell} data-label="Data Aplicação">
                   {new Date(item.applicationDate).toLocaleDateString("pt-BR")}
                 </td>
                 <td className={styles.buttonGroup}>

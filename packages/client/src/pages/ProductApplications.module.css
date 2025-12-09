@@ -151,3 +151,198 @@
   background: #007bff;
   color: white;
 }
+
+/* ========== MEDIA QUERIES ========== */
+@media (max-width: 1024px) {
+  .applicationPage {
+    padding: 0.75rem;
+  }
+  
+  .toolbar {
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .tableWrapper {
+    padding: 0.75rem;
+  }
+  
+  .headerCell,
+  .cell {
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .applicationPage {
+    padding: 0.5rem;
+  }
+  
+  .toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .searchWrapper {
+    min-width: unset;
+  }
+  
+  .toolbarButtons {
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  
+  .table {
+    display: block;
+  }
+  
+  .table thead {
+    display: none;
+  }
+  
+  .table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .row {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg-white);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--color-border);
+  }
+  
+  .cell, td[class*="status"] {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cell:last-child,
+  td[class*="status"]:last-child {
+    border-bottom: none;
+  }
+  
+  .cell::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    min-width: 120px;
+  }
+  
+  .cell {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  .buttonGroup {
+    justify-content: flex-end;
+    padding: 1rem 0 0 0;
+    gap: 0.5rem;
+  }
+  
+  .buttonGroup::before {
+    content: 'Ações:';
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 667px) {
+  .toolbarButtons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .sortButton,
+  .reportButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .dropdownMenu {
+    min-width: 100%;
+  }
+  
+  .cell::before {
+    min-width: 110px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .applicationPage {
+    padding: 0.25rem;
+  }
+  
+  .toolbar {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .row {
+    padding: 0.75rem;
+  }
+  
+  .cell::before {
+    min-width: 100px;
+    font-size: 0.85rem;
+  }
+  
+  .buttonGroup {
+    flex-wrap: wrap;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .pagination button {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Para telas muito pequenas (mobile) */
+@media (max-width: 360px) {
+  .buttonText {
+    display: none;
+  }
+  
+  .sortButton,
+  .reportButton {
+    width: auto;
+    padding: 0.75rem;
+  }
+  
+  .sortButton span,
+  .reportButton span {
+    display: none;
+  }
+  
+  .cell::before {
+    min-width: 90px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .applicationPage {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .tableWrapper {
+    max-width: 100%;
+  }
+}
