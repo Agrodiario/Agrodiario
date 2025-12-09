@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 COPY packages/backend/package.json ./packages/backend/
 
-# Install dependencies
+# Install all dependencies (including dev for build)
 RUN yarn install --frozen-lockfile --production=false
 
 # Copy backend source code
@@ -22,12 +22,16 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
+# Copy package files for production install
+COPY package.json yarn.lock ./
+COPY packages/backend/package.json ./packages/backend/
+
+# Install production dependencies only (fresh install avoids symlink issues)
+RUN yarn install --frozen-lockfile --production=true && \
+    yarn cache clean
+
 # Copy built application
 COPY --from=builder /app/packages/backend/dist ./dist
-COPY --from=builder /app/packages/backend/package.json ./
-
-# Copy node_modules from builder
-COPY --from=builder /app/node_modules ./node_modules
 
 # Copy startup script
 COPY packages/backend/start.sh ./start.sh
