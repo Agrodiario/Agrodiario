@@ -35,7 +35,8 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
   };
 
   const handleAddTalhao = () => {
-    console.log('Adicionar novo talhão:', property.id);
+    // Navigate to edit page where user can add talhões
+    navigate(`/properties/edit/${property.id}`);
   };
 
   // 4. Handler para confirmar a exclusão
