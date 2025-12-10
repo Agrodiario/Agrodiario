@@ -11,6 +11,9 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFiles,
+  Req,
 } from '@nestjs/common';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
@@ -18,6 +21,26 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { diskStorage } from 'multer';
+import { resolve } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { FilesInterceptor } from '@nestjs/platform-express';
+
+const multerOptions = {
+  storage: diskStorage({
+    destination: (req, file, cb) => {
+      const uploadPath = resolve(process.cwd(), 'uploads');
+      if (!existsSync(uploadPath)) mkdirSync(uploadPath, { recursive: true });
+      cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+      // Correção de encoding para caracteres especiais
+      const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      const sanitizedName = originalName.replace(/\s+/g, '-');
+      cb(null, `${Date.now()}-${sanitizedName}`);
+    },
+  }),
+};
 
 @Controller('properties')
 @UseGuards(JwtAuthGuard)
@@ -26,8 +49,14 @@ export class PropertiesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createPropertyDto: CreatePropertyDto, @CurrentUser() user: User) {
-    return this.propertiesService.create(createPropertyDto, user.id);
+  @UseInterceptors(FilesInterceptor('files', 10, multerOptions))
+  create(
+    @Body() createPropertyDto: CreatePropertyDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Req() req: any,
+  ) {
+    // Agora passa os files para o service
+    return this.propertiesService.create(createPropertyDto, req.user.id, files);
   }
 
   @Get()
@@ -44,12 +73,15 @@ export class PropertiesController {
   }
 
   @Patch(':id')
+  @UseInterceptors(FilesInterceptor('files', 10, multerOptions))
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseUUIDPipe) id: string, // Mudei de ParseIntPipe para UUID para manter consistência
     @Body() updatePropertyDto: UpdatePropertyDto,
-    @CurrentUser() user: User,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Req() req: any,
   ) {
-    return this.propertiesService.update(id, updatePropertyDto, user.id);
+    // Agora passa os files para o service
+    return this.propertiesService.update(id, updatePropertyDto, req.user.id, files);
   }
 
   @Delete(':id')

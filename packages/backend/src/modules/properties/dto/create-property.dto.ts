@@ -27,6 +27,5 @@ export class CreatePropertyDto {
   mainCrop: string;
 
   @IsOptional()
-  @IsString()
-  certifications?: string;
+  certificates?: any;
 }

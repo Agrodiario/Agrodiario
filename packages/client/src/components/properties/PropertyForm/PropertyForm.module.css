@@ -203,6 +203,61 @@
   min-width: 140px;
 }
 
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.fileItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #eaecf0;
+}
+
+.fileName {
+  font-size: 0.9rem;
+  color: #344054;
+  word-break: break-all;
+}
+
+.newTag {
+  color: #008542;
+  font-weight: 600;
+  font-size: 0.8rem;
+  margin-left: 6px;
+}
+
+.fileActions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #667085;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.actionBtn:hover {
+  background-color: #eaecf0;
+  color: #344054;
+}
+
+.deleteBtn:hover {
+  color: #d92d20;
+  background-color: #fef3f2;
+}
+
 @media (max-width: 600px) {
   .row {
     grid-template-columns: 1fr;

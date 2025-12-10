@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from '../../../database/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -19,8 +19,8 @@ export class Property extends BaseEntity {
   @Column({ type: 'varchar', length: 100 })
   mainCrop: string;
 
-  @Column({ type: 'text', nullable: true })
-  certifications: string;
+  @Column('simple-array', { nullable: true })
+  certificates: string[];
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
@@ -28,7 +28,6 @@ export class Property extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   plots: { name: string; area: number }[];
 
-  // Relationship to User (owner)
   @ManyToOne(() => User, (user) => user.properties, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;

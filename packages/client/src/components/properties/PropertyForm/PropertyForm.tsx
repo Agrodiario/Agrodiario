@@ -13,7 +13,7 @@ import { Input } from '../../common/Input/Input';
 import { Button } from '../../common/Button/Button';
 import { FileInput } from '../../common/FileInput/FileInput';
 import { TagToggle } from '../../common/TagToggle/TagToggle';
-import { FiArrowLeft, FiCrosshair, FiMaximize, FiMinimize, FiUpload } from 'react-icons/fi';
+import { FiArrowLeft, FiCrosshair, FiEye, FiMaximize, FiMinimize, FiTrash2, FiUpload } from 'react-icons/fi';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -23,6 +23,8 @@ import { CultureSearchSelect } from '@/components/cultures/CultureSearchSelect/C
 // IMPORTAÇÕES DOS UTILS
 import { validateNumberField } from '@/utils/validators';
 import { numberMask } from '@/utils/masks';
+
+import { UPLOADS_URL } from '../../../config/api.client'
 
 // --- Correção de ícones do Leaflet ---
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -45,11 +47,12 @@ export type PropertyFormData = {
   situacao: 'producao' | 'preparo' | 'pousio';
   markerPosition: [number, number] | null;
   talhaoPolygon: any;
+  certificates?: string[];
 };
 
 type Props = {
   initialData?: Partial<PropertyFormData>;
-  onSubmit: (data: PropertyFormData) => void;
+  onSubmit: (formData: FormData) => void;
   isLoading?: boolean;
 };
 
@@ -131,12 +134,24 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     situacao: initialData?.situacao || 'preparo',
     markerPosition: initialData?.markerPosition || null,
     talhaoPolygon: initialData?.talhaoPolygon || null,
+    certificates: initialData?.certificates || [],
   });
+
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [existingFiles, setExistingFiles] = useState<string[]>(initialData?.certificates || []);
+  const [removedFiles, setRemovedFiles] = useState<string[]>([]);
 
   // Estados de Validação
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setExistingFiles(initialData.certificates || []);
+      if (initialData.markerPosition) setMapCenter(initialData.markerPosition);
+    }
+  }, [initialData]);
 
   const handleLocateMe = () => {
     if ("geolocation" in navigator) {
@@ -150,6 +165,32 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         },
         (error) => console.warn("Erro geo:", error)
       );
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      setNewFiles((prev) => [...prev, ...filesArray]);
+    }
+  };
+
+  const handleRemoveFile = (index: number, type: 'new' | 'existing') => {
+    if (type === 'new') {
+      setNewFiles((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      const fileToRemove = existingFiles[index];
+      setExistingFiles((prev) => prev.filter((_, i) => i !== index));
+      setRemovedFiles((prev) => [...prev, fileToRemove]);
+    }
+  };
+
+  const handleViewFile = (file: File | string) => {
+    if (typeof file === 'string') {
+      window.open(`${UPLOADS_URL}${file}`, '_blank');
+    } else {
+      const url = URL.createObjectURL(file);
+      window.open(url, '_blank');
     }
   };
 
@@ -361,7 +402,42 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
       return;
     }
 
-    onSubmit(formData);
+    const dataToSend = new FormData();
+
+    // 2. Adiciona campos de texto simples
+    dataToSend.append('name', formData.name);
+    dataToSend.append('address', formData.address);
+    dataToSend.append('areaTotal', formData.areaTotal);
+    dataToSend.append('areaProducao', formData.areaProducao);
+    dataToSend.append('cultivo', formData.cultivo);
+    dataToSend.append('situacao', formData.situacao);
+
+    // Campos de Talhão
+    if (formData.talhaoName) dataToSend.append('talhaoName', formData.talhaoName);
+    if (formData.talhaoArea) dataToSend.append('talhaoArea', formData.talhaoArea);
+    if (formData.talhaoCultura) dataToSend.append('talhaoCultura', formData.talhaoCultura);
+
+    // 3. Adiciona Objetos Complexos (JSON.stringify)
+    if (formData.markerPosition) {
+      dataToSend.append('markerPosition', JSON.stringify(formData.markerPosition));
+    }
+    if (formData.talhaoPolygon) {
+      dataToSend.append('talhaoPolygon', JSON.stringify(formData.talhaoPolygon));
+    }
+
+    // 4. Adiciona Arquivos Novos (Upload)
+    if (newFiles.length > 0) {
+      newFiles.forEach(file => {
+        dataToSend.append('files', file); // 'files' deve bater com o backend
+      });
+    }
+
+    // 5. Adiciona Lista de Remoção
+    if (removedFiles.length > 0) {
+      dataToSend.append('removedFiles', JSON.stringify(removedFiles));
+    }
+
+    onSubmit(dataToSend as any);
   };
 
   // Handler para atualizar a posição do pino no mapa 1
@@ -455,9 +531,51 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         </div>
 
         <div className={styles.section}>
-          <h3 className={styles.textTitle}>Certificações</h3>
-          <p className={styles.subtitle}>Você pode inserir certificações já existentes, se houver.</p>
-          <FileInput leftIcon={<FiUpload />}>Fazer upload de foto ou documento</FileInput>
+          <h3 className={styles.textTitle}>Certificações e Documentos</h3>
+          <p className={styles.subtitle}>Insira fotos ou PDFs da propriedade.</p>
+          
+          {/* LISTA DE ARQUIVOS */}
+          <div className={styles.fileList}>
+            {/* Arquivos Existentes */}
+            {existingFiles.map((fileName, index) => (
+              <div key={`existing-${index}`} className={styles.fileItem}>
+                <span className={styles.fileName}>{fileName}</span>
+                <div className={styles.fileActions}>
+                  <button type="button" onClick={() => handleViewFile(fileName)} className={styles.actionBtn} title="Visualizar">
+                    <FiEye size={18} />
+                  </button>
+                  <button type="button" onClick={() => handleRemoveFile(index, 'existing')} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Remover">
+                    <FiTrash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {/* Arquivos Novos */}
+            {newFiles.map((file, index) => (
+              <div key={`new-${index}`} className={styles.fileItem}>
+                <span className={styles.fileName}>
+                  {file.name} <span className={styles.newTag}>(Novo)</span>
+                </span>
+                <div className={styles.fileActions}>
+                  <button type="button" onClick={() => handleViewFile(file)} className={styles.actionBtn} title="Visualizar">
+                    <FiEye size={18} />
+                  </button>
+                  <button type="button" onClick={() => handleRemoveFile(index, 'new')} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Remover">
+                    <FiTrash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <FileInput 
+            leftIcon={<FiUpload size={18} />}
+            onChange={handleFileChange}
+            multiple 
+          >
+            Fazer upload de foto ou documento
+          </FileInput>
         </div>
 
         <div className={styles.section}>
