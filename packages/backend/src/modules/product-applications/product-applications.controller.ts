@@ -1,23 +1,26 @@
 import {
   Body,
-  Controller, DefaultValuePipe,
+  Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param, ParseIntPipe,
+  Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
-  Query, Req,
+  Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ProductApplicationsService } from '../product-applications/product-applications.service';
-import { CreateProductApplicationDto } from '../product-applications/dto/create-product-application.dto';
+import { ProductApplicationsService } from './product-applications.service';
+import { CreateProductApplicationDto } from './dto/create-product-application.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { UpdateProductApplicationDto } from '../product-applications/dto/update-product-application.dto';
+import { UpdateProductApplicationDto } from './dto/update-product-application.dto';
 
 @Controller('product-applications')
 @UseGuards(JwtAuthGuard)
@@ -57,7 +60,6 @@ export class ProductApplicationsController {
     @Body() updateProductApplicationDto: UpdateProductApplicationDto,
     @CurrentUser() user: User,
   ) {
-    console.log("Chegou aqui");
     return this.productApplicationsService.update(id, updateProductApplicationDto, user.id);
   }
 
