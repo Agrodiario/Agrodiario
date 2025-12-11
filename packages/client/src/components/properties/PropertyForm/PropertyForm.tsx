@@ -88,8 +88,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   const [activeTalhaoIndex, setActiveTalhaoIndex] = useState<number | null>(null);
 
   // Estados de Validação
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
 
   // Estados para arquivos de certificação
@@ -117,7 +115,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         return `${fieldName === 'areaTotal' ? 'Área total' : 'Área de produção'} é obrigatória`;
       }
 
-      let error = validateNumberField(
+      const error = validateNumberField(
         value,
         fieldName === 'areaTotal' ? 'Área total' : 'Área de produção'
       );
@@ -161,24 +159,8 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     setFormData((prev) => {
       const updatedFormData = { ...prev, [fieldName]: processedValue };
 
-      // Valida o campo se já foi tocado
-      if (touchedFields[fieldName]) {
-        const error = validateField(fieldName, processedValue);
-        setErrors(prevErrors => ({ ...prevErrors, [fieldName]: error }));
-      }
-
       return updatedFormData;
     });
-  };
-
-  const handleBlur = (fieldName: keyof PropertyFormData, customValue?: string) => {
-    setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
-
-    const value = customValue !== undefined ? customValue : (formData[fieldName] || '').toString();
-
-    const error = validateField(fieldName, value);
-
-    setErrors(prev => ({ ...prev, [fieldName]: error }));
   };
 
   // --- TALHÃO HANDLERS ---
@@ -266,7 +248,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     // 2. Marca os campos de propriedade como tocados
     const newTouched: Record<string, boolean> = {};
     requiredPropertyFields.forEach(field => { newTouched[field] = true; });
-    setTouchedFields(newTouched);
 
     // 3. Valida campos de propriedade
     const finalErrors: Record<string, string> = {};
@@ -294,8 +275,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         }
       }
     });
-
-    setErrors(finalErrors);
 
     if (hasError) {
       return;
@@ -363,7 +342,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             name="name"
             value={formData.name}
             onChange={handleChange}
-            onBlur={() => handleBlur('name')}
             placeholder="Ex: Sítio Oliveira"
             required
           />
@@ -372,7 +350,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             name="address"
             value={formData.address}
             onChange={handleChange}
-            onBlur={() => handleBlur('address')}
             placeholder="Estrada da Lavoura..."
             required
           />
@@ -383,7 +360,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               name="areaTotal"
               value={formData.areaTotal}
               onChange={handleChange}
-              onBlur={() => handleBlur('areaTotal')}
               placeholder="10"
               required
             />
@@ -392,7 +368,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               name="areaProducao"
               value={formData.areaProducao}
               onChange={handleChange}
-              onBlur={() => handleBlur('areaProducao')}
               placeholder="2"
               required
             />

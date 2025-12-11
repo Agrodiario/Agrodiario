@@ -1,5 +1,5 @@
 import { Product } from 'src/types/product.types.ts';
-import { FiCheck, FiX } from 'react-icons/fi';
+import { FiCheck } from 'react-icons/fi';
 import styles from './ProductCardList.module.css';
 
 interface ProductCardListProps {

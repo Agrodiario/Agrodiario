@@ -32,16 +32,6 @@ interface ValidationErrors {
   general?: string;
 }
 
-interface TouchedFields {
-  name: boolean;
-  cpf: boolean;
-  birthDate: boolean;
-  phone: boolean;
-  email: boolean;
-  password: boolean;
-  confirmPassword: boolean;
-}
-
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
@@ -54,10 +44,6 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
-  const [touched, setTouched] = useState<TouchedFields>({
-    name: false, cpf: false, birthDate: false, phone: false,
-    email: false, password: false, confirmPassword: false,
-  });
 
   const validateField = (name: keyof FormData, value: string, currentFormData: FormData): string => {
     switch (name) {
@@ -138,7 +124,6 @@ export default function RegisterPage() {
   };
 
   const handleBlur = (field: keyof FormData) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
     const error = validateField(field, formData[field], formData);
     setErrors(prev => ({ ...prev, [field]: error }));
   };
@@ -188,11 +173,6 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    setTouched({
-      name: true, cpf: true, birthDate: true, phone: true, 
-      email: true, password: true, confirmPassword: true
-    });
     
     if (!validateForm()) {
       return;
