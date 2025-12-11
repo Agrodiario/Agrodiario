@@ -11,7 +11,7 @@ import { Input } from '../../common/Input/Input';
 import { Button } from '../../common/Button/Button';
 import { FileInput } from '../../common/FileInput/FileInput';
 import { TagToggle } from '../../common/TagToggle/TagToggle';
-import { FiArrowLeft, FiUpload, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiArrowLeft, FiUpload, FiPlus, FiTrash2, FiEye } from 'react-icons/fi';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -91,6 +91,9 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
+
+  // Estados para arquivos de certificação
+  const [certificationFiles, setCertificationFiles] = useState<File[]>([]);
 
   // --- LÓGICA DE VALIDAÇÃO ---
 
@@ -306,6 +309,23 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     setFormData(prev => ({ ...prev, markerPosition: pos }));
   };
 
+  // Handlers para upload de arquivos
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      setCertificationFiles((prev) => [...prev, ...filesArray]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setCertificationFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleViewFile = (file: File) => {
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
+  };
+
   // Handlers para o desenho no mapa 2 (talhão)
   const _onCreated = (e: any) => {
     if (e.layerType === 'polygon') {
@@ -391,7 +411,37 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Certificações</h3>
           <p className={styles.subtitle}>Você pode inserir certificações já existentes, se houver.</p>
-          <FileInput leftIcon={<FiUpload />}>Fazer upload de foto ou documento</FileInput>
+          <FileInput leftIcon={<FiUpload />} onChange={handleFileChange} multiple>
+            Fazer upload de foto ou documento
+          </FileInput>
+
+          {certificationFiles.length > 0 && (
+            <div className={styles.fileList}>
+              {certificationFiles.map((file, index) => (
+                <div key={index} className={styles.fileItem}>
+                  <span className={styles.fileName}>{file.name}</span>
+                  <div className={styles.fileActions}>
+                    <button
+                      type="button"
+                      onClick={() => handleViewFile(file)}
+                      className={styles.actionBtn}
+                      title="Visualizar"
+                    >
+                      <FiEye size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(index)}
+                      className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                      title="Remover"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* === SEÇÃO 3: MAPA DA PROPRIEDADE === */}
