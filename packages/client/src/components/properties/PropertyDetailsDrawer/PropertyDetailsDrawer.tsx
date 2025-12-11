@@ -34,13 +34,11 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
   
   // Estado para armazenar as culturas associadas aos talhões
   const [plotCultures, setPlotCultures] = useState<Map<string, string>>(new Map());
-  const [loadingCultures, setLoadingCultures] = useState(true);
 
   // Buscar culturas associadas aos talhões
   useEffect(() => {
     const fetchCultures = async () => {
       try {
-        setLoadingCultures(true);
         const cultures = await cultureService.findByProperty(property.id);
         
         // Criar um mapa de plotName -> cultureName
@@ -54,8 +52,6 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
         setPlotCultures(culturesMap);
       } catch (error) {
         console.error('Erro ao buscar culturas dos talhões:', error);
-      } finally {
-        setLoadingCultures(false);
       }
     };
 

@@ -14,10 +14,9 @@ type Props = {
   required?: boolean;
 };
 
-export function CultureSearchSelect({ value, onChange, placeholder, isDisabled, label = 'Cultura', required = false }: Props) {
+export function CultureSearchSelect({ value, onChange, isDisabled, label = 'Cultura', required = false }: Props) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [inputValue, setInputValue] = useState('');
 
   // Função para capitalizar primeira letra
   const capitalizeFirstLetter = (text: string): string => {
@@ -73,7 +72,7 @@ export function CultureSearchSelect({ value, onChange, placeholder, isDisabled, 
   const hasValue = value && value.trim() !== '';
 
   const customStyles = {
-    control: (base: any, state: any) => ({
+    control: (base: any) => ({
       ...base,
       border: 'none',
       boxShadow: 'none',
@@ -143,7 +142,6 @@ export function CultureSearchSelect({ value, onChange, placeholder, isDisabled, 
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onInputChange={(newInputValue, actionMeta) => {
-            setInputValue(newInputValue);
             if (actionMeta.action === 'input-change' && !newInputValue) {
               onChange('');
             }
