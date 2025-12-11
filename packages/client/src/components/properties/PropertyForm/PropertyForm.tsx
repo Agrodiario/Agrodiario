@@ -145,8 +145,6 @@ export function PropertyForm({
   const [activePlotIndex, setActivePlotIndex] = useState<number | null>(null);
 
   // Estados de Validação
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
-  const [_errors, setErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
 
   const handleLocateMe = () => {

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   PropertyForm,
   PropertyFormData,
-  TalhaoData,
+  PlotData,
 } from "../components/properties/PropertyForm/PropertyForm";
 import { propertyService } from "../services/property.service";
 import { Property, UpdatePropertyDto, Plot } from "../types/property.types";
@@ -31,7 +31,7 @@ export default function EditPropertyPage() {
         const data: Property = await propertyService.findOne(id);
 
         // Transform plots to talhões format
-        const talhoes: TalhaoData[] = (data.plots || []).map((plot) => ({
+        const plots: PlotData[] = (data.plots || []).map((plot) => ({
           name: plot.name,
           area: String(plot.area).replace(".", ","),
           situacao: plot.situacao || "preparo",
@@ -48,7 +48,7 @@ export default function EditPropertyPage() {
             ? String(data.productionArea).replace(".", ",")
             : "0",
           cultivo: data.mainCrop,
-          talhoes: talhoes,
+          plots: plots,
         };
 
         setPropertyToEdit(mappedData);
@@ -71,12 +71,12 @@ export default function EditPropertyPage() {
       setIsSaving(true);
 
       // Transform talhões to plots
-      const plots: Plot[] = data.talhoes.map((talhao) => ({
-        name: talhao.name,
-        area: parseFloat(talhao.area.replace(",", ".")),
+      const plots: Plot[] = data.plots.map((plot) => ({
+        name: plot.name,
+        area: parseFloat(plot.area.replace(",", ".")),
         culture: "",
-        situacao: talhao.situacao,
-        polygon: talhao.polygon,
+        situacao: plot.situacao,
+        polygon: plot.polygon,
       }));
 
       const updateData: UpdatePropertyDto = {
