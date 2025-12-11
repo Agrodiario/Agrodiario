@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { PropertyForm, PropertyFormData, TalhaoData } from '../components/properties/PropertyForm/PropertyForm';
-import { propertyService } from '../services/property.service';
-import { Property, UpdatePropertyDto, Plot } from '../types/property.types';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  PropertyForm,
+  PropertyFormData,
+  TalhaoData,
+} from "../components/properties/PropertyForm/PropertyForm";
+import { propertyService } from "../services/property.service";
+import { Property, UpdatePropertyDto, Plot } from "../types/property.types";
 
 export default function EditPropertyPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   // Estados
-  const [propertyToEdit, setPropertyToEdit] = useState<Partial<PropertyFormData> | null>(null);
+  const [propertyToEdit, setPropertyToEdit] =
+    useState<Partial<PropertyFormData> | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -26,27 +31,31 @@ export default function EditPropertyPage() {
         const data: Property = await propertyService.findOne(id);
 
         // Transform plots to talhões format
-        const talhoes: TalhaoData[] = (data.plots || []).map(plot => ({
+        const talhoes: TalhaoData[] = (data.plots || []).map((plot) => ({
           name: plot.name,
-          area: String(plot.area).replace('.', ','),
-          situacao: plot.situacao || 'preparo',
+          area: String(plot.area).replace(".", ","),
+          situacao: plot.situacao || "preparo",
           polygon: plot.polygon || null,
         }));
 
         const mappedData: Partial<PropertyFormData> = {
           name: data.name,
           address: data.address,
-          areaTotal: data.totalArea ? String(data.totalArea).replace('.', ',') : '0',
-          areaProducao: data.productionArea ? String(data.productionArea).replace('.', ',') : '0',
+          areaTotal: data.totalArea
+            ? String(data.totalArea).replace(".", ",")
+            : "0",
+          areaProducao: data.productionArea
+            ? String(data.productionArea).replace(".", ",")
+            : "0",
           cultivo: data.mainCrop,
           talhoes: talhoes,
         };
 
         setPropertyToEdit(mappedData);
       } catch (error) {
-        console.error('Erro ao carregar propriedade:', error);
-        alert('Não foi possível carregar os dados da propriedade.');
-        navigate('/properties');
+        console.error("Erro ao carregar propriedade:", error);
+        alert("Não foi possível carregar os dados da propriedade.");
+        navigate("/properties");
       } finally {
         setIsLoadingData(false);
       }
@@ -62,10 +71,10 @@ export default function EditPropertyPage() {
       setIsSaving(true);
 
       // Transform talhões to plots
-      const plots: Plot[] = data.talhoes.map(talhao => ({
+      const plots: Plot[] = data.talhoes.map((talhao) => ({
         name: talhao.name,
-        area: parseFloat(talhao.area.replace(',', '.')),
-        culture: '',
+        area: parseFloat(talhao.area.replace(",", ".")),
+        culture: "",
         situacao: talhao.situacao,
         polygon: talhao.polygon,
       }));
@@ -73,18 +82,22 @@ export default function EditPropertyPage() {
       const updateData: UpdatePropertyDto = {
         name: data.name,
         address: data.address,
-        totalArea: data.areaTotal ? parseFloat(data.areaTotal.replace(',', '.')) : undefined,
-        productionArea: data.areaProducao ? parseFloat(data.areaProducao.replace(',', '.')) : undefined,
+        totalArea: data.areaTotal
+          ? parseFloat(data.areaTotal.replace(",", "."))
+          : undefined,
+        productionArea: data.areaProducao
+          ? parseFloat(data.areaProducao.replace(",", "."))
+          : undefined,
         mainCrop: data.cultivo,
         plots: plots.length > 0 ? plots : undefined,
       };
 
       await propertyService.update(id, updateData);
 
-      navigate('/properties');
+      navigate("/properties");
     } catch (error) {
-      console.error('Erro ao atualizar propriedade:', error);
-      alert('Erro ao salvar as alterações. Verifique os dados.');
+      console.error("Erro ao atualizar propriedade:", error);
+      alert("Erro ao salvar as alterações. Verifique os dados.");
     } finally {
       setIsSaving(false);
     }
@@ -93,7 +106,9 @@ export default function EditPropertyPage() {
   // Renderização de estados
   if (isLoadingData) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+      <div
+        style={{ display: "flex", justifyContent: "center", padding: "3rem" }}
+      >
         <p>Carregando dados da propriedade...</p>
       </div>
     );

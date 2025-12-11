@@ -1,16 +1,12 @@
-import { useNavigate, NavLink } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
-import styles from './Sidebar.module.css';
-import logo from '@/assets/logo-grande.png';
+import { useNavigate, NavLink } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
+import styles from "./Sidebar.module.css";
+import logo from "@/assets/logo-grande.png";
 
-import {
-  FiLogOut,
-  FiMenu,
-  FiX
-} from 'react-icons/fi';
-import { TbBuildingWarehouse, TbNotebook, TbPlant2 } from 'react-icons/tb';
-import { LuFileBadge } from 'react-icons/lu';
-import { useState } from 'react';
+import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { TbBuildingWarehouse, TbNotebook, TbPlant2 } from "react-icons/tb";
+import { LuFileBadge } from "react-icons/lu";
+import { useState } from "react";
 
 export function Sidebar() {
   const navigate = useNavigate();
@@ -19,7 +15,7 @@ export function Sidebar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const toggleMobileMenu = () => {
@@ -28,7 +24,7 @@ export function Sidebar() {
 
   return (
     <>
-      <button 
+      <button
         className={styles.mobileToggle}
         onClick={toggleMobileMenu}
         aria-label="Abrir menu"
@@ -38,13 +34,12 @@ export function Sidebar() {
 
       {/* Overlay para mobile */}
       {isMobileOpen && (
-        <div 
-          className={styles.overlay}
-          onClick={toggleMobileMenu}
-        />
+        <div className={styles.overlay} onClick={toggleMobileMenu} />
       )}
 
-      <aside className={`${styles.sidebar} ${isMobileOpen ? styles.mobileOpen : ''}`}>
+      <aside
+        className={`${styles.sidebar} ${isMobileOpen ? styles.mobileOpen : ""}`}
+      >
         <div>
           <div className={styles.sidebarTop}>
             <img src={logo} alt="AgroDiário Logo" className={styles.logo} />

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet-draw';
+import { useEffect, useRef } from "react";
+import { useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet-draw";
 
 interface EditableMapProps {
   onCreated: (e: any) => void;
@@ -9,7 +9,11 @@ interface EditableMapProps {
   existingPolygon?: any;
 }
 
-export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableMapProps) {
+export function EditableMap({
+  onCreated,
+  onDeleted,
+  existingPolygon,
+}: EditableMapProps) {
   const map = useMap();
   const featureGroupRef = useRef<L.FeatureGroup | null>(null);
   const drawControlRef = useRef<any>(null);
@@ -24,7 +28,7 @@ export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableM
 
     // Configura o controle de desenho
     const drawControl = new (L.Control as any).Draw({
-      position: 'topright',
+      position: "topright",
       draw: {
         rectangle: false,
         circle: false,
@@ -35,10 +39,10 @@ export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableM
           allowIntersection: false,
           showArea: true,
           drawError: {
-            color: '#e1e100',
-            message: '<strong>Erro:</strong> linhas não podem se cruzar!',
+            color: "#e1e100",
+            message: "<strong>Erro:</strong> linhas não podem se cruzar!",
           },
-          shapeOptions: { color: 'yellow', fillOpacity: 0.4 },
+          shapeOptions: { color: "yellow", fillOpacity: 0.4 },
         },
       },
       edit: {
@@ -56,7 +60,10 @@ export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableM
 
     // Se houver polígono existente, adiciona ao mapa
     if (existingPolygon) {
-      const layer = L.polygon(existingPolygon, { color: 'yellow', fillOpacity: 0.4 });
+      const layer = L.polygon(existingPolygon, {
+        color: "yellow",
+        fillOpacity: 0.4,
+      });
       featureGroup.addLayer(layer);
     }
 
@@ -79,7 +86,10 @@ export function EditableMap({ onCreated, onDeleted, existingPolygon }: EditableM
 
     featureGroupRef.current.clearLayers();
     if (existingPolygon) {
-      const layer = L.polygon(existingPolygon, { color: 'yellow', fillOpacity: 0.4 });
+      const layer = L.polygon(existingPolygon, {
+        color: "yellow",
+        fillOpacity: 0.4,
+      });
       featureGroupRef.current.addLayer(layer);
     }
   }, [existingPolygon]);

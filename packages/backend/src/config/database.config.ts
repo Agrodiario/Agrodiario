@@ -30,10 +30,7 @@ export default registerAs('database', () => {
       entities: ['dist/**/*.entity{.ts,.js}'],
       migrations: ['dist/database/migrations/*{.ts,.js}'],
       migrationsTableName: 'migrations',
-      ssl:
-        process.env.NODE_ENV === 'production'
-          ? { rejectUnauthorized: false }
-          : false,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     };
   }
 

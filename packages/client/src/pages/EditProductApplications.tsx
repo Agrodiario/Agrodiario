@@ -1,22 +1,24 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { productApplicationService } from '../services/productApplication.service.ts';
-import { ProductApplicationFormData } from '../types/productApplication.types.ts';
-import { ProductApplicationForm } from '../components/productApplications/ProductApplicationForm.tsx';
-import { ProductFormData } from '../types/product.types.ts';
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { productApplicationService } from "../services/productApplication.service.ts";
+import { ProductApplicationFormData } from "../types/productApplication.types.ts";
+import { ProductApplicationForm } from "../components/productApplications/ProductApplicationForm.tsx";
+import { ProductFormData } from "../types/product.types.ts";
 
 export default function EditProductApplications() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [productApplicationToEdit, setProductApplicationToEdit] = useState<Partial<ProductApplicationFormData> | null>(null);
-  const [productToEdit, setProductToEdit] = useState<Partial<ProductFormData> | null>(null);
+  const [productApplicationToEdit, setProductApplicationToEdit] =
+    useState<Partial<ProductApplicationFormData> | null>(null);
+  const [productToEdit, setProductToEdit] =
+    useState<Partial<ProductFormData> | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function loadProductApplication() {
       if (!id) {
-        navigate('/products');
+        navigate("/products");
         return;
       }
 
@@ -27,9 +29,9 @@ export default function EditProductApplications() {
         setProductApplicationToEdit(data);
         setProductToEdit(data.product);
       } catch (error) {
-        console.error('Erro ao carregar aplicação:', error);
-        alert('Não foi possível carregar os dados da aplicação.');
-        navigate('/product');
+        console.error("Erro ao carregar aplicação:", error);
+        alert("Não foi possível carregar os dados da aplicação.");
+        navigate("/product");
       } finally {
         setIsLoadingData(false);
       }
@@ -50,13 +52,13 @@ export default function EditProductApplications() {
         productId: data.productId,
         productName: data.productName,
         applicationDate: data.applicationDate,
-      }
+      };
       await productApplicationService.update(id, updateData);
 
-      navigate('/products');
+      navigate("/products");
     } catch (error) {
-      console.error('Erro ao atualizar aplicação:', error);
-      alert('Erro ao salvar as alterações. Verifique os dados.');
+      console.error("Erro ao atualizar aplicação:", error);
+      alert("Erro ao salvar as alterações. Verifique os dados.");
     } finally {
       setIsSaving(false);
     }
@@ -65,7 +67,9 @@ export default function EditProductApplications() {
   // Renderização de estados
   if (isLoadingData) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+      <div
+        style={{ display: "flex", justifyContent: "center", padding: "3rem" }}
+      >
         <p>Carregando dados da propriedade...</p>
       </div>
     );
@@ -75,7 +79,7 @@ export default function EditProductApplications() {
     return <div>Aplicação não encontrada.</div>;
   }
   if (!productToEdit) {
-    return <div>Produto não encontrado</div>
+    return <div>Produto não encontrado</div>;
   }
 
   return (

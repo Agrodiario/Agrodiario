@@ -1,12 +1,12 @@
-import {Link, Outlet, useLocation} from 'react-router-dom';
-import styles from './ProductApplicationsLayout.module.css'
-import {FiPlus} from 'react-icons/fi';
+import { Link, Outlet, useLocation } from "react-router-dom";
+import styles from "./ProductApplicationsLayout.module.css";
+import { FiPlus } from "react-icons/fi";
 
 export default function ProductApplicationsLayout() {
   const location = useLocation();
 
-  const isNewPage = location.pathname == '/products/new';
-  const isEditPage = location.pathname.startsWith('/products/edit');
+  const isNewPage = location.pathname == "/products/new";
+  const isEditPage = location.pathname.startsWith("/products/edit");
   const hideButton = isNewPage || isEditPage;
 
   return (
@@ -27,5 +27,5 @@ export default function ProductApplicationsLayout() {
         <Outlet />
       </div>
     </div>
-  )
+  );
 }

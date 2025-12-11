@@ -5,7 +5,7 @@
  */
 export function validateCpf(cpf: string): boolean {
   // 1. Remove caracteres não numéricos
-  const cleanCpf = cpf.replace(/[^\d]/g, '');
+  const cleanCpf = cpf.replace(/[^\d]/g, "");
 
   if (cleanCpf.length !== 11 || /^(\d)\1{10}$/.test(cleanCpf)) {
     return false;
@@ -45,7 +45,7 @@ export function validateCpf(cpf: string): boolean {
  * @returns true se for uma data válida, false caso contrário.
  */
 export function isValidDate(dateString: string): boolean {
-  const parts = dateString.split('/');
+  const parts = dateString.split("/");
   if (parts.length !== 3) return false;
 
   const day = parseInt(parts[0], 10);
@@ -68,8 +68,11 @@ export const isValidNumber = (value: string): boolean => {
   return /^[0-9]+([.,][0-9]+)?$/.test(value);
 };
 
-export const validateNumberField = (value: string, fieldName: string): string => {
-  if (!value || value.trim() === '') {
+export const validateNumberField = (
+  value: string,
+  fieldName: string,
+): string => {
+  if (!value || value.trim() === "") {
     return `${fieldName} é obrigatório`;
   }
 
@@ -78,10 +81,10 @@ export const validateNumberField = (value: string, fieldName: string): string =>
   }
 
   // Converte para número para verificar se é positivo
-  const numValue = parseFloat(value.replace(',', '.'));
+  const numValue = parseFloat(value.replace(",", "."));
   if (numValue <= 0) {
     return `${fieldName} deve ser maior que zero`;
   }
 
-  return '';
+  return "";
 };

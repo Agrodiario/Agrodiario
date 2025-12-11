@@ -1,33 +1,35 @@
 // src/services/property.service.ts
-import { apiClient } from '../config/api.client';
+import { apiClient } from "../config/api.client";
 import {
   Property,
   CreatePropertyDto,
   UpdatePropertyDto,
   PropertiesListResponse,
-} from '../types/property.types';
+} from "../types/property.types";
 
 class PropertyService {
   async create(data: CreatePropertyDto): Promise<Property> {
-    const response = await apiClient.post<Property>('/properties', data);
+    const response = await apiClient.post<Property>("/properties", data);
     return response.data;
   }
 
   async findAll(
     page: number = 1,
     limit: number = 10,
-    order: 'ASC' | 'DESC' = 'DESC',
-    search: string = ''
+    order: "ASC" | "DESC" = "DESC",
+    search: string = "",
   ): Promise<PropertiesListResponse> {
-
-    const response = await apiClient.get<PropertiesListResponse>('/properties', {
-      params: {
-        page,
-        limit,
-        order,
-        search: encodeURIComponent(search),
+    const response = await apiClient.get<PropertiesListResponse>(
+      "/properties",
+      {
+        params: {
+          page,
+          limit,
+          order,
+          search: encodeURIComponent(search),
+        },
       },
-    });
+    );
     return response.data;
   }
 
@@ -42,12 +44,16 @@ class PropertyService {
   }
 
   async remove(id: string): Promise<{ message: string }> {
-    const response = await apiClient.delete<{ message: string }>(`/properties/${id}`);
+    const response = await apiClient.delete<{ message: string }>(
+      `/properties/${id}`,
+    );
     return response.data;
   }
 
   async hardRemove(id: string): Promise<{ message: string }> {
-    const response = await apiClient.delete<{ message: string }>(`/properties/${id}/hard`);
+    const response = await apiClient.delete<{ message: string }>(
+      `/properties/${id}/hard`,
+    );
     return response.data;
   }
 }

@@ -1,67 +1,67 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // Layouts
-import RootLayout from './layouts/RootLayout';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { RootRedirector } from './components/RootRedirector';
+import RootLayout from "./layouts/RootLayout";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { RootRedirector } from "./components/RootRedirector";
 
 // Páginas
-import LoginPage from './pages/auth/Login';
-import RegisterPage from './pages/auth/Register';
-import ForgotPasswordPage from './pages/auth/ForgotPassword';
-import ResetPasswordPage from './pages/auth/ResetPassword';
-import DiaryPage from './pages/Diary';
-import PropertiesPage from './pages/Properties';
-import CulturesPage from './pages/Cultures';
-import ProductApplicationsPage from './pages/ProductApplications.tsx';
-import DiaryLayout from './layouts/DiaryLayout';
-import NewActivity from './pages/NewActivity';
-import EditActivity from './pages/EditActivity';
-import PropertiesLayout from './layouts/PropertiesLayout';
-import NewProperty from './pages/NewProperty';
-import EditProperty from './pages/EditProperty';
-import CulturesLayout from './layouts/CulturesLayout';
-import NewCulture from './pages/NewCulture';
-import EditCulture from './pages/EditCulture';
-import Landing from './pages/landing-page/Landing';
-import ProductApplicationsLayout from './layouts/ProductApplicationsLayout.tsx';
-import NewProductApplication from './pages/NewProductApplication.tsx';
-import EditProductApplications from './pages/EditProductApplications.tsx';
+import LoginPage from "./pages/auth/Login";
+import RegisterPage from "./pages/auth/Register";
+import ForgotPasswordPage from "./pages/auth/ForgotPassword";
+import ResetPasswordPage from "./pages/auth/ResetPassword";
+import DiaryPage from "./pages/Diary";
+import PropertiesPage from "./pages/Properties";
+import CulturesPage from "./pages/Cultures";
+import ProductApplicationsPage from "./pages/ProductApplications.tsx";
+import DiaryLayout from "./layouts/DiaryLayout";
+import NewActivity from "./pages/NewActivity";
+import EditActivity from "./pages/EditActivity";
+import PropertiesLayout from "./layouts/PropertiesLayout";
+import NewProperty from "./pages/NewProperty";
+import EditProperty from "./pages/EditProperty";
+import CulturesLayout from "./layouts/CulturesLayout";
+import NewCulture from "./pages/NewCulture";
+import EditCulture from "./pages/EditCulture";
+import Landing from "./pages/landing-page/Landing";
+import ProductApplicationsLayout from "./layouts/ProductApplicationsLayout.tsx";
+import NewProductApplication from "./pages/NewProductApplication.tsx";
+import EditProductApplications from "./pages/EditProductApplications.tsx";
 
 export const router = createBrowserRouter([
   /* --- ROTA RAIZ - Redirecionamento Inteligente --- */
   {
-    path: '/',
+    path: "/",
     element: <RootRedirector />,
   },
 
   /* --- LANDING PAGE (Pública) --- */
   {
-    path: '/landing',
+    path: "/landing",
     element: <Landing />,
   },
 
   /* --- AUTENTICAÇÃO (Públicas) --- */
   {
-    path: '/login',
+    path: "/login",
     element: <LoginPage />,
   },
   {
-    path: '/register',
+    path: "/register",
     element: <RegisterPage />,
   },
   {
-    path: '/forgot-password',
+    path: "/forgot-password",
     element: <ForgotPasswordPage />,
   },
   {
-    path: '/reset-password',
+    path: "/reset-password",
     element: <ResetPasswordPage />,
   },
 
   /* --- APP PRINCIPAL (Protegido) --- */
   {
-    path: '/',
+    path: "/",
     element: (
       <ProtectedRoute>
         <RootLayout />
@@ -69,55 +69,55 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path: 'diary',
+        path: "diary",
         element: <DiaryLayout />,
         children: [
-          { index: true, element: <DiaryPage /> }, 
-          { path: 'new', element: <NewActivity /> },
-          { path: 'edit/:id', element: <EditActivity /> }
+          { index: true, element: <DiaryPage /> },
+          { path: "new", element: <NewActivity /> },
+          { path: "edit/:id", element: <EditActivity /> },
         ],
       },
 
       {
-        path: 'properties',
+        path: "properties",
         element: <PropertiesLayout />,
         children: [
           { index: true, element: <PropertiesPage /> },
-          { path: 'new', element: <NewProperty /> },
-          { path: 'edit/:id', element: <EditProperty /> }
+          { path: "new", element: <NewProperty /> },
+          { path: "edit/:id", element: <EditProperty /> },
         ],
       },
 
       /* Culturas */
       {
-        path: 'cultures',
+        path: "cultures",
         element: <CulturesLayout />,
         children: [
           { index: true, element: <CulturesPage /> },
-          { path: 'new', element: <NewCulture /> },
-          { path: 'edit/:id', element: <EditCulture /> },
+          { path: "new", element: <NewCulture /> },
+          { path: "edit/:id", element: <EditCulture /> },
         ],
       },
 
       {
-        path: 'products',
+        path: "products",
         element: <ProductApplicationsLayout />,
         children: [
-          { index: true, element: <ProductApplicationsPage />},
-          { path: 'new', element: <NewProductApplication />},
-          { path: 'edit/:id', element: <EditProductApplications /> },
+          { index: true, element: <ProductApplicationsPage /> },
+          { path: "new", element: <NewProductApplication /> },
+          { path: "edit/:id", element: <EditProductApplications /> },
         ],
       },
 
       {
-        path: '*',
+        path: "*",
         element: <Navigate to="/diary" replace />,
       },
     ],
   },
 
   {
-    path: '*',
+    path: "*",
     element: <Navigate to="/landing" replace />,
   },
 ]);

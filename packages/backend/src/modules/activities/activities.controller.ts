@@ -1,12 +1,20 @@
-import { 
-  Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, 
-  UseInterceptors, UploadedFiles, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseInterceptors,
+  UploadedFiles,
   Query,
   DefaultValuePipe,
   UseGuards,
-  Req
+  Req,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ActivityService } from './activities.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -43,7 +51,7 @@ export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 
   @Post()
-  @UseInterceptors(FilesInterceptor('files', 10, multerOptions)) 
+  @UseInterceptors(FilesInterceptor('files', 10, multerOptions))
   create(
     @Body() createActivityDto: CreateActivityDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
@@ -57,7 +65,7 @@ export class ActivityController {
   findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('order') order: string, 
+    @Query('order') order: string,
     @Req() req: any,
     @Query('search') search?: string,
   ) {
@@ -74,7 +82,7 @@ export class ActivityController {
   @Patch(':id')
   @UseInterceptors(FilesInterceptor('files', 10, multerOptions))
   update(
-    @Param('id', ParseIntPipe) id: number, 
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateActivityDto: UpdateActivityDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Req() req: any,

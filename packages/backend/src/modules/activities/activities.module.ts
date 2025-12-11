@@ -3,8 +3,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, resolve } from 'path'; 
-import { existsSync, mkdirSync } from 'fs'; 
+import { extname, resolve } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { ActivityService } from './activities.service';
 import { ActivityController } from './activities.controller';
 import { Activity } from './entities/activity.entity';
@@ -12,10 +12,10 @@ import { Activity } from './entities/activity.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Activity]),
-    MulterModule.registerAsync({ 
+    MulterModule.registerAsync({
       useFactory: () => {
         const uploadPath = resolve(__dirname, '..', '..', 'uploads');
-        
+
         if (!existsSync(uploadPath)) {
           mkdirSync(uploadPath, { recursive: true });
         }

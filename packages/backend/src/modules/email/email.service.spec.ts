@@ -122,9 +122,9 @@ describe('EmailService', () => {
       (service as any).transporter = { sendMail: mockSendMail };
 
       // Act & Assert
-      await expect(
-        service.sendPasswordResetEmail(testEmail, testToken),
-      ).rejects.toThrow('SMTP connection failed');
+      await expect(service.sendPasswordResetEmail(testEmail, testToken)).rejects.toThrow(
+        'SMTP connection failed',
+      );
     });
   });
 
@@ -185,9 +185,9 @@ describe('EmailService', () => {
       (service as any).transporter = { sendMail: mockSendMail };
 
       // Act & Assert
-      await expect(
-        service.sendVerificationEmail(testEmail, testToken),
-      ).rejects.toThrow('Email service unavailable');
+      await expect(service.sendVerificationEmail(testEmail, testToken)).rejects.toThrow(
+        'Email service unavailable',
+      );
     });
   });
 

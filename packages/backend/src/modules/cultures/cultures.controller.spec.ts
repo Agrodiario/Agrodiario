@@ -86,10 +86,7 @@ describe('CulturesController', () => {
       const result = await controller.create(createCultureDto, mockUser);
 
       // Assert
-      expect(mockCulturesService.create).toHaveBeenCalledWith(
-        createCultureDto,
-        mockUser.id,
-      );
+      expect(mockCulturesService.create).toHaveBeenCalledWith(createCultureDto, mockUser.id);
       expect(result).toEqual(mockResult);
     });
   });
@@ -179,9 +176,7 @@ describe('CulturesController', () => {
       const result = await controller.getUserProperties(mockUser);
 
       // Assert
-      expect(mockCulturesService.getUserProperties).toHaveBeenCalledWith(
-        mockUser.id,
-      );
+      expect(mockCulturesService.getUserProperties).toHaveBeenCalledWith(mockUser.id);
       expect(result).toEqual(mockProperties);
       expect(result).toHaveLength(2);
     });
@@ -216,10 +211,7 @@ describe('CulturesController', () => {
       const result = await controller.findOne(cultureId, mockUser);
 
       // Assert
-      expect(mockCulturesService.findOne).toHaveBeenCalledWith(
-        cultureId,
-        mockUser.id,
-      );
+      expect(mockCulturesService.findOne).toHaveBeenCalledWith(cultureId, mockUser.id);
       expect(result).toEqual(mockCulture);
     });
   });

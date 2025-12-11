@@ -1,4 +1,16 @@
-import { IsNotEmpty, IsUUID, IsInt, Min, IsEnum, IsString, MaxLength, IsDateString, IsNumber, IsPositive, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsUUID,
+  IsInt,
+  Min,
+  IsEnum,
+  IsString,
+  MaxLength,
+  IsDateString,
+  IsNumber,
+  IsPositive,
+  IsOptional,
+} from 'class-validator';
 import { CultureOrigin } from '../enums/culture-origin.enum';
 
 export class CreateCultureDto {

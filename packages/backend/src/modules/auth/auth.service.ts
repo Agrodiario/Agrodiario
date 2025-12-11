@@ -175,8 +175,7 @@ export class AuthService {
 
     if (!user) {
       return {
-        message:
-          'Se seu email estiver registrado, você receberá um link de verificação',
+        message: 'Se seu email estiver registrado, você receberá um link de verificação',
       };
     }
 
@@ -187,11 +186,9 @@ export class AuthService {
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     await this.usersRepository.update(user.id, { emailVerificationToken });
 
-    this.emailService
-      .sendVerificationEmail(user.email, emailVerificationToken)
-      .catch((err) => {
-        this.logger.error(`Falha ao enviar email de verificação: ${err.message}`);
-      });
+    this.emailService.sendVerificationEmail(user.email, emailVerificationToken).catch((err) => {
+      this.logger.error(`Falha ao enviar email de verificação: ${err.message}`);
+    });
 
     return { message: 'Email de verificação enviado com sucesso' };
   }
@@ -203,8 +200,7 @@ export class AuthService {
 
     if (!user) {
       return {
-        message:
-          'Se seu email estiver registrado, você receberá um link para redefinição de senha',
+        message: 'Se seu email estiver registrado, você receberá um link para redefinição de senha',
       };
     }
 
@@ -216,15 +212,12 @@ export class AuthService {
       passwordResetExpires,
     });
 
-    this.emailService
-      .sendPasswordResetEmail(user.email, passwordResetToken)
-      .catch((err) => {
-        this.logger.error(`Falha ao enviar email de redefinição de senha: ${err.message}`);
-      });
+    this.emailService.sendPasswordResetEmail(user.email, passwordResetToken).catch((err) => {
+      this.logger.error(`Falha ao enviar email de redefinição de senha: ${err.message}`);
+    });
 
     return {
-      message:
-        'Se seu email estiver registrado, você receberá um link para redefinição de senha',
+      message: 'Se seu email estiver registrado, você receberá um link para redefinição de senha',
     };
   }
 

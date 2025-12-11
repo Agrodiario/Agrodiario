@@ -112,7 +112,10 @@ describe('ProductApplicationsService', () => {
 
   describe('findAll', () => {
     it('should return paginated list', async () => {
-      const records = [{ id: '1', userId }, { id: '2', userId }];
+      const records = [
+        { id: '1', userId },
+        { id: '2', userId },
+      ];
 
       productAppRepo.findAndCount.mockResolvedValue([records, 2]);
 

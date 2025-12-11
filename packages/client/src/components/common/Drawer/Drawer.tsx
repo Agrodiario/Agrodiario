@@ -1,7 +1,7 @@
 // src/components/common/Drawer/Drawer.tsx
-import { ReactNode, useEffect } from 'react';
-import styles from './Drawer.module.css';
-import { FiX } from 'react-icons/fi';
+import { ReactNode, useEffect } from "react";
+import styles from "./Drawer.module.css";
+import { FiX } from "react-icons/fi";
 
 type DrawerProps = {
   isOpen: boolean;
@@ -14,13 +14,13 @@ export function Drawer({ isOpen, onClose, title, children }: DrawerProps) {
   // Efeito para fechar o drawer com a tecla 'Esc'
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
 

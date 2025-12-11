@@ -1,19 +1,22 @@
-import { apiClient } from '../config/api.client';
-import { RegisterDto, LoginDto, AuthResponse, User } from '../types/auth.types';
+import { apiClient } from "../config/api.client";
+import { RegisterDto, LoginDto, AuthResponse, User } from "../types/auth.types";
 
 class AuthService {
   async register(data: RegisterDto): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', data);
+    const response = await apiClient.post<AuthResponse>("/auth/register", data);
     return response.data;
   }
 
   async login(credentials: LoginDto): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/login",
+      credentials,
+    );
     return response.data;
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await apiClient.get<User>('/auth/me');
+    const response = await apiClient.get<User>("/auth/me");
     return response.data;
   }
 
@@ -23,17 +26,25 @@ class AuthService {
   }
 
   async resendVerification(email: string): Promise<{ message: string }> {
-    const response = await apiClient.post('/auth/resend-verification', { email });
+    const response = await apiClient.post("/auth/resend-verification", {
+      email,
+    });
     return response.data;
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
-    const response = await apiClient.post('/auth/forgot-password', { email });
+    const response = await apiClient.post("/auth/forgot-password", { email });
     return response.data;
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-    const response = await apiClient.post('/auth/reset-password', { token, newPassword });
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const response = await apiClient.post("/auth/reset-password", {
+      token,
+      newPassword,
+    });
     return response.data;
   }
 }

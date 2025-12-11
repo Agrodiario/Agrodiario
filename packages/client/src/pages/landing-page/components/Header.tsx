@@ -1,6 +1,6 @@
 import { Button } from "@/components/common/Button/Button";
 import styles from "./Header.module.css";
-import background from '@/assets/background.jpg';
+import background from "@/assets/background.jpg";
 
 export function Header() {
   const handleSignup = () => {
@@ -30,7 +30,7 @@ export function Header() {
           registrarem ações sustentáveis.
         </p>
 
-        <Button variant='quaternary' onClick={handleSignup}>
+        <Button variant="quaternary" onClick={handleSignup}>
           Cadastre-se agora!
         </Button>
       </div>

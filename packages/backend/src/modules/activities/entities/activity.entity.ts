@@ -1,7 +1,15 @@
 // src/activities/entities/activity.entity.ts
 import { User } from '../../users/entities/user.entity';
 import { Culture } from '../../cultures/entities/culture.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 
 export enum ActivityType {
   PREPARO = 'preparo',
@@ -33,10 +41,10 @@ export class Activity {
   titulo: string;
 
   @Column({ type: 'date' })
-  date: Date; 
+  date: Date;
 
   @Column()
-  propriedade: string; 
+  propriedade: string;
 
   @Column({
     type: 'enum',

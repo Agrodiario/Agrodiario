@@ -26,7 +26,7 @@ const mockEmbrapaService = {
   getInsumos: jest.fn().mockResolvedValue([]),
   getAccessToken: jest.fn().mockResolvedValue('fake_token'),
   getAllProdutoFormuladoByMarcaComercial: jest.fn().mockResolvedValue({
-    data: []
+    data: [],
   }),
 };
 
@@ -95,7 +95,7 @@ describe('ProductsService', () => {
       expect(mockProductsRepository.save).toHaveBeenCalledWith(createDto);
       expect(result).toEqual({
         id: '1',
-        ...createDto
+        ...createDto,
       });
     });
 
@@ -118,7 +118,7 @@ describe('ProductsService', () => {
       expect(mockProductsRepository.save).toHaveBeenCalledWith(createDto);
       expect(result).toEqual({
         id: '1',
-        ...createDto
+        ...createDto,
       });
     });
   });
@@ -135,21 +135,21 @@ describe('ProductsService', () => {
 
     it('should throw NotFoundException if not found', async () => {
       mockProductsRepository.findOne.mockResolvedValue(null);
-      await expect(service.findOne('999'))
-        .rejects
-        .toBeInstanceOf(NotFoundException);
+      await expect(service.findOne('999')).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
   describe('searchByCommercialName', () => {
     it('should return empty array when API returns no data', async () => {
       mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial.mockResolvedValue({
-        data: []
+        data: [],
       });
 
       const result = await service.searchByCommercialName('teste');
-      
-      expect(mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial).toHaveBeenCalledWith('teste');
+
+      expect(mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial).toHaveBeenCalledWith(
+        'teste',
+      );
       expect(result).toEqual([]);
     });
 
@@ -163,18 +163,20 @@ describe('ProductsService', () => {
             classe_categoria_agronomica: ['Herbicida'],
             ingrediente_ativo_detalhado: [
               { ingrediente_ativo: 'Ingrediente A' },
-              { ingrediente_ativo: 'Ingrediente B' }
+              { ingrediente_ativo: 'Ingrediente B' },
             ],
-            produto_agricultura_organica: true
-          }
-        ]
+            produto_agricultura_organica: true,
+          },
+        ],
       };
 
       mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial.mockResolvedValue(mockApiData);
 
       const result = await service.searchByCommercialName('Produto');
-      
-      expect(mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial).toHaveBeenCalledWith('Produto');
+
+      expect(mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial).toHaveBeenCalledWith(
+        'Produto',
+      );
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
         registrationNumber: '12345',
@@ -182,7 +184,7 @@ describe('ProductsService', () => {
         registrationHolder: 'Empresa Teste',
         categories: ['Herbicida'],
         activeIngredients: ['Ingrediente A', 'Ingrediente B'],
-        organicFarmingProduct: true
+        organicFarmingProduct: true,
       });
     });
 
@@ -195,23 +197,25 @@ describe('ProductsService', () => {
             titular_registro: 'Outra Empresa',
             classe_categoria_agronomica: ['Fungicida'],
             ingrediente_ativo: ['Composto X (10%)', 'Composto Y (20%)'],
-            produto_agricultura_organica: false
-          }
-        ]
+            produto_agricultura_organica: false,
+          },
+        ],
       };
 
       mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial.mockResolvedValue(mockApiData);
 
       const result = await service.searchByCommercialName('Outro');
-      
+
       expect(result[0].activeIngredients).toEqual(['Composto X', 'Composto Y']);
     });
 
     it('should return empty array on error', async () => {
-      mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial.mockRejectedValue(new Error('API Error'));
-      
+      mockEmbrapaService.getAllProdutoFormuladoByMarcaComercial.mockRejectedValue(
+        new Error('API Error'),
+      );
+
       const result = await service.searchByCommercialName('teste');
-      
+
       expect(result).toEqual([]);
     });
   });

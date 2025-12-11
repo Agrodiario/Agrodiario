@@ -54,12 +54,8 @@ describe('CulturesService', () => {
     }).compile();
 
     service = module.get<CulturesService>(CulturesService);
-    culturesRepository = module.get<Repository<Culture>>(
-      getRepositoryToken(Culture),
-    );
-    propertiesRepository = module.get<Repository<Property>>(
-      getRepositoryToken(Property),
-    );
+    culturesRepository = module.get<Repository<Culture>>(getRepositoryToken(Culture));
+    propertiesRepository = module.get<Repository<Property>>(getRepositoryToken(Property));
   });
 
   afterEach(() => {
@@ -144,9 +140,7 @@ describe('CulturesService', () => {
       mockPropertiesRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.create(createCultureDto, userId)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.create(createCultureDto, userId)).rejects.toThrow(NotFoundException);
       await expect(service.create(createCultureDto, userId)).rejects.toThrow(
         'Propriedade não encontrada',
       );
@@ -164,9 +158,7 @@ describe('CulturesService', () => {
       mockPropertiesRepository.findOne.mockResolvedValue(null); // isActive: true no where clause
 
       // Act & Assert
-      await expect(service.create(createCultureDto, userId)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.create(createCultureDto, userId)).rejects.toThrow(NotFoundException);
     });
 
     it('deve lançar ForbiddenException quando a propriedade pertence a outro usuário', async () => {
@@ -179,9 +171,7 @@ describe('CulturesService', () => {
       mockPropertiesRepository.findOne.mockResolvedValue(mockProperty);
 
       // Act & Assert
-      await expect(service.create(createCultureDto, userId)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(service.create(createCultureDto, userId)).rejects.toThrow(ForbiddenException);
       await expect(service.create(createCultureDto, userId)).rejects.toThrow(
         'Você não tem permissão para criar cultura nesta propriedade',
       );
@@ -221,14 +211,7 @@ describe('CulturesService', () => {
       // Assert
       expect(mockPropertiesRepository.find).toHaveBeenCalledWith({
         where: { userId, isActive: true },
-        select: [
-          'id',
-          'name',
-          'address',
-          'totalArea',
-          'productionArea',
-          'mainCrop',
-        ],
+        select: ['id', 'name', 'address', 'totalArea', 'productionArea', 'mainCrop'],
         order: { name: 'ASC' },
       });
       expect(result).toEqual(mockProperties);
@@ -330,12 +313,8 @@ describe('CulturesService', () => {
       mockCulturesRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findOne(cultureId, userId)).rejects.toThrow(
-        NotFoundException,
-      );
-      await expect(service.findOne(cultureId, userId)).rejects.toThrow(
-        'Cultura não encontrada',
-      );
+      await expect(service.findOne(cultureId, userId)).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(cultureId, userId)).rejects.toThrow('Cultura não encontrada');
     });
 
     it('deve lançar ForbiddenException quando a cultura pertence a outro usuário', async () => {
@@ -357,9 +336,7 @@ describe('CulturesService', () => {
       mockCulturesRepository.findOne.mockResolvedValue(mockCulture);
 
       // Act & Assert
-      await expect(service.findOne(cultureId, userId)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(service.findOne(cultureId, userId)).rejects.toThrow(ForbiddenException);
       await expect(service.findOne(cultureId, userId)).rejects.toThrow(
         'Você não tem permissão para acessar esta cultura',
       );

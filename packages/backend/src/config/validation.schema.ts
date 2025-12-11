@@ -46,8 +46,7 @@ export const validationSchema = Joi.object({
   // Custom validation: require either DATABASE_URL or all DB_* variables
   .custom((value, helpers) => {
     const hasDbUrl = !!value.DATABASE_URL;
-    const hasIndividualVars =
-      value.DB_HOST && value.DB_USERNAME && value.DB_DATABASE;
+    const hasIndividualVars = value.DB_HOST && value.DB_USERNAME && value.DB_DATABASE;
 
     if (!hasDbUrl && !hasIndividualVars) {
       return helpers.error('any.custom', {

@@ -1,11 +1,11 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import styles from './DiaryLayout.module.css';
-import { FiPlus} from 'react-icons/fi';
+import { Outlet, Link, useLocation } from "react-router-dom";
+import styles from "./DiaryLayout.module.css";
+import { FiPlus } from "react-icons/fi";
 
 export default function DiaryLayout() {
   const location = useLocation();
 
-  const isNewActivityPage = location.pathname === '/diary/new';
+  const isNewActivityPage = location.pathname === "/diary/new";
 
   return (
     <div className={styles.diaryLayout}>
@@ -13,7 +13,6 @@ export default function DiaryLayout() {
       <header className={styles.header}>
         <h1 className={styles.title}>Diário de atividades</h1>
         <div className={styles.actions}>
-
           {/* 4. RENDERIZAÇÃO CONDICIONAL */}
           {/* Só mostre o botão se NÃO estiver na página new */}
           {!isNewActivityPage && (
