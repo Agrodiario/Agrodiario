@@ -27,7 +27,7 @@ export class UpdateCultureDto {
   supplier?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: 'Data de plantio deve estar no formato YYYY-MM-DD' })
+  @IsString({ message: 'Data de plantio deve ser uma string' })
   plantingDate?: string;
 
   @IsOptional()

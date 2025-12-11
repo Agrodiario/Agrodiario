@@ -6,8 +6,10 @@ import { InfoBlock } from '../../common/InfoBlock/InfoBlock'; // Importe o novo 
 import { TalhaoCard } from '../TalhaoCard/TalhaoCard';
 import { FiTrash2, FiEdit2, FiMap, FiPlus } from 'react-icons/fi';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal/ConfirmationModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plot } from '@/types/property.types';
+import { cultureService } from '@/services/culture.service';
+import { Culture } from '@/types/culture.types';
 
 export type Property = {
   id: string;
@@ -27,8 +29,38 @@ type Props = {
 export function PropertyDetailsDrawer({ property, onDelete }: Props) {
   const navigate = useNavigate();
 
-  // 3. Estado para controlar o modal de exclusão
+  // Estado para controlar o modal de exclusão
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
+  // Estado para armazenar as culturas associadas aos talhões
+  const [plotCultures, setPlotCultures] = useState<Map<string, string>>(new Map());
+  const [loadingCultures, setLoadingCultures] = useState(true);
+
+  // Buscar culturas associadas aos talhões
+  useEffect(() => {
+    const fetchCultures = async () => {
+      try {
+        setLoadingCultures(true);
+        const cultures = await cultureService.findByProperty(property.id);
+        
+        // Criar um mapa de plotName -> cultureName
+        const culturesMap = new Map<string, string>();
+        cultures.forEach((culture: Culture) => {
+          if (culture.plotName) {
+            culturesMap.set(culture.plotName, culture.cultureName);
+          }
+        });
+        
+        setPlotCultures(culturesMap);
+      } catch (error) {
+        console.error('Erro ao buscar culturas dos talhões:', error);
+      } finally {
+        setLoadingCultures(false);
+      }
+    };
+
+    fetchCultures();
+  }, [property.id]);
 
   const handleEdit = () => {
     navigate(`/properties/edit/${property.id}`);
@@ -39,7 +71,7 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
     navigate(`/properties/edit/${property.id}`);
   };
 
-  // 4. Handler para confirmar a exclusão
+  // Handler para confirmar a exclusão
   const handleConfirmDelete = () => {
     onDelete(); // Chama a função que realmente exclui (vinda do componente pai)
     setIsDeleteModalOpen(false); // Fecha o modal
@@ -76,18 +108,23 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
           ) : (
             // Lista de Talhões
             <div className={styles.talhoesList}>
-              {property.plots.map((plot, index) => (
-                <TalhaoCard
-                  key={index}
-                  talhao={{
-                    id: index,
-                    name: plot.name,
-                    cultura: plot.culture,
-                    area: plot.area,
-                    status: plot.situacao === 'preparo' ? 'em preparo' : plot.situacao === 'producao' ? 'plantado' : 'colhido',
-                  }}
-                />
-              ))}
+              {property.plots.map((plot, index) => {
+                // Buscar a cultura associada ao talhão através do mapa
+                const culturaAssociada = plotCultures.get(plot.name) || '';
+                
+                return (
+                  <TalhaoCard
+                    key={index}
+                    talhao={{
+                      id: index,
+                      name: plot.name,
+                      cultura: culturaAssociada,
+                      area: plot.area,
+                      status: plot.situacao === 'preparo' ? 'em preparo' : plot.situacao === 'producao' ? 'plantado' : 'colhido',
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
 

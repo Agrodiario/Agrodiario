@@ -8,6 +8,7 @@ import { ConfirmationModal } from '@/components/common/ConfirmationModal/Confirm
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { parseDateSafe } from '../../../utils/dateUtils';
 
 type Props = {
   culture: Culture;
@@ -33,18 +34,16 @@ export function CultureDetailsDrawer({ culture, onDelete }: Props) {
     conventional: 'Convencional',
     transgenic: 'Transgênico',
   };
-  const translatedOrigin = culture.origin ? originMap[culture.origin] || culture.origin : 'N/A';
+const translatedOrigin = culture.origin ? originMap[culture.origin] || culture.origin : 'N/A';
 
-  // Formatar datas
-  const formattedPlantingDate = culture.plantingDate
-    ? format(new Date(culture.plantingDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-    : 'N/A';
+// Formatar datas
+const formattedPlantingDate = culture.plantingDate
+  ? format(parseDateSafe(culture.plantingDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+  : 'N/A';
 
-  const formattedExpectedHarvest = culture.expectedHarvestDate
-    ? format(new Date(culture.expectedHarvestDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-    : 'N/A';
-
-  return (
+const formattedExpectedHarvest = culture.expectedHarvestDate
+  ? format(parseDateSafe(culture.expectedHarvestDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+  : 'N/A';  return (
     <div className={styles.container}>
       {/* Conteúdo Principal (com scroll) */}
       <div className={styles.mainContent}>

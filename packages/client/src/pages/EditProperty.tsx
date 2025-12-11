@@ -29,7 +29,6 @@ export default function EditPropertyPage() {
         const talhoes: TalhaoData[] = (data.plots || []).map(plot => ({
           name: plot.name,
           area: String(plot.area).replace('.', ','),
-          cultura: plot.culture || '',
           situacao: plot.situacao || 'preparo',
           polygon: plot.polygon || null,
         }));
@@ -66,7 +65,7 @@ export default function EditPropertyPage() {
       const plots: Plot[] = data.talhoes.map(talhao => ({
         name: talhao.name,
         area: parseFloat(talhao.area.replace(',', '.')),
-        culture: talhao.cultura,
+        culture: '',
         situacao: talhao.situacao,
         polygon: talhao.polygon,
       }));

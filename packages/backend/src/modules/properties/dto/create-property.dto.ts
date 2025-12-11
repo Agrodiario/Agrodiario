@@ -22,10 +22,10 @@ export class PlotDto {
   @Min(0, { message: 'Área do talhão deve ser maior ou igual a zero' })
   area: number;
 
-  @IsNotEmpty({ message: 'Cultura do talhão é obrigatória' })
+  @IsOptional()
   @IsString()
   @MaxLength(100)
-  culture: string;
+  culture?: string;
 
   @IsNotEmpty({ message: 'Situação do talhão é obrigatória' })
   @IsString()

@@ -34,7 +34,6 @@ L.Icon.Default.mergeOptions({
 export type TalhaoData = {
   name: string;
   area: string;
-  cultura: string;
   situacao: 'producao' | 'preparo' | 'pousio';
   polygon: any;
 };
@@ -68,7 +67,6 @@ function LocationMarker({ position, setPosition }: any) {
 const createEmptyTalhao = (): TalhaoData => ({
   name: '',
   area: '',
-  cultura: '',
   situacao: 'preparo',
   polygon: null,
 });
@@ -142,9 +140,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         return 'Área do talhão é obrigatória';
       }
       return validateNumberField(value, 'Área do talhão');
-    }
-    if (fieldName === 'cultura' && (!value || value.trim() === '')) {
-      return 'Cultura do talhão é obrigatória';
     }
     return '';
   };
@@ -252,7 +247,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     formData.talhoes.forEach(talhao => {
       if (validateTalhaoField('name', talhao.name)) areTalhoesValid = false;
       if (validateTalhaoField('area', talhao.area)) areTalhoesValid = false;
-      if (validateTalhaoField('cultura', talhao.cultura)) areTalhoesValid = false;
     });
 
     setIsValid(isBasicPropertyValid && areTalhoesValid);
@@ -288,9 +282,8 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     formData.talhoes.forEach((talhao, index) => {
       const nameError = validateTalhaoField('name', talhao.name);
       const areaError = validateTalhaoField('area', talhao.area);
-      const culturaError = validateTalhaoField('cultura', talhao.cultura);
 
-      if (nameError || areaError || culturaError) {
+      if (nameError || areaError) {
         hasError = true;
         // Set active talhao to the first one with error
         if (activeTalhaoIndex === null) {
@@ -353,8 +346,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             onBlur={() => handleBlur('name')}
             placeholder="Ex: Sítio Oliveira"
             required
-            error={errors.name}
-            showError={touchedFields.name && !!errors.name}
           />
           <Input
             label="Endereço (estrada, município, estado)"
@@ -364,8 +355,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             onBlur={() => handleBlur('address')}
             placeholder="Estrada da Lavoura..."
             required
-            error={errors.address}
-            showError={touchedFields.address && !!errors.address}
           />
 
           <div className={styles.row}>
@@ -377,8 +366,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               onBlur={() => handleBlur('areaTotal')}
               placeholder="10"
               required
-              error={errors.areaTotal}
-              showError={touchedFields.areaTotal && !!errors.areaTotal}
             />
             <Input
               label="Área de produção (hectares)"
@@ -388,8 +375,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               onBlur={() => handleBlur('areaProducao')}
               placeholder="2"
               required
-              error={errors.areaProducao}
-              showError={touchedFields.areaProducao && !!errors.areaProducao}
             />
           </div>
           <div className={styles.inputGroup}>
@@ -466,7 +451,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
                   </div>
                   <div className={styles.talhaoCardInfo}>
                     {talhao.area && <span>{talhao.area} ha</span>}
-                    {talhao.cultura && <span>{talhao.cultura}</span>}
                   </div>
                 </div>
               ))}
@@ -495,14 +479,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
                 placeholder="1"
                 required
               />
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Cultura atual do talhão</label>
-                <CultureSearchSelect
-                  value={activeTalhao.cultura}
-                  onChange={(selectedCrop) => updateTalhao(activeTalhaoIndex, 'cultura', selectedCrop)}
-                  placeholder="Selecione a cultura atual..."
-                />
-              </div>
 
               <h4 className={styles.textTitle} style={{ marginTop: '1rem' }}>Situação do talhão</h4>
               <div className={styles.tagGroup}>

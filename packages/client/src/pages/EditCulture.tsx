@@ -27,9 +27,18 @@ export default function EditCulture() {
         console.log('Culture loaded:', culture);
 
         // Transform backend data to form data
-        const plantingDateStr = typeof culture.plantingDate === 'string' 
-          ? culture.plantingDate.split('T')[0] 
-          : new Date(culture.plantingDate).toISOString().split('T')[0];
+        // Converter de YYYY-MM-DD para dd/mm/yyyy
+        let plantingDateStr = '';
+        if (typeof culture.plantingDate === 'string') {
+          const [year, month, day] = culture.plantingDate.split('T')[0].split('-');
+          plantingDateStr = `${day}/${month}/${year}`;
+        } else {
+          const date = new Date(culture.plantingDate);
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          plantingDateStr = `${day}/${month}/${year}`;
+        }
 
         setInitialData({
           propertyId: culture.propertyId,
@@ -63,6 +72,10 @@ export default function EditCulture() {
     setError(null);
 
     try {
+      // Converter data de dd/mm/yyyy para YYYY-MM-DD
+      const [day, month, year] = data.plantingDate.split('/');
+      const plantingDateISO = `${year}-${month}-${day}`;
+
       // Transform form data to match backend DTO
       const updateDto: UpdateCultureDto = {
         cultureName: data.cultureName,
@@ -70,7 +83,7 @@ export default function EditCulture() {
         cycle: parseInt(data.cycle),
         origin: data.origin,
         supplier: data.supplier || undefined,
-        plantingDate: data.plantingDate,
+        plantingDate: plantingDateISO,
         plantingArea: parseFloat(data.plantingArea),
         plotName: data.plotName || null,
         observations: data.observations || undefined,

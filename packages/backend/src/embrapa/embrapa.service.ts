@@ -24,6 +24,14 @@ export class EmbrapaService {
     const key = this.configService.get<string>('EMBRAPA_CONSUMER_KEY');
     const secret = this.configService.get<string>('EMBRAPA_CONSUMER_SECRET');
 
+    console.log('[EMBRAPA] Consumer Key:', key ? `${key.substring(0, 4)}...` : 'undefined');
+    console.log('[EMBRAPA] Consumer Secret:', secret ? `${secret.substring(0, 4)}...` : 'undefined');
+
+    if (!key || !secret) {
+      console.error('[EMBRAPA] Credenciais não configuradas!');
+      throw new InternalServerErrorException('Credenciais da EMBRAPA não configuradas');
+    }
+
     const authHeader = Buffer.from(`${key}:${secret}`).toString('base64');
 
     try {

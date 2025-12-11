@@ -11,7 +11,6 @@ export interface PropertyFormData {
   cultivo?: string;
   talhaoName?: string;
   talhaoArea?: string;
-  talhaoCultura?: string;
   situacao?: PropertyStatus;
 }
 
@@ -36,7 +35,6 @@ export class PropertyFormPage extends BasePage {
   // Section 4: Talhao (Plot)
   readonly talhaoNameInput: Locator;
   readonly talhaoAreaInput: Locator;
-  readonly talhaoCulturaSelect: Locator;
 
   // Section 5: Status
   readonly statusButtons: Record<PropertyStatus, Locator>;
@@ -75,7 +73,6 @@ export class PropertyFormPage extends BasePage {
     // Section 4: Talhao
     this.talhaoNameInput = page.locator('input[name="talhaoName"]');
     this.talhaoAreaInput = page.locator('input[name="talhaoArea"]');
-    this.talhaoCulturaSelect = page.locator('[class*="select"]').nth(1);
 
     // Section 5: Status
     this.statusButtons = {
@@ -116,11 +113,6 @@ export class PropertyFormPage extends BasePage {
     await this.statusButtons[status].click();
   }
 
-  async selectTalhaoCultura(culturaName: string) {
-    await this.talhaoCulturaSelect.click();
-    await this.page.locator(`text=${culturaName}`).click();
-  }
-
   async clickOnMap() {
     // Click on center of map to place marker
     const box = await this.mapContainer.boundingBox();
@@ -145,10 +137,6 @@ export class PropertyFormPage extends BasePage {
 
     if (data.talhaoArea) {
       await this.talhaoAreaInput.fill(data.talhaoArea);
-    }
-
-    if (data.talhaoCultura) {
-      await this.selectTalhaoCultura(data.talhaoCultura);
     }
 
     if (data.situacao) {

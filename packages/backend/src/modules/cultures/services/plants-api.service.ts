@@ -112,7 +112,10 @@ export class PlantsApiService {
    */
   private async translateAndMapToCrops(plants: any[]): Promise<WikidataCrop[]> {
     const commonNames = plants.map(plant => plant.common_name);
+    
+    this.logger.debug(`Original plant names (EN): ${commonNames.slice(0, 3).join(', ')}...`);
     const translatedNames = await this.translationService.translateBatch(commonNames);
+    this.logger.debug(`Translated names (PT): ${translatedNames.slice(0, 3).join(', ')}...`);
 
     return plants.map((plant, index) => ({
       id: plant.id.toString(),

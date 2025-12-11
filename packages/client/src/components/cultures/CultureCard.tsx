@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import styles from './CultureCard.module.css';
 import { Button } from '../common/Button/Button';
 import { Culture } from '../../types/culture.types';
-import { FiCalendar, FiSun } from 'react-icons/fi';
+import { FiCalendar, FiSun, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { PiPlantFill } from 'react-icons/pi';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { parseDateSafe } from '../../utils/dateUtils';
 
 interface CultureCardProps {
   culture: Culture;
@@ -25,20 +27,24 @@ function InfoItem({ icon, title, text }: any) {
 }
 
 export function CultureCard({ culture, onView }: CultureCardProps) {
+  const [showActivities, setShowActivities] = useState(false);
+
   // Formatar data de plantio
   const formattedDate = culture.plantingDate
-    ? format(new Date(culture.plantingDate), "dd/MM/yy", { locale: ptBR })
+    ? format(parseDateSafe(culture.plantingDate), "dd/MM/yy", { locale: ptBR })
     : 'N/A';
 
   // Formatar previsão de colheita
   const formattedHarvest = culture.expectedHarvestDate
-    ? format(new Date(culture.expectedHarvestDate), "dd/MM/yy", { locale: ptBR })
+    ? format(parseDateSafe(culture.expectedHarvestDate), "dd/MM/yy", { locale: ptBR })
     : 'N/A';
 
   // Determinar o que exibir na linha de propriedade/área
   const propertyLine = culture.plotName 
     ? `${culture.property?.name || 'Propriedade'} - ${culture.plotName}`
     : `${culture.property?.name || 'Propriedade'} - ${culture.plantingArea} ha`;
+
+  const hasActivities = (culture.activitiesCount || 0) > 0;
 
   return (
     <div className={styles.card}>
@@ -83,9 +89,41 @@ export function CultureCard({ culture, onView }: CultureCardProps) {
 
       {/* Rodapé */}
       <footer className={styles.footer}>
-        <p className={styles.activitiesCount}>
-          Atividades vinculadas: {culture.activitiesCount || 0}
-        </p>
+        <div 
+          className={styles.activitiesHeader}
+          onClick={() => hasActivities && setShowActivities(!showActivities)}
+          style={{ cursor: hasActivities ? 'pointer' : 'default' }}
+        >
+          <p className={styles.activitiesCount}>
+            Atividades vinculadas: {culture.activitiesCount || 0}
+          </p>
+          {hasActivities && (
+            <span className={styles.chevron}>
+              {showActivities ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
+            </span>
+          )}
+        </div>
+        
+        {showActivities && hasActivities && culture.activities && (
+          <div className={styles.activitiesList}>
+            {culture.activities.map((activity) => (
+              <div key={activity.id} className={styles.activityItem}>
+                <div className={styles.activityContent}>
+                  <div className={styles.activityHeader}>
+                    <span className={styles.activityTitle}>{activity.titulo}</span>
+                    <span className={styles.activityDate}>
+                      {activity.data ? format(parseDateSafe(activity.data), "dd/MM/yy", { locale: ptBR }) : 'N/A'}
+                    </span>
+                  </div>
+                  {activity.descricao && (
+                    <p className={styles.activityDescription}>{activity.descricao}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <Button
           onClick={onView}
           variant="quaternary"

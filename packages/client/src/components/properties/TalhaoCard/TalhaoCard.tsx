@@ -32,7 +32,7 @@ export function TalhaoCard({ talhao }: Props) {
       </header>
       
       <div className={styles.content}>
-        <p><strong>Cultura atual:</strong> {talhao.cultura}</p>
+        {talhao.cultura && <p><strong>Cultura atual:</strong> {talhao.cultura}</p>}
         <p><strong>Área:</strong> {talhao.area}</p>
       </div>
 

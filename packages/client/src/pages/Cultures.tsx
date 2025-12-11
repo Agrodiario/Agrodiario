@@ -48,6 +48,13 @@ export default function CulturesPage() {
         orderToLoad
       );
 
+      // Debug: verificar se as atividades estão chegando
+      console.log('[Cultures] Response data:', response.data.length, 'cultures');
+      if (response.data.length > 0) {
+        console.log('[Cultures] First culture:', response.data[0]);
+        console.log('[Cultures] First culture activities:', response.data[0].activities);
+      }
+
       if (pageToLoad === 1) {
         setCultures(response.data);
       } else {

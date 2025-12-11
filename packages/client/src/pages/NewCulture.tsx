@@ -14,6 +14,10 @@ export default function NewCulture() {
     setError(null);
 
     try {
+      // Converter data de dd/mm/yyyy para YYYY-MM-DD
+      const [day, month, year] = data.plantingDate.split('/');
+      const plantingDateISO = `${year}-${month}-${day}`;
+
       // Transform form data to match backend DTO
       const cultureDto: CreateCultureDto = {
         propertyId: data.propertyId,
@@ -22,7 +26,7 @@ export default function NewCulture() {
         cycle: parseInt(data.cycle),
         origin: data.origin,
         supplier: data.supplier || undefined,
-        plantingDate: data.plantingDate,
+        plantingDate: plantingDateISO,
         plantingArea: parseFloat(data.plantingArea),
         plotName: data.plotName || undefined,
         observations: data.observations || undefined,
