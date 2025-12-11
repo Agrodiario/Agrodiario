@@ -4,7 +4,7 @@ import { EmbrapaService } from './embrapa.service';
 import { EmbrapaController } from './embrapa.controller';
 
 @Module({
-  imports: [HttpModule], 
+  imports: [HttpModule],
   controllers: [EmbrapaController],
   providers: [EmbrapaService],
   exports: [EmbrapaService],

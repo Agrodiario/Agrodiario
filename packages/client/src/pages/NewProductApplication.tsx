@@ -1,8 +1,8 @@
-import { ProductApplicationFormData } from '../types/productApplication.types.ts';
-import { ProductApplicationForm } from '../components/productApplications/ProductApplicationForm.tsx';
-import { productApplicationService } from '../services/productApplication.service.ts';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ProductApplicationFormData } from "../types/productApplication.types.ts";
+import { ProductApplicationForm } from "../components/productApplications/ProductApplicationForm.tsx";
+import { productApplicationService } from "../services/productApplication.service.ts";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function NewProductApplication() {
   const navigate = useNavigate();
@@ -31,22 +31,24 @@ export default function NewProductApplication() {
         !productApplicationDto.productName ||
         !productApplicationDto.applicationDate
       ) {
-        setError('Preencha todos os campos obrigatórios');
+        setError("Preencha todos os campos obrigatórios");
         setIsLoading(false);
         return;
       }
 
       await productApplicationService.create(productApplicationDto);
 
-      navigate('/product');
+      navigate("/product");
     } catch (e) {
-      console.error('Erro ao criar aplicação de produto', e);
+      console.error("Erro ao criar aplicação de produto", e);
 
       // Solução 1: Tipar o erro explicitamente
       if (e instanceof Error) {
-        setError(e.message || 'Erro ao criar aplicação de produto. Tente novamente');
+        setError(
+          e.message || "Erro ao criar aplicação de produto. Tente novamente",
+        );
       } else {
-        setError('Erro ao criar aplicação de produto. Tente novamente');
+        setError("Erro ao criar aplicação de produto. Tente novamente");
       }
     } finally {
       setIsLoading(false);
@@ -58,14 +60,14 @@ export default function NewProductApplication() {
       {error && (
         <div
           style={{
-            padding: '12px',
-            backgroundColor: '#fee',
-            color: '#c33',
-            borderRadius: '4px',
-            marginBottom: '16px',
-            fontSize: '14px',
-            maxWidth: '800px',
-            margin: '0 auto 16px',
+            padding: "12px",
+            backgroundColor: "#fee",
+            color: "#c33",
+            borderRadius: "4px",
+            marginBottom: "16px",
+            fontSize: "14px",
+            maxWidth: "800px",
+            margin: "0 auto 16px",
           }}
         >
           {error}
@@ -80,14 +82,14 @@ export default function NewProductApplication() {
       {error && (
         <div
           style={{
-            padding: '12px',
-            backgroundColor: '#fee',
-            color: '#c33',
-            borderRadius: '4px',
-            marginBottom: '16px',
-            fontSize: '14px',
-            maxWidth: '800px',
-            margin: '0 auto 16px',
+            padding: "12px",
+            backgroundColor: "#fee",
+            color: "#c33",
+            borderRadius: "4px",
+            marginBottom: "16px",
+            fontSize: "14px",
+            maxWidth: "800px",
+            margin: "0 auto 16px",
           }}
         >
           {error}

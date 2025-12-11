@@ -102,7 +102,7 @@ describe('EmbrapaService', () => {
       jest.spyOn(httpService, 'get').mockReturnValue(of(mockProductsResponse));
 
       await service.getInsumos();
-      
+
       await service.getInsumos();
 
       expect(httpService.post).toHaveBeenCalledTimes(1);
@@ -119,9 +119,11 @@ describe('EmbrapaService', () => {
     });
 
     it('should throw InternalServerErrorException if authentication fails', async () => {
-      jest.spyOn(httpService, 'post').mockReturnValue(throwError(() => ({
-        response: { data: 'Auth Failed' },
-      })));
+      jest.spyOn(httpService, 'post').mockReturnValue(
+        throwError(() => ({
+          response: { data: 'Auth Failed' },
+        })),
+      );
 
       await expect(service.getInsumos()).rejects.toThrow(InternalServerErrorException);
     });
@@ -182,11 +184,13 @@ describe('EmbrapaService', () => {
     });
 
     it('should throw InternalServerErrorException if authentication fails', async () => {
-      jest.spyOn(httpService, 'post').mockReturnValue(throwError(() => ({
-        response: { data: 'Auth Failed' },
-      })));
+      jest.spyOn(httpService, 'post').mockReturnValue(
+        throwError(() => ({
+          response: { data: 'Auth Failed' },
+        })),
+      );
 
       await expect(service.getInsumos()).rejects.toThrow(InternalServerErrorException);
     });
-  })
+  });
 });

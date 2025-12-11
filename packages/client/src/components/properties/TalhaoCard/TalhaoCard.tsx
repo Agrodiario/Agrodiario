@@ -1,6 +1,6 @@
 // src/components/properties/TalhaoCard/TalhaoCard.tsx
-import styles from './TalhaoCard.module.css';
-import { TagToggle } from '../../common/TagToggle/TagToggle';
+import styles from "./TalhaoCard.module.css";
+import { TagToggle } from "../../common/TagToggle/TagToggle";
 // import { FiPlus } from 'react-icons/fi';
 
 // Tipo para os dados do talhão
@@ -9,7 +9,7 @@ export type Talhao = {
   name: string;
   cultura: string;
   area: number;
-  status: 'em preparo' | 'plantado' | 'colhido'; // Adicione outros status se necessário
+  status: "em preparo" | "plantado" | "colhido"; // Adicione outros status se necessário
 };
 
 type Props = {
@@ -26,14 +26,30 @@ export function TalhaoCard({ talhao }: Props) {
       <header className={styles.header}>
         <span className={styles.title}>{talhao.name}</span>
         {/* Usamos o TagToggle apenas para visualização */}
-        <TagToggle color="green" isActive={true} style={{ cursor: 'default', fontSize: '0.75rem', padding: '4px 10px' }}>
-          {talhao.status === 'em preparo' ? '✓ Em preparo' : capitalize(talhao.status)}
+        <TagToggle
+          color="green"
+          isActive={true}
+          style={{
+            cursor: "default",
+            fontSize: "0.75rem",
+            padding: "4px 10px",
+          }}
+        >
+          {talhao.status === "em preparo"
+            ? "✓ Em preparo"
+            : capitalize(talhao.status)}
         </TagToggle>
       </header>
-      
+
       <div className={styles.content}>
-        {talhao.cultura && <p><strong>Cultura atual:</strong> {talhao.cultura}</p>}
-        <p><strong>Área:</strong> {talhao.area}</p>
+        {talhao.cultura && (
+          <p>
+            <strong>Cultura atual:</strong> {talhao.cultura}
+          </p>
+        )}
+        <p>
+          <strong>Área:</strong> {talhao.area}
+        </p>
       </div>
 
       {/* <button className={styles.viewAreaButton}>

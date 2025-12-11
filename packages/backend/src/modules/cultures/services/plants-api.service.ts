@@ -33,9 +33,10 @@ export class PlantsApiService {
   }
 
   private createApiClient(): AxiosInstance {
-    const apiToken = this.configService.get<string>('TREFLE_API_TOKEN') || 
-                     'usr-KHirc_oh8C0Sk_y8uTPn8LmidIo7k66ANcadoCYqjF4';
-    
+    const apiToken =
+      this.configService.get<string>('TREFLE_API_TOKEN') ||
+      'usr-KHirc_oh8C0Sk_y8uTPn8LmidIo7k66ANcadoCYqjF4';
+
     return axios.create({
       baseURL: PlantsApiService.API_BASE_URL,
       timeout: PlantsApiService.API_TIMEOUT,
@@ -43,7 +44,10 @@ export class PlantsApiService {
     });
   }
 
-  async searchCrops(searchTerm?: string, limit: number = PlantsApiService.DEFAULT_LIMIT): Promise<WikidataCrop[]> {
+  async searchCrops(
+    searchTerm?: string,
+    limit: number = PlantsApiService.DEFAULT_LIMIT,
+  ): Promise<WikidataCrop[]> {
     try {
       const params = this.buildSearchParams(searchTerm);
       const response = await this.trefleApi.get('/plants/search', { params });
@@ -104,15 +108,15 @@ export class PlantsApiService {
    * Filters plants that have a common name
    */
   private filterPlantsWithCommonName(plants: any[]): any[] {
-    return plants.filter(plant => plant.common_name);
+    return plants.filter((plant) => plant.common_name);
   }
 
   /**
    * Translates plant names and maps to WikidataCrop format
    */
   private async translateAndMapToCrops(plants: any[]): Promise<WikidataCrop[]> {
-    const commonNames = plants.map(plant => plant.common_name);
-    
+    const commonNames = plants.map((plant) => plant.common_name);
+
     this.logger.debug(`Original plant names (EN): ${commonNames.slice(0, 3).join(', ')}...`);
     const translatedNames = await this.translationService.translateBatch(commonNames);
     this.logger.debug(`Translated names (PT): ${translatedNames.slice(0, 3).join(', ')}...`);
@@ -129,7 +133,7 @@ export class PlantsApiService {
    * Translates plant names and maps to WikidataCultivar format
    */
   private async translateAndMapToCultivars(plants: any[]): Promise<WikidataCultivar[]> {
-    const commonNames = plants.map(plant => plant.common_name);
+    const commonNames = plants.map((plant) => plant.common_name);
     const translatedNames = await this.translationService.translateBatch(commonNames);
 
     return plants.map((plant, index) => ({

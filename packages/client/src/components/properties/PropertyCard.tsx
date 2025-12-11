@@ -1,12 +1,12 @@
-import styles from './PropertyCard.module.css';
-import { Button } from '../common/Button/Button';
+import styles from "./PropertyCard.module.css";
+import { Button } from "../common/Button/Button";
 import {
   FiHome,
   FiMapPin,
   FiGrid, // Para Talhões
   FiMap, // Para Área
-} from 'react-icons/fi';
-import { PiTreeEvergreen } from 'react-icons/pi'; // Para Cultivo
+} from "react-icons/fi";
+import { PiTreeEvergreen } from "react-icons/pi"; // Para Cultivo
 
 // Componente auxiliar
 function InfoItem({ icon, title, text }: any) {
@@ -22,9 +22,7 @@ function InfoItem({ icon, title, text }: any) {
 }
 
 export function PropertyCard({ property, onView }: any) {
-  const numTalhoes = Array.isArray(property.plots)
-    ? property.plots.length
-    : 0;
+  const numTalhoes = Array.isArray(property.plots) ? property.plots.length : 0;
   return (
     <div className={styles.card}>
       {/* Cabeçalho */}
@@ -40,11 +38,7 @@ export function PropertyCard({ property, onView }: any) {
           title="Estrada da Lavoura"
           text={property.location}
         />
-        <InfoItem
-          icon={<FiGrid />}
-          title="Talhões"
-          text={numTalhoes}
-        />
+        <InfoItem icon={<FiGrid />} title="Talhões" text={numTalhoes} />
         <InfoItem
           icon={<PiTreeEvergreen />}
           title="Cultivo principal"
@@ -63,7 +57,7 @@ export function PropertyCard({ property, onView }: any) {
         <Button
           onClick={onView}
           variant="quaternary"
-          style={{ width: '100%' }}
+          style={{ width: "100%" }}
           className={styles.manageButtonLink}
         >
           Gerenciar

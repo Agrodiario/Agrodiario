@@ -1,17 +1,17 @@
-import { Button } from '../components/common/Button/Button';
-import { Input } from '../components/common/Input/Input';
-import { Dropdown } from '../components/common/Dropdown/Dropdown';
-import { PropertyCard } from '../components/properties/PropertyCard';
-import styles from './Properties.module.css';
-import { FiSearch, FiDownload } from 'react-icons/fi';
-import { FaRegCalendarPlus } from 'react-icons/fa';
-import { MdArrowDropDown } from 'react-icons/md';
-import { Drawer } from '@/components/common/Drawer/Drawer';
-import { useState, useEffect } from 'react';
-import { Property } from '@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer';
-import { PropertyDetailsDrawer } from '@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer';
-import { propertyService } from '../services/property.service';
-import { generatePropertyReport } from '@/utils/generatePDF';
+import { Button } from "../components/common/Button/Button";
+import { Input } from "../components/common/Input/Input";
+import { Dropdown } from "../components/common/Dropdown/Dropdown";
+import { PropertyCard } from "../components/properties/PropertyCard";
+import styles from "./Properties.module.css";
+import { FiSearch, FiDownload } from "react-icons/fi";
+import { FaRegCalendarPlus } from "react-icons/fa";
+import { MdArrowDropDown } from "react-icons/md";
+import { Drawer } from "@/components/common/Drawer/Drawer";
+import { useState, useEffect } from "react";
+import { Property } from "@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer";
+import { PropertyDetailsDrawer } from "@/components/properties/PropertyDetailsDrawer/PropertyDetailsDrawer";
+import { propertyService } from "../services/property.service";
+import { generatePropertyReport } from "@/utils/generatePDF";
 
 const ITEMS_PER_PAGE = 6; // Igual ao diary
 
@@ -21,34 +21,36 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'DESC' | 'ASC'>('DESC');
-  
+  const [sortOrder, setSortOrder] = useState<"DESC" | "ASC">("DESC");
+
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null,
+  );
 
   const fetchProperties = async (
-    pageToLoad: number, 
-    orderToLoad: 'ASC' | 'DESC', 
-    searchToLoad: string
+    pageToLoad: number,
+    orderToLoad: "ASC" | "DESC",
+    searchToLoad: string,
   ) => {
     try {
       if (pageToLoad === 1) setLoading(true);
       else setLoadingMore(true);
 
       const response = await propertyService.findAll(
-        pageToLoad, 
-        ITEMS_PER_PAGE, 
-        orderToLoad, 
-        searchToLoad
+        pageToLoad,
+        ITEMS_PER_PAGE,
+        orderToLoad,
+        searchToLoad,
       );
 
-      const transformedProperties = response.data.map(prop => ({
+      const transformedProperties = response.data.map((prop) => ({
         id: prop.id,
         name: prop.name,
-        location: prop.address.split(',').slice(-2).join(',').trim(),
+        location: prop.address.split(",").slice(-2).join(",").trim(),
         plots: prop.plots || [],
         cultivo: prop.mainCrop,
         area: prop.productionArea,
@@ -65,7 +67,7 @@ export default function PropertiesPage() {
       }
       setTotal(response.total || response.data.length);
     } catch (err: any) {
-      console.error('Erro ao carregar propriedades:', err);
+      console.error("Erro ao carregar propriedades:", err);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -75,18 +77,25 @@ export default function PropertiesPage() {
   const handleGenerateReport = async () => {
     try {
       setIsGeneratingReport(true);
-      const response = await propertyService.findAll(1, 1000, sortOrder, searchTerm);
-      const textoFiltro = searchTerm ? `Busca por: "${searchTerm}"` : 'Todos os registros';
+      const response = await propertyService.findAll(
+        1,
+        1000,
+        sortOrder,
+        searchTerm,
+      );
+      const textoFiltro = searchTerm
+        ? `Busca por: "${searchTerm}"`
+        : "Todos os registros";
       generatePropertyReport(response.data, textoFiltro);
     } catch (error) {
-      console.error('Erro ao gerar relatório de propriedades', error);
-      alert('Erro ao gerar o relatório. Tente novamente.');
+      console.error("Erro ao gerar relatório de propriedades", error);
+      alert("Erro ao gerar o relatório. Tente novamente.");
     } finally {
       setIsGeneratingReport(false);
     }
   };
 
-  const handleSortChange = (newOrder: 'ASC' | 'DESC') => {
+  const handleSortChange = (newOrder: "ASC" | "DESC") => {
     if (newOrder === sortOrder) return;
     setSortOrder(newOrder);
     setPage(1);
@@ -144,14 +153,14 @@ export default function PropertiesPage() {
             icon={<FiSearch size={18} />}
           />
         </div>
-        
+
         <div className={styles.toolbarButtons}>
           <Dropdown
             trigger={
-              <Button 
-                variant="tertiary" 
-                leftIcon={<FaRegCalendarPlus size={18} />} 
-                rightIcon={<MdArrowDropDown size={18} />} 
+              <Button
+                variant="tertiary"
+                leftIcon={<FaRegCalendarPlus size={18} />}
+                rightIcon={<MdArrowDropDown size={18} />}
                 className={styles.sortButton}
               >
                 <span className={styles.buttonText}>Ordenar por</span>
@@ -159,38 +168,44 @@ export default function PropertiesPage() {
             }
           >
             <div className={styles.dropdownMenu}>
-              <button 
+              <button
                 className={styles.dropdownItem}
-                onClick={() => handleSortChange('DESC')}
-                style={{ 
-                  fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal',
-                  backgroundColor: sortOrder === 'DESC' ? 'var(--color-bg-light)' : 'transparent'
+                onClick={() => handleSortChange("DESC")}
+                style={{
+                  fontWeight: sortOrder === "DESC" ? "bold" : "normal",
+                  backgroundColor:
+                    sortOrder === "DESC"
+                      ? "var(--color-bg-light)"
+                      : "transparent",
                 }}
               >
                 Mais recentes
               </button>
-              <button 
+              <button
                 className={styles.dropdownItem}
-                onClick={() => handleSortChange('ASC')}
-                style={{ 
-                  fontWeight: sortOrder === 'ASC' ? 'bold' : 'normal',
-                  backgroundColor: sortOrder === 'ASC' ? 'var(--color-bg-light)' : 'transparent'
+                onClick={() => handleSortChange("ASC")}
+                style={{
+                  fontWeight: sortOrder === "ASC" ? "bold" : "normal",
+                  backgroundColor:
+                    sortOrder === "ASC"
+                      ? "var(--color-bg-light)"
+                      : "transparent",
                 }}
               >
                 Mais antigas
               </button>
             </div>
           </Dropdown>
-          
-          <Button 
-            variant="secondary" 
-            leftIcon={<FiDownload size={18} />} 
+
+          <Button
+            variant="secondary"
+            leftIcon={<FiDownload size={18} />}
             className={styles.reportButton}
             onClick={handleGenerateReport}
             disabled={isGeneratingReport}
           >
             <span className={styles.buttonText}>
-              {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
+              {isGeneratingReport ? "Gerando..." : "Gerar relatório"}
             </span>
           </Button>
         </div>
@@ -205,16 +220,14 @@ export default function PropertiesPage() {
         ) : properties.length === 0 ? (
           <div className={styles.emptyState}>
             <p>Nenhuma propriedade encontrada.</p>
-            {searchTerm && (
-              <p>Tente ajustar os termos da busca.</p>
-            )}
+            {searchTerm && <p>Tente ajustar os termos da busca.</p>}
           </div>
         ) : (
           properties.map((prop) => (
-            <PropertyCard 
-              key={prop.id} 
+            <PropertyCard
+              key={prop.id}
               property={prop}
-              onView={() => handleViewProperty(prop)} 
+              onView={() => handleViewProperty(prop)}
             />
           ))
         )}
@@ -222,16 +235,16 @@ export default function PropertiesPage() {
 
       <footer className={styles.footer}>
         {hasMore && (
-          <Button 
-            variant="quaternary" 
+          <Button
+            variant="quaternary"
             className={styles.loadMoreButton}
             onClick={handleLoadMore}
             disabled={loadingMore}
           >
-            {loadingMore ? 'Carregando...' : 'Carregar mais'}
+            {loadingMore ? "Carregando..." : "Carregar mais"}
           </Button>
         )}
-        
+
         {/* Mensagem quando acaba */}
         {!hasMore && properties.length > 0 && (
           <span className={styles.endMessage}>
@@ -246,7 +259,10 @@ export default function PropertiesPage() {
         title="Visualizar propriedade"
       >
         {selectedProperty && (
-          <PropertyDetailsDrawer property={selectedProperty} onDelete={handleDelete} />
+          <PropertyDetailsDrawer
+            property={selectedProperty}
+            onDelete={handleDelete}
+          />
         )}
       </Drawer>
     </div>

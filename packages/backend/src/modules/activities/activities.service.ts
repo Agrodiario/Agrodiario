@@ -6,7 +6,7 @@ import { Activity } from './entities/activity.entity';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { join } from 'path';
-import * as fs from 'fs'; 
+import * as fs from 'fs';
 
 @Injectable()
 export class ActivityService {
@@ -17,11 +17,10 @@ export class ActivityService {
 
   async create(
     createActivityDto: CreateActivityDto,
-    userId: number, 
-    files: Array<Express.Multer.File> = []
+    userId: number,
+    files: Array<Express.Multer.File> = [],
   ): Promise<Activity> {
-    
-    const fileNames = files ? files.map(file => file.filename) : [];
+    const fileNames = files ? files.map((file) => file.filename) : [];
 
     const newActivity = this.activityRepository.create({
       ...createActivityDto,
@@ -33,13 +32,12 @@ export class ActivityService {
   }
 
   async findAll(
-    page: number = 1, 
-    limit: number = 10, 
+    page: number = 1,
+    limit: number = 10,
     order: 'ASC' | 'DESC' = 'DESC',
     search?: string,
     userId?: number,
-  ): Promise<{ data: Activity[], total: number }> {
-    
+  ): Promise<{ data: Activity[]; total: number }> {
     const skip = (page - 1) * limit;
 
     const query = this.activityRepository.createQueryBuilder('activity');
@@ -74,10 +72,10 @@ export class ActivityService {
   }
 
   async update(
-    id: number, 
+    id: number,
     updateActivityDto: UpdateActivityDto,
     userId: number,
-    files: Array<Express.Multer.File> = []
+    files: Array<Express.Multer.File> = [],
   ): Promise<Activity> {
     const activity = await this.findOne(id, userId);
 
@@ -86,14 +84,14 @@ export class ActivityService {
     if (updateActivityDto.removedFiles) {
       try {
         const filesToRemove: string[] = JSON.parse(updateActivityDto.removedFiles);
-        
-        currentAnexos = currentAnexos.filter(filename => !filesToRemove.includes(filename));
 
-        filesToRemove.forEach(filename => {
+        currentAnexos = currentAnexos.filter((filename) => !filesToRemove.includes(filename));
+
+        filesToRemove.forEach((filename) => {
           const filePath = join(__dirname, '..', '..', 'uploads', filename);
-          
+
           if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath); 
+            fs.unlinkSync(filePath);
           }
         });
       } catch (error) {
@@ -101,8 +99,8 @@ export class ActivityService {
       }
     }
 
-    const newFileNames = files ? files.map(file => file.filename) : [];
-    
+    const newFileNames = files ? files.map((file) => file.filename) : [];
+
     const finalAnexos = [...currentAnexos, ...newFileNames];
 
     const { removedFiles, ...dataToUpdate } = updateActivityDto;
@@ -119,7 +117,7 @@ export class ActivityService {
     const activity = await this.findOne(id, userId);
 
     if (activity.anexos && activity.anexos.length > 0) {
-      activity.anexos.forEach(filename => {
+      activity.anexos.forEach((filename) => {
         const filePath = join(__dirname, '..', '..', 'uploads', filename);
         if (fs.existsSync(filePath)) {
           try {

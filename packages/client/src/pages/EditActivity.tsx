@@ -1,16 +1,17 @@
 // src/pages/EditActivity.tsx
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ActivityForm, ActivityFormData } from './ActivityForm'; 
-import { activityService } from '../services/activityService';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ActivityForm, ActivityFormData } from "./ActivityForm";
+import { activityService } from "../services/activityService";
 
 export default function EditActivity() {
   const navigate = useNavigate();
-  const { id } = useParams(); 
+  const { id } = useParams();
 
-  const [activityToEdit, setActivityToEdit] = useState<Partial<ActivityFormData> | null>(null);
-  const [isLoadingData, setIsLoadingData] = useState(true); 
-  const [isSaving, setIsSaving] = useState(false);          
+  const [activityToEdit, setActivityToEdit] =
+    useState<Partial<ActivityFormData> | null>(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function loadActivity() {
@@ -19,12 +20,12 @@ export default function EditActivity() {
       try {
         setIsLoadingData(true);
         const data = await activityService.getById(id);
-        
-        setActivityToEdit(data); 
+
+        setActivityToEdit(data);
       } catch (error) {
-        console.error('Erro ao carregar atividade:', error);
-        alert('Não foi possível carregar os dados da atividade.');
-        navigate('/diary'); 
+        console.error("Erro ao carregar atividade:", error);
+        alert("Não foi possível carregar os dados da atividade.");
+        navigate("/diary");
       } finally {
         setIsLoadingData(false);
       }
@@ -33,23 +34,28 @@ export default function EditActivity() {
     loadActivity();
   }, [id, navigate]);
 
-  const handleEdit = async (data: ActivityFormData, files: File[], removedFiles: string[]) => {
+  const handleEdit = async (
+    data: ActivityFormData,
+    files: File[],
+    removedFiles: string[],
+  ) => {
     if (!id) return;
 
     try {
       setIsSaving(true);
 
-
       await activityService.update(id, {
         ...data,
-        insumoQuantidade: data.insumoQuantidade ? parseFloat(data.insumoQuantidade) : undefined,
-        files: files,          
-        removedFiles: removedFiles, 
+        insumoQuantidade: data.insumoQuantidade
+          ? parseFloat(data.insumoQuantidade)
+          : undefined,
+        files: files,
+        removedFiles: removedFiles,
       });
 
-      navigate('/diary');
+      navigate("/diary");
     } catch (error) {
-      console.error('Erro ao atualizar atividade:', error);
+      console.error("Erro ao atualizar atividade:", error);
     } finally {
       setIsSaving(false);
     }
@@ -57,7 +63,9 @@ export default function EditActivity() {
 
   if (isLoadingData) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+      <div
+        style={{ display: "flex", justifyContent: "center", padding: "3rem" }}
+      >
         <p>Carregando dados da atividade...</p>
       </div>
     );
@@ -68,10 +76,10 @@ export default function EditActivity() {
   }
 
   return (
-    <ActivityForm 
-      initialData={activityToEdit} 
-      onSubmit={handleEdit} 
-      isLoading={isSaving} 
+    <ActivityForm
+      initialData={activityToEdit}
+      onSubmit={handleEdit}
+      isLoading={isSaving}
     />
   );
 }

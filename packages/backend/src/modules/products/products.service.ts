@@ -19,8 +19,7 @@ export class ProductsService {
       JSON.stringify(entity.commercialNames.sort()) ===
         JSON.stringify(dto.commercialNames.sort()) &&
       entity.registrationHolder === dto.registrationHolder &&
-      JSON.stringify(entity.categories.sort()) ===
-        JSON.stringify(dto.categories.sort()) &&
+      JSON.stringify(entity.categories.sort()) === JSON.stringify(dto.categories.sort()) &&
       JSON.stringify(entity.activeIngredients.sort()) ===
         JSON.stringify(dto.activeIngredients.sort()) &&
       entity.organicFarmingProduct === dto.organicFarmingProduct

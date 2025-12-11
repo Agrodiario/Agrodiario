@@ -1,8 +1,8 @@
 // src/pages/NewActivity.tsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {ActivityForm, ActivityFormData} from './ActivityForm'; 
-import { activityService } from '../services/activityService';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ActivityForm, ActivityFormData } from "./ActivityForm";
+import { activityService } from "../services/activityService";
 
 export default function NewActivity() {
   const navigate = useNavigate();
@@ -14,23 +14,20 @@ export default function NewActivity() {
 
       await activityService.create({
         ...data,
-        insumoQuantidade: data.insumoQuantidade ? parseFloat(data.insumoQuantidade) : undefined,
+        insumoQuantidade: data.insumoQuantidade
+          ? parseFloat(data.insumoQuantidade)
+          : undefined,
         files: files,
       });
 
-      navigate('/diary'); 
+      navigate("/diary");
     } catch (error) {
-      console.error('Erro ao criar atividade:', error);
-      alert('Ocorreu um erro ao criar a atividade. Tente novamente.');
+      console.error("Erro ao criar atividade:", error);
+      alert("Ocorreu um erro ao criar a atividade. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  return (
-    <ActivityForm 
-      onSubmit={handleCreate} 
-      isLoading={isLoading} 
-    />
-  );
+  return <ActivityForm onSubmit={handleCreate} isLoading={isLoading} />;
 }

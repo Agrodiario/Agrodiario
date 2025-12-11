@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ActivityService } from './activities.service'; 
+import { ActivityService } from './activities.service';
 import { Activity } from './entities/activity.entity';
 import { NotFoundException } from '@nestjs/common';
 import * as fs from 'fs';
-
 
 jest.mock('fs');
 
@@ -72,7 +71,7 @@ describe('ActivityService', () => {
     }).compile();
 
     service = module.get<ActivityService>(ActivityService);
-    
+
     jest.clearAllMocks();
   });
 
@@ -97,7 +96,7 @@ describe('ActivityService', () => {
 
       expect(mockActivityRepository.create).toHaveBeenCalledWith({
         ...createDto,
-        anexos: ['123-foto.png'], 
+        anexos: ['123-foto.png'],
         userId: 1,
       });
       expect(mockActivityRepository.save).toHaveBeenCalled();
@@ -110,7 +109,9 @@ describe('ActivityService', () => {
       const result = await service.findAll(1, 10, 'DESC', undefined, 1);
 
       expect(mockActivityRepository.createQueryBuilder).toHaveBeenCalledWith('activity');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('activity.userId = :userId', { userId: 1 });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('activity.userId = :userId', {
+        userId: 1,
+      });
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('activity.date', 'DESC');
       expect(result).toEqual({ data: mockActivityArray, total: 2 });
     });
@@ -142,37 +143,37 @@ describe('ActivityService', () => {
     it('should update activity and handle file removal', async () => {
       const updateDto = {
         titulo: 'Titulo Atualizado',
-        removedFiles: JSON.stringify(['antigo.png']), 
+        removedFiles: JSON.stringify(['antigo.png']),
       };
 
       (fs.existsSync as jest.Mock).mockReturnValue(true);
 
       const result = await service.update(1, updateDto, 1, [mockFile]);
 
-      expect(fs.unlinkSync).toHaveBeenCalled(); 
+      expect(fs.unlinkSync).toHaveBeenCalled();
 
       expect(mockActivityRepository.merge).toHaveBeenCalledWith(
         mockOneActivity,
         expect.objectContaining({
           titulo: 'Titulo Atualizado',
-          anexos: ['123-foto.png'], 
-        })
+          anexos: ['123-foto.png'],
+        }),
       );
-      
+
       expect(mockActivityRepository.save).toHaveBeenCalled();
     });
 
     it('should handle update without file changes', async () => {
       const updateDto = { titulo: 'Apenas texto' };
-      
-      await service.update(1, updateDto, 1, []); 
+
+      await service.update(1, updateDto, 1, []);
 
       expect(mockActivityRepository.merge).toHaveBeenCalledWith(
         mockOneActivity,
         expect.objectContaining({
           titulo: 'Apenas texto',
-          anexos: ['antigo.png'], 
-        })
+          anexos: ['antigo.png'],
+        }),
       );
       expect(fs.unlinkSync).not.toHaveBeenCalled();
     });

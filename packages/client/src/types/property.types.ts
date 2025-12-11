@@ -2,7 +2,7 @@ export interface Plot {
   name: string;
   area: number;
   culture: string;
-  situacao: 'producao' | 'preparo' | 'pousio';
+  situacao: "producao" | "preparo" | "pousio";
   polygon?: any;
 }
 

@@ -8,9 +8,9 @@ export function parseDateSafe(dateString: string | Date): Date {
   }
 
   // Se tem 'T' é ISO, pega apenas a parte da data
-  const dateOnly = dateString.split('T')[0];
-  const [year, month, day] = dateOnly.split('-').map(Number);
-  
+  const dateOnly = dateString.split("T")[0];
+  const [year, month, day] = dateOnly.split("-").map(Number);
+
   // Cria a data no timezone local
   return new Date(year, month - 1, day);
 }
@@ -20,8 +20,8 @@ export function parseDateSafe(dateString: string | Date): Date {
  */
 export function formatDateBR(date: string | Date): string {
   const d = parseDateSafe(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 }
@@ -30,6 +30,6 @@ export function formatDateBR(date: string | Date): string {
  * Converte data do formato dd/mm/yyyy para YYYY-MM-DD
  */
 export function formatDateISO(dateBR: string): string {
-  const [day, month, year] = dateBR.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const [day, month, year] = dateBR.split("/");
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }

@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react'; // <--- Importamos useEffect
-import { Navbar } from './components/Navbar';
-import './Landing.css';
-import { Header } from './components/Header';
-import { About } from './components/About';
-import { Team } from './components/Team';
-import { Affiliation } from './components/Affiliation';
-import { CallToAction } from './components/CallToAction';
-import { Footer } from './components/Footer';
+import { useState, useEffect } from "react"; // <--- Importamos useEffect
+import { Navbar } from "./components/Navbar";
+import "./Landing.css";
+import { Header } from "./components/Header";
+import { About } from "./components/About";
+import { Team } from "./components/Team";
+import { Affiliation } from "./components/Affiliation";
+import { CallToAction } from "./components/CallToAction";
+import { Footer } from "./components/Footer";
 
-type SectionId = 'inicio' | 'sobre' | 'quem-somos' | 'parceiros';
+type SectionId = "inicio" | "sobre" | "quem-somos" | "parceiros";
 
 export default function Landing() {
-  const [activeSection, setActiveSection] = useState<SectionId>('inicio');
+  const [activeSection, setActiveSection] = useState<SectionId>("inicio");
 
   useEffect(() => {
-    const sections = document.querySelectorAll('section[id]');
+    const sections = document.querySelectorAll("section[id]");
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -25,9 +25,9 @@ export default function Landing() {
       },
       {
         root: null, // viewport
-        rootMargin: '-50% 0px -50% 0px',
+        rootMargin: "-50% 0px -50% 0px",
         threshold: 0,
-      }
+      },
     );
 
     sections.forEach((sec) => observer.observe(sec));
@@ -41,7 +41,7 @@ export default function Landing() {
     setActiveSection(section as SectionId);
     const element = document.getElementById(section);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
     }
   };
 

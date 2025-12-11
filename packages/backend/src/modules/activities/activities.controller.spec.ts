@@ -24,7 +24,7 @@ const mockFile: Express.Multer.File = {
   destination: './uploads',
   filename: 'test-file.png',
   stream: new Readable(),
-  path: ''
+  path: '',
 };
 
 const mockRequest = {
@@ -64,11 +64,11 @@ describe('ActivityController', () => {
         descricao: 'Teste',
         responsavel: 'João',
         titulo: 'Atividade Teste',
-        operacao: ''
+        operacao: '',
       };
 
       const expectedResult = { id: 1, ...createDto, userId: 1 };
-      
+
       jest.spyOn(service, 'create').mockResolvedValue(expectedResult as any);
 
       const result = await controller.create(createDto, [mockFile], mockRequest);
@@ -82,7 +82,7 @@ describe('ActivityController', () => {
     it('should call service.findAll with correct pagination, order and userId', async () => {
       const page = 1;
       const limit = 10;
-      const order = 'asc'; 
+      const order = 'asc';
       const search = 'Soja';
 
       const expectedResult = { data: [], total: 0 };
@@ -90,25 +90,13 @@ describe('ActivityController', () => {
 
       await controller.findAll(page, limit, order, mockRequest, search);
 
-      expect(service.findAll).toHaveBeenCalledWith(
-        page, 
-        limit, 
-        'ASC', 
-        search, 
-        mockRequest.user.id
-      );
+      expect(service.findAll).toHaveBeenCalledWith(page, limit, 'ASC', search, mockRequest.user.id);
     });
 
     it('should use DESC as default order if not provided', async () => {
       await controller.findAll(1, 10, 'DESC', mockRequest);
 
-      expect(service.findAll).toHaveBeenCalledWith(
-        1, 
-        10, 
-        'DESC', 
-        undefined, 
-        mockRequest.user.id
-      );
+      expect(service.findAll).toHaveBeenCalledWith(1, 10, 'DESC', undefined, mockRequest.user.id);
     });
   });
 
@@ -116,7 +104,7 @@ describe('ActivityController', () => {
     it('should call service.findOne with id and userId', async () => {
       const activityId = 5;
       const expectedResult = { id: activityId, titulo: 'Teste' };
-      
+
       jest.spyOn(service, 'findOne').mockResolvedValue(expectedResult as any);
 
       const result = await controller.findOne(activityId, mockRequest);
@@ -136,12 +124,9 @@ describe('ActivityController', () => {
 
       const result = await controller.update(activityId, updateDto, [mockFile], mockRequest);
 
-      expect(service.update).toHaveBeenCalledWith(
-        activityId, 
-        updateDto, 
-        mockRequest.user.id, 
-        [mockFile]
-      );
+      expect(service.update).toHaveBeenCalledWith(activityId, updateDto, mockRequest.user.id, [
+        mockFile,
+      ]);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -149,7 +134,7 @@ describe('ActivityController', () => {
   describe('remove', () => {
     it('should call service.remove with id and userId', async () => {
       const activityId = 1;
-      
+
       jest.spyOn(service, 'remove').mockResolvedValue(undefined);
 
       await controller.remove(activityId, mockRequest);

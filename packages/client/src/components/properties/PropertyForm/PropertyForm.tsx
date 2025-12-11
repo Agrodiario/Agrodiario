@@ -1,26 +1,26 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { EditableMap } from '../../map/EditableMap';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
-import L from 'leaflet';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { EditableMap } from "../../map/EditableMap";
+import "leaflet/dist/leaflet.css";
+import "leaflet-draw/dist/leaflet.draw.css";
+import L from "leaflet";
 
-import styles from './PropertyForm.module.css';
-import { Input } from '../../common/Input/Input';
-import { Button } from '../../common/Button/Button';
-import { FileInput } from '../../common/FileInput/FileInput';
-import { TagToggle } from '../../common/TagToggle/TagToggle';
-import { FiArrowLeft, FiUpload, FiPlus, FiTrash2, FiEye } from 'react-icons/fi';
+import styles from "./PropertyForm.module.css";
+import { Input } from "../../common/Input/Input";
+import { Button } from "../../common/Button/Button";
+import { FileInput } from "../../common/FileInput/FileInput";
+import { TagToggle } from "../../common/TagToggle/TagToggle";
+import { FiArrowLeft, FiUpload, FiPlus, FiTrash2, FiEye } from "react-icons/fi";
 
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { CultureSearchSelect } from '@/components/cultures/CultureSearchSelect/CultureSearchSelect';
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { CultureSearchSelect } from "@/components/cultures/CultureSearchSelect/CultureSearchSelect";
 
 // IMPORTAÇÕES DOS UTILS
-import { validateNumberField } from '@/utils/validators';
-import { numberMask } from '@/utils/masks';
+import { validateNumberField } from "@/utils/validators";
+import { numberMask } from "@/utils/masks";
 
 // --- Correção de ícones do Leaflet ---
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -34,7 +34,7 @@ L.Icon.Default.mergeOptions({
 export type TalhaoData = {
   name: string;
   area: string;
-  situacao: 'producao' | 'preparo' | 'pousio';
+  situacao: "producao" | "preparo" | "pousio";
   polygon: any;
 };
 
@@ -65,27 +65,33 @@ function LocationMarker({ position, setPosition }: any) {
 }
 
 const createEmptyTalhao = (): TalhaoData => ({
-  name: '',
-  area: '',
-  situacao: 'preparo',
+  name: "",
+  area: "",
+  situacao: "preparo",
   polygon: null,
 });
 
-export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props) {
+export function PropertyForm({
+  initialData,
+  onSubmit,
+  isLoading = false,
+}: Props) {
   const navigate = useNavigate();
   const isEditMode = !!initialData;
 
   const [formData, setFormData] = useState<PropertyFormData>({
-    name: initialData?.name || '',
-    address: initialData?.address || '',
-    areaTotal: initialData?.areaTotal || '',
-    areaProducao: initialData?.areaProducao || '',
-    cultivo: initialData?.cultivo || '',
+    name: initialData?.name || "",
+    address: initialData?.address || "",
+    areaTotal: initialData?.areaTotal || "",
+    areaProducao: initialData?.areaProducao || "",
+    cultivo: initialData?.cultivo || "",
     markerPosition: initialData?.markerPosition || [-22.85, -50.65],
     talhoes: initialData?.talhoes || [],
   });
 
-  const [activeTalhaoIndex, setActiveTalhaoIndex] = useState<number | null>(null);
+  const [activeTalhaoIndex, setActiveTalhaoIndex] = useState<number | null>(
+    null,
+  );
 
   // Estados de Validação
   const [isValid, setIsValid] = useState(false);
@@ -95,64 +101,75 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   // --- LÓGICA DE VALIDAÇÃO ---
 
-  const validateField = (fieldName: keyof PropertyFormData, value: string): string => {
+  const validateField = (
+    fieldName: keyof PropertyFormData,
+    value: string,
+  ): string => {
     // Campos de texto obrigatórios (Propriedade)
-    if (['name', 'address', 'cultivo'].includes(fieldName)) {
-      if (!value || value.trim() === '') {
+    if (["name", "address", "cultivo"].includes(fieldName)) {
+      if (!value || value.trim() === "") {
         switch (fieldName) {
-          case 'name': return 'Nome da propriedade é obrigatório';
-          case 'address': return 'Endereço é obrigatório';
-          case 'cultivo': return 'Cultivo principal é obrigatório';
-          default: return 'Campo obrigatório';
+          case "name":
+            return "Nome da propriedade é obrigatório";
+          case "address":
+            return "Endereço é obrigatório";
+          case "cultivo":
+            return "Cultivo principal é obrigatório";
+          default:
+            return "Campo obrigatório";
         }
       }
     }
 
     // Validação para campos de área (Numéricos)
-    if (['areaTotal', 'areaProducao'].includes(fieldName)) {
+    if (["areaTotal", "areaProducao"].includes(fieldName)) {
       // Campos de Propriedade (Área Total e Produção) são obrigatórios
-      if (!value || value.trim() === '') {
-        return `${fieldName === 'areaTotal' ? 'Área total' : 'Área de produção'} é obrigatória`;
+      if (!value || value.trim() === "") {
+        return `${fieldName === "areaTotal" ? "Área total" : "Área de produção"} é obrigatória`;
       }
 
       const error = validateNumberField(
         value,
-        fieldName === 'areaTotal' ? 'Área total' : 'Área de produção'
+        fieldName === "areaTotal" ? "Área total" : "Área de produção",
       );
 
       // Ajuste específico para área de produção (pode ser 0)
-      if (fieldName === 'areaProducao' && error.includes('maior que zero')) {
-        const numValue = parseFloat(value.replace(',', '.'));
-        if (numValue >= 0) return '';
+      if (fieldName === "areaProducao" && error.includes("maior que zero")) {
+        const numValue = parseFloat(value.replace(",", "."));
+        if (numValue >= 0) return "";
       }
 
       return error;
     }
 
-    return '';
+    return "";
   };
 
-  const validateTalhaoField = (fieldName: keyof TalhaoData, value: string): string => {
-    if (fieldName === 'name' && (!value || value.trim() === '')) {
-      return 'Nome do talhão é obrigatório';
+  const validateTalhaoField = (
+    fieldName: keyof TalhaoData,
+    value: string,
+  ): string => {
+    if (fieldName === "name" && (!value || value.trim() === "")) {
+      return "Nome do talhão é obrigatório";
     }
-    if (fieldName === 'area') {
-      if (!value || value.trim() === '') {
-        return 'Área do talhão é obrigatória';
+    if (fieldName === "area") {
+      if (!value || value.trim() === "") {
+        return "Área do talhão é obrigatória";
       }
-      return validateNumberField(value, 'Área do talhão');
+      return validateNumberField(value, "Área do talhão");
     }
-    return '';
+    return "";
   };
 
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     const fieldName = name as keyof PropertyFormData;
     let processedValue = value;
 
     // Aplica máscara de número para os campos de área
-    if (['areaTotal', 'areaProducao'].includes(fieldName)) {
+    if (["areaTotal", "areaProducao"].includes(fieldName)) {
       processedValue = numberMask(value);
     }
 
@@ -166,7 +183,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   // --- TALHÃO HANDLERS ---
 
   const addTalhao = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       talhoes: [...prev.talhoes, createEmptyTalhao()],
     }));
@@ -174,7 +191,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   };
 
   const removeTalhao = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       talhoes: prev.talhoes.filter((_, i) => i !== index),
     }));
@@ -188,39 +205,45 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   const updateTalhao = (index: number, field: keyof TalhaoData, value: any) => {
     let processedValue = value;
 
-    if (field === 'area') {
+    if (field === "area") {
       processedValue = numberMask(value);
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       talhoes: prev.talhoes.map((t, i) =>
-        i === index ? { ...t, [field]: processedValue } : t
+        i === index ? { ...t, [field]: processedValue } : t,
       ),
     }));
   };
 
   const handleTalhaoPolygonCreated = (polygon: any) => {
     if (activeTalhaoIndex !== null) {
-      updateTalhao(activeTalhaoIndex, 'polygon', polygon);
+      updateTalhao(activeTalhaoIndex, "polygon", polygon);
     }
   };
 
   const handleTalhaoPolygonDeleted = () => {
     if (activeTalhaoIndex !== null) {
-      updateTalhao(activeTalhaoIndex, 'polygon', null);
+      updateTalhao(activeTalhaoIndex, "polygon", null);
     }
   };
 
   // Efeito para validar o formulário inteiro em tempo real
   useEffect(() => {
-    const requiredPropertyFields: (keyof PropertyFormData)[] = ['name', 'address', 'areaTotal', 'areaProducao', 'cultivo'];
+    const requiredPropertyFields: (keyof PropertyFormData)[] = [
+      "name",
+      "address",
+      "areaTotal",
+      "areaProducao",
+      "cultivo",
+    ];
 
     let isBasicPropertyValid = true;
 
     // 1. Validação dos campos de Propriedade (Sempre obrigatórios)
-    requiredPropertyFields.forEach(field => {
-      const value = (formData[field] || '').toString();
+    requiredPropertyFields.forEach((field) => {
+      const value = (formData[field] || "").toString();
       const error = validateField(field, value);
       if (error) {
         isBasicPropertyValid = false;
@@ -229,32 +252,39 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
     // 2. Validação dos Talhões (cada talhão precisa ter todos os campos preenchidos)
     let areTalhoesValid = true;
-    formData.talhoes.forEach(talhao => {
-      if (validateTalhaoField('name', talhao.name)) areTalhoesValid = false;
-      if (validateTalhaoField('area', talhao.area)) areTalhoesValid = false;
+    formData.talhoes.forEach((talhao) => {
+      if (validateTalhaoField("name", talhao.name)) areTalhoesValid = false;
+      if (validateTalhaoField("area", talhao.area)) areTalhoesValid = false;
     });
 
     setIsValid(isBasicPropertyValid && areTalhoesValid);
   }, [formData]);
-
 
   // Handler para o envio do formulário
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // 1. Campos de Propriedade obrigatórios
-    const requiredPropertyFields: (keyof PropertyFormData)[] = ['name', 'address', 'areaTotal', 'areaProducao', 'cultivo'];
+    const requiredPropertyFields: (keyof PropertyFormData)[] = [
+      "name",
+      "address",
+      "areaTotal",
+      "areaProducao",
+      "cultivo",
+    ];
 
     // 2. Marca os campos de propriedade como tocados
     const newTouched: Record<string, boolean> = {};
-    requiredPropertyFields.forEach(field => { newTouched[field] = true; });
+    requiredPropertyFields.forEach((field) => {
+      newTouched[field] = true;
+    });
 
     // 3. Valida campos de propriedade
     const finalErrors: Record<string, string> = {};
     let hasError = false;
 
-    requiredPropertyFields.forEach(field => {
-      const value = (formData[field] || '').toString();
+    requiredPropertyFields.forEach((field) => {
+      const value = (formData[field] || "").toString();
       const error = validateField(field, value);
       if (error) {
         finalErrors[field] = error;
@@ -264,8 +294,8 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
     // 4. Valida todos os talhões
     formData.talhoes.forEach((talhao, index) => {
-      const nameError = validateTalhaoField('name', talhao.name);
-      const areaError = validateTalhaoField('area', talhao.area);
+      const nameError = validateTalhaoField("name", talhao.name);
+      const areaError = validateTalhaoField("area", talhao.area);
 
       if (nameError || areaError) {
         hasError = true;
@@ -285,7 +315,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   // Handler para atualizar a posição do pino no mapa 1
   const handleMarkerChange = (pos: [number, number]) => {
-    setFormData(prev => ({ ...prev, markerPosition: pos }));
+    setFormData((prev) => ({ ...prev, markerPosition: pos }));
   };
 
   // Handlers para upload de arquivos
@@ -302,12 +332,12 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   const handleViewFile = (file: File) => {
     const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   // Handlers para o desenho no mapa 2 (talhão)
   const _onCreated = (e: any) => {
-    if (e.layerType === 'polygon') {
+    if (e.layerType === "polygon") {
       handleTalhaoPolygonCreated(e.layer.getLatLngs());
     }
   };
@@ -317,10 +347,11 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   };
 
   // Get active talhão for display
-  const activeTalhao = activeTalhaoIndex !== null ? formData.talhoes[activeTalhaoIndex] : null;
+  const activeTalhao =
+    activeTalhaoIndex !== null ? formData.talhoes[activeTalhaoIndex] : null;
 
-  const title = isEditMode ? 'Editar propriedade' : 'Nova propriedade/talhão';
-  const submitText = isEditMode ? 'Salvar alterações' : 'Salvar propriedade';
+  const title = isEditMode ? "Editar propriedade" : "Nova propriedade/talhão";
+  const submitText = isEditMode ? "Salvar alterações" : "Salvar propriedade";
 
   return (
     <div className={styles.page}>
@@ -332,7 +363,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-
         {/* === SEÇÃO 1: DADOS DA PROPRIEDADE (Obrigatórios) === */}
         <div className={styles.section}>
           <h3 className={styles.blueTitle}>Dados da propriedade</h3>
@@ -376,7 +406,9 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             <label className={styles.label}>Cultivo principal</label>
             <CultureSearchSelect
               value={formData.cultivo}
-              onChange={(selectedCrop) => setFormData(prev => ({ ...prev, cultivo: selectedCrop }))}
+              onChange={(selectedCrop) =>
+                setFormData((prev) => ({ ...prev, cultivo: selectedCrop }))
+              }
               placeholder="Selecione o cultivo principal..."
             />
           </div>
@@ -385,8 +417,14 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         {/* === SEÇÃO 2: CERTIFICAÇÕES === */}
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Certificações</h3>
-          <p className={styles.subtitle}>Você pode inserir certificações já existentes, se houver.</p>
-          <FileInput leftIcon={<FiUpload />} onChange={handleFileChange} multiple>
+          <p className={styles.subtitle}>
+            Você pode inserir certificações já existentes, se houver.
+          </p>
+          <FileInput
+            leftIcon={<FiUpload />}
+            onChange={handleFileChange}
+            multiple
+          >
             Fazer upload de foto ou documento
           </FileInput>
 
@@ -422,15 +460,25 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         {/* === SEÇÃO 3: MAPA DA PROPRIEDADE === */}
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Área da propriedade</h3>
-          <p className={styles.subtitle}>Selecione no mapa a localização da propriedade.</p>
+          <p className={styles.subtitle}>
+            Selecione no mapa a localização da propriedade.
+          </p>
 
           <div className={styles.mapContainer}>
-            <MapContainer center={[-22.85, -50.65]} zoom={15} scrollWheelZoom={false} className={styles.map}>
+            <MapContainer
+              center={[-22.85, -50.65]}
+              zoom={15}
+              scrollWheelZoom={false}
+              className={styles.map}
+            >
               <TileLayer
                 attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               />
-              <LocationMarker position={formData.markerPosition} setPosition={handleMarkerChange} />
+              <LocationMarker
+                position={formData.markerPosition}
+                setPosition={handleMarkerChange}
+              />
             </MapContainer>
           </div>
         </div>
@@ -450,13 +498,16 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
           </div>
 
           {formData.talhoes.length === 0 ? (
-            <p className={styles.subtitle}>Nenhum talhão adicionado. Clique em "Adicionar talhão" para criar um.</p>
+            <p className={styles.subtitle}>
+              Nenhum talhão adicionado. Clique em "Adicionar talhão" para criar
+              um.
+            </p>
           ) : (
             <div className={styles.talhoesList}>
               {formData.talhoes.map((talhao, index) => (
                 <div
                   key={index}
-                  className={`${styles.talhaoCard} ${activeTalhaoIndex === index ? styles.talhaoCardActive : ''}`}
+                  className={`${styles.talhaoCard} ${activeTalhaoIndex === index ? styles.talhaoCardActive : ""}`}
                   onClick={() => setActiveTalhaoIndex(index)}
                 >
                   <div className={styles.talhaoCardHeader}>
@@ -487,12 +538,17 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         {activeTalhao && activeTalhaoIndex !== null && (
           <>
             <div className={styles.section}>
-              <h3 className={styles.textTitle}>Editar Talhão: {activeTalhao.name || `Talhão ${activeTalhaoIndex + 1}`}</h3>
+              <h3 className={styles.textTitle}>
+                Editar Talhão:{" "}
+                {activeTalhao.name || `Talhão ${activeTalhaoIndex + 1}`}
+              </h3>
               <Input
                 label="Nome do talhão"
                 name={`talhao-name-${activeTalhaoIndex}`}
                 value={activeTalhao.name}
-                onChange={(e) => updateTalhao(activeTalhaoIndex, 'name', e.target.value)}
+                onChange={(e) =>
+                  updateTalhao(activeTalhaoIndex, "name", e.target.value)
+                }
                 placeholder="Ex: Talhão Norte"
                 required
               />
@@ -500,33 +556,43 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
                 label="Área (hectares)"
                 name={`talhao-area-${activeTalhaoIndex}`}
                 value={activeTalhao.area}
-                onChange={(e) => updateTalhao(activeTalhaoIndex, 'area', e.target.value)}
+                onChange={(e) =>
+                  updateTalhao(activeTalhaoIndex, "area", e.target.value)
+                }
                 placeholder="1"
                 required
               />
 
-              <h4 className={styles.textTitle} style={{ marginTop: '1rem' }}>Situação do talhão</h4>
+              <h4 className={styles.textTitle} style={{ marginTop: "1rem" }}>
+                Situação do talhão
+              </h4>
               <div className={styles.tagGroup}>
                 <TagToggle
                   color="blue"
-                  isActive={activeTalhao.situacao === 'producao'}
-                  onClick={() => updateTalhao(activeTalhaoIndex, 'situacao', 'producao')}
+                  isActive={activeTalhao.situacao === "producao"}
+                  onClick={() =>
+                    updateTalhao(activeTalhaoIndex, "situacao", "producao")
+                  }
                   type="button"
                 >
                   Em produção
                 </TagToggle>
                 <TagToggle
                   color="green"
-                  isActive={activeTalhao.situacao === 'preparo'}
-                  onClick={() => updateTalhao(activeTalhaoIndex, 'situacao', 'preparo')}
+                  isActive={activeTalhao.situacao === "preparo"}
+                  onClick={() =>
+                    updateTalhao(activeTalhaoIndex, "situacao", "preparo")
+                  }
                   type="button"
                 >
                   Em preparo
                 </TagToggle>
                 <TagToggle
                   color="orange"
-                  isActive={activeTalhao.situacao === 'pousio'}
-                  onClick={() => updateTalhao(activeTalhaoIndex, 'situacao', 'pousio')}
+                  isActive={activeTalhao.situacao === "pousio"}
+                  onClick={() =>
+                    updateTalhao(activeTalhaoIndex, "situacao", "pousio")
+                  }
                   type="button"
                 >
                   Em pousio
@@ -537,13 +603,18 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             {/* === SEÇÃO 6: MAPA DO TALHÃO === */}
             <div className={styles.section}>
               <h3 className={styles.textTitle}>Área do talhão</h3>
-              <p className={styles.subtitle}>Desenhe no mapa a área do talhão.</p>
+              <p className={styles.subtitle}>
+                Desenhe no mapa a área do talhão.
+              </p>
 
               <div className={styles.mapContainer}>
-                <MapContainer center={[-22.852, -50.651]} zoom={16} scrollWheelZoom={false} className={styles.map}>
-                  <TileLayer
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                  />
+                <MapContainer
+                  center={[-22.852, -50.651]}
+                  zoom={16}
+                  scrollWheelZoom={false}
+                  className={styles.map}
+                >
+                  <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
                   <EditableMap
                     onCreated={_onCreated}
                     onDeleted={_onDeleted}
@@ -557,15 +628,23 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
         {/* === RODAPÉ === */}
         <footer className={styles.footer}>
-          <Button variant="tertiary" type="button" onClick={() => navigate(-1)} disabled={isLoading}>
+          <Button
+            variant="tertiary"
+            type="button"
+            onClick={() => navigate(-1)}
+            disabled={isLoading}
+          >
             Cancelar
           </Button>
-          <Button variant="primary" type="submit" disabled={!isValid || isLoading}>
-            {isLoading ? 'Salvando...' : submitText}
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={!isValid || isLoading}
+          >
+            {isLoading ? "Salvando..." : submitText}
           </Button>
         </footer>
-
-      </form >
-    </div >
+      </form>
+    </div>
   );
 }

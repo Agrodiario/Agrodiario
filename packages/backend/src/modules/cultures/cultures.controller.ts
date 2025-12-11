@@ -36,8 +36,8 @@ export class CulturesController {
 
   @Get()
   async findAll(
-    @CurrentUser() user: User, 
-    @Query('page') page?: string, 
+    @CurrentUser() user: User,
+    @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('sortBy') sortBy?: string,
@@ -64,7 +64,7 @@ export class CulturesController {
   @Get('by-property/:propertyId')
   async getCulturesByProperty(
     @Param('propertyId', ParseUUIDPipe) propertyId: string,
-    @CurrentUser() user: User
+    @CurrentUser() user: User,
   ) {
     return this.culturesService.findByProperty(propertyId, user.id);
   }
@@ -105,7 +105,7 @@ export class CulturesController {
    */
   private parsePositiveInteger(value: string | undefined, defaultValue: number): number {
     if (!value) return defaultValue;
-    
+
     const parsed = parseInt(value, 10);
     return isNaN(parsed) || parsed < 1 ? defaultValue : parsed;
   }

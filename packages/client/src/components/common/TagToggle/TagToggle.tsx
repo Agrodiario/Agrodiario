@@ -1,11 +1,11 @@
 // src/components/common/TagToggle/TagToggle.tsx
-import { ComponentPropsWithoutRef } from 'react';
-import styles from './TagToggle.module.css';
+import { ComponentPropsWithoutRef } from "react";
+import styles from "./TagToggle.module.css";
 
 // Recebe 'isActive' para saber se deve aplicar o estilo
-type TagToggleProps = ComponentPropsWithoutRef<'button'> & {
+type TagToggleProps = ComponentPropsWithoutRef<"button"> & {
   isActive: boolean;
-  color: 'red' | 'blue' | 'green' | 'orange'; // Cores do design
+  color: "red" | "blue" | "green" | "orange"; // Cores do design
 };
 
 export function TagToggle({
@@ -21,7 +21,7 @@ export function TagToggle({
     isActive ? styles.active : styles.inactive,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   return (
     <button className={className} {...props}>
