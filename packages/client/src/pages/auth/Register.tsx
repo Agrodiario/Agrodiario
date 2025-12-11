@@ -274,6 +274,7 @@ export default function RegisterPage() {
             onChange={handleChange} onBlur={() => handleBlur('name')}
             placeholder="Ex: Maria da Silva" required
             error={errors.name}
+            showError={!!errors.name}
           />
 
           {/* CPF */}
@@ -282,14 +283,16 @@ export default function RegisterPage() {
             onChange={handleChange} onBlur={() => handleBlur('cpf')}
             placeholder="000.000.000-00" maxLength={14} required
             error={errors.cpf}
+            showError={!!errors.cpf}
           />
-          
+
           {/* Data de nascimento */}
           <Input
             label="Data de nascimento" name="birthDate" value={formData.birthDate}
             onChange={handleChange} onBlur={() => handleBlur('birthDate')}
             placeholder="DD/MM/AAAA" maxLength={10} required
             error={errors.birthDate}
+            showError={!!errors.birthDate}
           />
 
           {/* Telefone */}
@@ -298,14 +301,16 @@ export default function RegisterPage() {
             onChange={handleChange} onBlur={() => handleBlur('phone')}
             placeholder="(00) 00000-0000" maxLength={15} required
             error={errors.phone}
+            showError={!!errors.phone}
           />
-          
+
           {/* E-mail */}
           <Input
             label="Seu e-mail" name="email" type="email" value={formData.email}
             onChange={handleChange} onBlur={() => handleBlur('email')}
             placeholder="Ex: maria.silva@email.com" required
             error={errors.email}
+            showError={!!errors.email}
           />
 
           {/* Senha */}
@@ -316,6 +321,7 @@ export default function RegisterPage() {
             icon={showPassword ? <FaEyeSlash /> : <FaEye />}
             onIconClick={() => setShowPassword(!showPassword)}
             error={errors.password}
+            showError={!!errors.password}
           />
 
           {/* Confirma Senha */}
@@ -326,6 +332,7 @@ export default function RegisterPage() {
             icon={showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             onIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
             error={errors.confirmPassword}
+            showError={!!errors.confirmPassword}
           />
 
           <Button type="submit" disabled={isButtonDisabled}>
