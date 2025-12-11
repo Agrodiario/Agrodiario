@@ -15,6 +15,7 @@ describe('CulturesService', () => {
 
   const mockQueryBuilder = {
     leftJoinAndSelect: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
@@ -126,9 +127,10 @@ describe('CulturesService', () => {
         cycle: 120,
         origin: CultureOrigin.ORGANIC,
         supplier: 'Sementes Brasil Ltda',
-        plantingDate: '2025-07-12',
+        plantingDate: new Date(2025, 6, 12, 0, 0, 0, 0), // Parsed from string by parseDateString
         plantingArea: 25.5,
         observations: 'Plantio de teste',
+        isActive: expect.any(Boolean), // Calculated by shouldBeActive
         userId,
       });
       expect(mockCulturesRepository.save).toHaveBeenCalledWith(mockCulture);

@@ -26,7 +26,7 @@ export default function ProductApplicationsPage() {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
+  const [lastPage, setLastPage] = useState(0);
   const pageNumbers = Array.from({ length: lastPage }, (_, i) => i + 1);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -66,7 +66,7 @@ export default function ProductApplicationsPage() {
     const response = await productApplicationService.findAll(page, 5, order, '');
     setProductApplications(response.data);
     setPage(response.page);
-    setLastPage(response.lastPage);
+    setLastPage(response.data.length > 0 ? response.lastPage : 0);
   }, []);
 
   const handleSortChange = (order: 'ASC' | 'DESC') => {
@@ -244,17 +244,19 @@ export default function ProductApplicationsPage() {
           Tem certeza de que deseja excluir esse registro?
         </ConfirmationModal>
 
-        <div className={styles.pagination}>
-          {pageNumbers.map((num) => (
-            <button
-              key={num}
-              onClick={() => setPage(num)}
-              className={num === page ? styles.activePage : ''}
-            >
-              {num}
-            </button>
-          ))}
-        </div>
+        {lastPage > 0 && (
+          <div className={styles.pagination}>
+            {pageNumbers.map((num) => (
+              <button
+                key={num}
+                onClick={() => setPage(num)}
+                className={num === page ? styles.activePage : ''}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

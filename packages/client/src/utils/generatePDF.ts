@@ -300,9 +300,11 @@ export const generateCultureReport = async (
     "Status"
   ];
 
-  const tableRows = cultures.map(item => {
-    const dataPlantio = new Date(item.plantingDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-    const areaPlantio = item.plantingArea ? `${Number(item.plantingArea).toFixed(2)}` : 'N/A';
+const tableRows = cultures.map(item => {
+  // Converter data sem problemas de timezone
+  const [year, month, day] = item.plantingDate.toString().split('T')[0].split('-');
+  const dataPlantio = `${day}/${month}/${year}`;
+  const areaPlantio = item.plantingArea ? `${Number(item.plantingArea).toFixed(2)}` : 'N/A';
     const variedade = item.cultivar || '-';
     const propriedade = item.property?.name || 'N/A';
 

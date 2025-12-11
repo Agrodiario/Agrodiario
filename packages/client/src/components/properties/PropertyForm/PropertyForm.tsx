@@ -11,7 +11,7 @@ import { Input } from '../../common/Input/Input';
 import { Button } from '../../common/Button/Button';
 import { FileInput } from '../../common/FileInput/FileInput';
 import { TagToggle } from '../../common/TagToggle/TagToggle';
-import { FiArrowLeft, FiUpload, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiArrowLeft, FiUpload, FiPlus, FiTrash2, FiEye } from 'react-icons/fi';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -34,7 +34,6 @@ L.Icon.Default.mergeOptions({
 export type TalhaoData = {
   name: string;
   area: string;
-  cultura: string;
   situacao: 'producao' | 'preparo' | 'pousio';
   polygon: any;
 };
@@ -68,7 +67,6 @@ function LocationMarker({ position, setPosition }: any) {
 const createEmptyTalhao = (): TalhaoData => ({
   name: '',
   area: '',
-  cultura: '',
   situacao: 'preparo',
   polygon: null,
 });
@@ -93,6 +91,9 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
+
+  // Estados para arquivos de certificação
+  const [certificationFiles, setCertificationFiles] = useState<File[]>([]);
 
   // --- LÓGICA DE VALIDAÇÃO ---
 
@@ -142,9 +143,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         return 'Área do talhão é obrigatória';
       }
       return validateNumberField(value, 'Área do talhão');
-    }
-    if (fieldName === 'cultura' && (!value || value.trim() === '')) {
-      return 'Cultura do talhão é obrigatória';
     }
     return '';
   };
@@ -252,7 +250,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     formData.talhoes.forEach(talhao => {
       if (validateTalhaoField('name', talhao.name)) areTalhoesValid = false;
       if (validateTalhaoField('area', talhao.area)) areTalhoesValid = false;
-      if (validateTalhaoField('cultura', talhao.cultura)) areTalhoesValid = false;
     });
 
     setIsValid(isBasicPropertyValid && areTalhoesValid);
@@ -288,9 +285,8 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     formData.talhoes.forEach((talhao, index) => {
       const nameError = validateTalhaoField('name', talhao.name);
       const areaError = validateTalhaoField('area', talhao.area);
-      const culturaError = validateTalhaoField('cultura', talhao.cultura);
 
-      if (nameError || areaError || culturaError) {
+      if (nameError || areaError) {
         hasError = true;
         // Set active talhao to the first one with error
         if (activeTalhaoIndex === null) {
@@ -311,6 +307,23 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   // Handler para atualizar a posição do pino no mapa 1
   const handleMarkerChange = (pos: [number, number]) => {
     setFormData(prev => ({ ...prev, markerPosition: pos }));
+  };
+
+  // Handlers para upload de arquivos
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      setCertificationFiles((prev) => [...prev, ...filesArray]);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setCertificationFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleViewFile = (file: File) => {
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
   };
 
   // Handlers para o desenho no mapa 2 (talhão)
@@ -353,8 +366,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             onBlur={() => handleBlur('name')}
             placeholder="Ex: Sítio Oliveira"
             required
-            error={errors.name}
-            showError={touchedFields.name && !!errors.name}
           />
           <Input
             label="Endereço (estrada, município, estado)"
@@ -364,8 +375,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             onBlur={() => handleBlur('address')}
             placeholder="Estrada da Lavoura..."
             required
-            error={errors.address}
-            showError={touchedFields.address && !!errors.address}
           />
 
           <div className={styles.row}>
@@ -377,8 +386,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               onBlur={() => handleBlur('areaTotal')}
               placeholder="10"
               required
-              error={errors.areaTotal}
-              showError={touchedFields.areaTotal && !!errors.areaTotal}
             />
             <Input
               label="Área de produção (hectares)"
@@ -388,8 +395,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               onBlur={() => handleBlur('areaProducao')}
               placeholder="2"
               required
-              error={errors.areaProducao}
-              showError={touchedFields.areaProducao && !!errors.areaProducao}
             />
           </div>
           <div className={styles.inputGroup}>
@@ -406,7 +411,37 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Certificações</h3>
           <p className={styles.subtitle}>Você pode inserir certificações já existentes, se houver.</p>
-          <FileInput leftIcon={<FiUpload />}>Fazer upload de foto ou documento</FileInput>
+          <FileInput leftIcon={<FiUpload />} onChange={handleFileChange} multiple>
+            Fazer upload de foto ou documento
+          </FileInput>
+
+          {certificationFiles.length > 0 && (
+            <div className={styles.fileList}>
+              {certificationFiles.map((file, index) => (
+                <div key={index} className={styles.fileItem}>
+                  <span className={styles.fileName}>{file.name}</span>
+                  <div className={styles.fileActions}>
+                    <button
+                      type="button"
+                      onClick={() => handleViewFile(file)}
+                      className={styles.actionBtn}
+                      title="Visualizar"
+                    >
+                      <FiEye size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(index)}
+                      className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                      title="Remover"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* === SEÇÃO 3: MAPA DA PROPRIEDADE === */}
@@ -466,7 +501,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
                   </div>
                   <div className={styles.talhaoCardInfo}>
                     {talhao.area && <span>{talhao.area} ha</span>}
-                    {talhao.cultura && <span>{talhao.cultura}</span>}
                   </div>
                 </div>
               ))}
@@ -495,14 +529,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
                 placeholder="1"
                 required
               />
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Cultura atual do talhão</label>
-                <CultureSearchSelect
-                  value={activeTalhao.cultura}
-                  onChange={(selectedCrop) => updateTalhao(activeTalhaoIndex, 'cultura', selectedCrop)}
-                  placeholder="Selecione a cultura atual..."
-                />
-              </div>
 
               <h4 className={styles.textTitle} style={{ marginTop: '1rem' }}>Situação do talhão</h4>
               <div className={styles.tagGroup}>

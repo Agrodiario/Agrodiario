@@ -24,6 +24,13 @@ export interface Culture {
   isCycleComplete?: boolean;
   expectedHarvestDate?: string;
   activitiesCount?: number;
+  activities?: Array<{
+    id: number;
+    titulo: string;
+    data: string;
+    tipo?: string;
+    descricao?: string;
+  }>;
 }
 
 export interface CreateCultureDto {

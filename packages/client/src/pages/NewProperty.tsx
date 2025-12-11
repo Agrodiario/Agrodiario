@@ -20,7 +20,7 @@ export default function NewPropertyPage() {
       const plots: Plot[] = data.talhoes.map(talhao => ({
         name: talhao.name,
         area: parseFloat(talhao.area.replace(',', '.')),
-        culture: talhao.cultura,
+        culture: '',
         situacao: talhao.situacao,
         polygon: talhao.polygon,
       }));

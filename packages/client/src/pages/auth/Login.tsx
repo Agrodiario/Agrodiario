@@ -170,7 +170,6 @@ export default function LoginPage() {
               placeholder="seu@email.com"
               required
               error={errors.email}
-              showError={touched.email && !!errors.email}
             />
 
             <Input
@@ -185,7 +184,6 @@ export default function LoginPage() {
               icon={showPassword ? <FaEyeSlash /> : <FaEye />}
               onIconClick={() => setShowPassword(!showPassword)}
               error={errors.password}
-              showError={touched.password && !!errors.password}
             />
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>

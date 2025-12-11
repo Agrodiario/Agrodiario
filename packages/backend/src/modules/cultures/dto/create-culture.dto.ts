@@ -11,10 +11,10 @@ export class CreateCultureDto {
   @MaxLength(255, { message: 'Nome da cultura deve ter no máximo 255 caracteres' })
   cultureName: string;
 
-  @IsNotEmpty({ message: 'Cultivar/Variedade é obrigatório' })
+  @IsOptional()
   @IsString({ message: 'Cultivar/Variedade deve ser um texto' })
   @MaxLength(255, { message: 'Cultivar/Variedade deve ter no máximo 255 caracteres' })
-  cultivar: string;
+  cultivar?: string;
 
   @IsNotEmpty({ message: 'Ciclo da cultura é obrigatório' })
   @IsInt({ message: 'Ciclo deve ser um número inteiro' })
@@ -25,13 +25,13 @@ export class CreateCultureDto {
   @IsEnum(CultureOrigin, { message: 'Origem deve ser organic, conventional ou transgenic' })
   origin: CultureOrigin;
 
-  @IsNotEmpty({ message: 'Fornecedor é obrigatório' })
+  @IsOptional()
   @IsString({ message: 'Fornecedor deve ser um texto' })
   @MaxLength(255, { message: 'Fornecedor deve ter no máximo 255 caracteres' })
-  supplier: string;
+  supplier?: string;
 
   @IsNotEmpty({ message: 'Data de plantio é obrigatória' })
-  @IsDateString({}, { message: 'Data de plantio deve estar no formato válido (YYYY-MM-DD)' })
+  @IsString({ message: 'Data de plantio deve ser uma string' })
   plantingDate: string;
 
   @IsNotEmpty({ message: 'Área de plantio é obrigatória' })

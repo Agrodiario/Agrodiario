@@ -1,3 +1,45 @@
-.wrapper {
+/* Wrapper com estilo similar ao Input */
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
+  padding: 12px 16px;
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
+}
+
+/* Floating Label */
+.inputLabel {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+/* WHEN FLOATING */
+.floating {
+  top: -8px;
+  left: 12px;
+  background-color: var(--color-bg-white);
+  padding: 0 6px;
+  font-size: 12px;
+  color: var(--color-primary);
+}
+
+/* Container do select para ocupar espaço correto */
+.selectContainer {
+  flex: 1;
+  min-width: 0;
 }

@@ -28,8 +28,13 @@ export class CulturesService {
   ): Promise<{ message: string; data: CultureResponseDto }> {
     await this.validatePropertyOwnership(createCultureDto.propertyId, userId);
 
+    const plantingDate = this.parseDateString(createCultureDto.plantingDate);
+    const isActive = this.shouldBeActive(plantingDate, createCultureDto.cycle);
+
     const culture = this.culturesRepository.create({
       ...createCultureDto,
+      plantingDate,
+      isActive,
       userId,
     });
 
@@ -62,6 +67,11 @@ export class CulturesService {
       .createQueryBuilder('culture')
       .leftJoinAndSelect('culture.property', 'property')
       .leftJoinAndSelect('culture.activities', 'activities')
+      .select([
+        'culture',
+        'property.id', 'property.name', 'property.address', 'property.totalArea', 'property.productionArea', 'property.mainCrop',
+        'activities.id', 'activities.titulo', 'activities.date', 'activities.tipo', 'activities.descricao'
+      ])
       .where('culture.userId = :userId', { userId });
 
     this.applySearchFilter(queryBuilder, search);
@@ -73,10 +83,19 @@ export class CulturesService {
 
     const [cultures, total] = await queryBuilder.getManyAndCount();
 
-    // Auto-deactivate completed cultures
-    await this.autoDeactivateCompletedCycles(cultures);
+    // Update active status based on planting date and cycle
+    await this.updateCulturesActiveStatus(cultures);
 
     const data = this.mapCulturesToResponseDtos(cultures);
+    
+    // Log para debug
+    console.log('[CulturesService] Total cultures:', total);
+    if (data.length > 0) {
+      console.log('[CulturesService] First culture activities:', data[0].activities?.length || 0);
+      if (data[0].activities && data[0].activities.length > 0) {
+        console.log('[CulturesService] First activity:', data[0].activities[0]);
+      }
+    }
     this.sortByCalculatedFields(data, sortBy, sortOrder);
 
     return {
@@ -102,8 +121,8 @@ export class CulturesService {
       throw new ForbiddenException('Você não tem permissão para acessar esta cultura');
     }
 
-    // Auto-deactivate if cycle is complete
-    await this.autoDeactivateCompletedCycles([culture]);
+    // Update active status based on planting date and cycle
+    await this.updateCulturesActiveStatus([culture]);
 
     const dto = this.mapToResponseDto(culture);
     dto.activitiesCount = culture.activities?.length || 0;
@@ -135,10 +154,13 @@ export class CulturesService {
     if (updateCultureDto.cycle !== undefined) culture.cycle = updateCultureDto.cycle;
     if (updateCultureDto.origin !== undefined) culture.origin = updateCultureDto.origin;
     if (updateCultureDto.supplier !== undefined) culture.supplier = updateCultureDto.supplier;
-    if (updateCultureDto.plantingDate !== undefined) culture.plantingDate = new Date(updateCultureDto.plantingDate);
+    if (updateCultureDto.plantingDate !== undefined) culture.plantingDate = this.parseDateString(updateCultureDto.plantingDate);
     if (updateCultureDto.plantingArea !== undefined) culture.plantingArea = updateCultureDto.plantingArea;
     if (updateCultureDto.plotName !== undefined) culture.plotName = updateCultureDto.plotName;
     if (updateCultureDto.observations !== undefined) culture.observations = updateCultureDto.observations;
+
+    // Recalcular isActive baseado na data de plantio e ciclo
+    culture.isActive = this.shouldBeActive(culture.plantingDate, culture.cycle);
 
     const updatedCulture = await this.culturesRepository.save(culture);
 
@@ -190,7 +212,7 @@ export class CulturesService {
   async findByProperty(propertyId: string, userId: string): Promise<any[]> {
     const cultures = await this.culturesRepository.find({
       where: { propertyId, userId, isActive: true },
-      select: ['id', 'cultureName', 'cultivar', 'cycle'],
+      select: ['id', 'cultureName', 'cultivar', 'cycle', 'plotName'],
       order: { cultureName: 'ASC' },
     });
 
@@ -242,6 +264,16 @@ export class CulturesService {
         productionArea: culture.property.productionArea,
         mainCrop: culture.property.mainCrop,
       };
+    }
+
+    if (culture.activities) {
+      response.activities = culture.activities.map(activity => ({
+        id: activity.id,
+        titulo: activity.titulo,
+        data: activity.date,
+        tipo: activity.tipo,
+        descricao: activity.descricao,
+      }));
     }
 
     return response;
@@ -296,26 +328,50 @@ export class CulturesService {
   }
 
   /**
-   * Auto-deactivates cultures that have completed their cycle
+   * Determines if a culture should be active based on planting date and cycle
    */
-  private async autoDeactivateCompletedCycles(cultures: Culture[]): Promise<void> {
-    const culturesToDeactivate = cultures.filter((culture) => {
-      if (!culture.isActive) return false;
-      return this.calculateDaysElapsed(culture.plantingDate) > culture.cycle;
+  private shouldBeActive(plantingDate: Date, cycle: number): boolean {
+    const today = this.getTodayAtMidnight();
+    const planting = this.getDateAtMidnight(plantingDate);
+    
+    // Se a data de plantio é no futuro, deve ser inativa
+    if (planting > today) {
+      return false;
+    }
+    
+    // Se o ciclo já foi completado, deve ser inativa
+    if (this.isCycleComplete(plantingDate, cycle)) {
+      return false;
+    }
+    
+    // Caso contrário, deve ser ativa
+    return true;
+  }
+
+  /**
+   * Updates active status of cultures based on planting date and cycle
+   */
+  private async updateCulturesActiveStatus(cultures: Culture[]): Promise<void> {
+    const culturesToUpdate: { culture: Culture; newStatus: boolean }[] = [];
+
+    cultures.forEach((culture) => {
+      const shouldBeActive = this.shouldBeActive(culture.plantingDate, culture.cycle);
+      
+      if (culture.isActive !== shouldBeActive) {
+        culturesToUpdate.push({ culture, newStatus: shouldBeActive });
+      }
     });
 
-    if (culturesToDeactivate.length > 0) {
-      const cultureIds = culturesToDeactivate.map(c => c.id);
-      
-      await this.culturesRepository.update(
-        { id: In(cultureIds) },
-        { isActive: false }
-      );
-      
-      // Update entities in memory to reflect database state
-      culturesToDeactivate.forEach(culture => {
-        culture.isActive = false;
-      });
+    if (culturesToUpdate.length > 0) {
+      // Update in database
+      for (const { culture, newStatus } of culturesToUpdate) {
+        await this.culturesRepository.update(
+          { id: culture.id },
+          { isActive: newStatus }
+        );
+        // Update in memory
+        culture.isActive = newStatus;
+      }
     }
   }
 
@@ -404,5 +460,14 @@ export class CulturesService {
     const midnight = new Date(date);
     midnight.setHours(0, 0, 0, 0);
     return midnight;
+  }
+
+  /**
+   * Converts a date string (YYYY-MM-DD) to a Date object at local midnight
+   * This avoids timezone issues where dates can shift by a day
+   */
+  private parseDateString(dateString: string): Date {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
   }
 }

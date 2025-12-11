@@ -38,6 +38,10 @@ export const validationSchema = Joi.object({
 
   // Rate Limiting
   MAX_LOGIN_ATTEMPTS: Joi.number().default(5),
+
+  // EMBRAPA API
+  EMBRAPA_CONSUMER_KEY: Joi.string().optional(),
+  EMBRAPA_CONSUMER_SECRET: Joi.string().optional(),
 })
   // Custom validation: require either DATABASE_URL or all DB_* variables
   .custom((value, helpers) => {
