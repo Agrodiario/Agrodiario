@@ -17,12 +17,12 @@ export default function NewPropertyPage() {
 
     try {
       // Transform talhões to plots
-      const plots: Plot[] = data.talhoes.map(talhao => ({
-        name: talhao.name,
-        area: parseFloat(talhao.area.replace(',', '.')),
+      const plots: Plot[] = data.plots.map(plot => ({
+        name: plot.name,
+        area: parseFloat(plot.area.replace(',', '.')),
         culture: '',
-        situacao: talhao.situacao,
-        polygon: talhao.polygon,
+        situacao: plot.situacao,
+        polygon: plot.polygon,
       }));
 
       // Transform form data to match backend DTO

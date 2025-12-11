@@ -33,7 +33,7 @@ L.Icon.Default.mergeOptions({
 });
 // ------------------------------------
 
-export type TalhaoData = {
+export type PlotData = {
   name: string;
   area: string;
   situacao: 'producao' | 'preparo' | 'pousio';
@@ -47,7 +47,7 @@ export type PropertyFormData = {
   areaProducao: string;
   cultivo: string;
   markerPosition: [number, number] | null;
-  talhoes: TalhaoData[];
+  plots: PlotData[];
 };
 
 type Props = {
@@ -112,7 +112,7 @@ function MapResizer({ isFullscreen }: { isFullscreen: boolean }) {
 
   return null;
 }
-const createEmptyTalhao = (): TalhaoData => ({
+const createEmptyPlot = (): PlotData => ({
   name: '',
   area: '',
   situacao: 'preparo',
@@ -134,20 +134,15 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     areaTotal: initialData?.areaTotal || '',
     areaProducao: initialData?.areaProducao || '',
     cultivo: initialData?.cultivo || '',
-    // talhaoName: initialData?.talhaoName || '',
-    // talhaoArea: initialData?.talhaoArea || '',
-    // talhaoCultura: initialData?.talhaoCultura || '',
-    // situacao: initialData?.situacao || 'preparo',
-    // talhaoPolygon: initialData?.talhaoPolygon || null,
     markerPosition: initialData?.markerPosition || [-22.85, -50.65],
-    talhoes: initialData?.talhoes || [],
+    plots: initialData?.plots || [],
   });
 
-  const [activeTalhaoIndex, setActiveTalhaoIndex] = useState<number | null>(null);
+  const [activePlotIndex, setActivePlotIndex] = useState<number | null>(null);
 
   // Estados de Validação
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [_errors, setErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
 
   const handleLocateMe = () => {
@@ -241,7 +236,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     return '';
   };
 
-  const validateTalhaoField = (fieldName: keyof TalhaoData, value: string): string => {
+  const validatePlotField = (fieldName: keyof PlotData, value: string): string => {
     if (fieldName === 'name' && (!value || value.trim() === '')) {
       return 'Nome do talhão é obrigatório';
     }
@@ -290,27 +285,27 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   // --- TALHÃO HANDLERS ---
 
-  const addTalhao = () => {
+  const addPlot = () => {
     setFormData(prev => ({
       ...prev,
-      talhoes: [...prev.talhoes, createEmptyTalhao()],
+      plots: [...prev.plots, createEmptyPlot()],
     }));
-    setActiveTalhaoIndex(formData.talhoes.length);
+    setActivePlotIndex(formData.plots.length);
   };
 
-  const removeTalhao = (index: number) => {
+  const removePlot = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      talhoes: prev.talhoes.filter((_, i) => i !== index),
+      plots: prev.plots.filter((_, i) => i !== index),
     }));
-    if (activeTalhaoIndex === index) {
-      setActiveTalhaoIndex(null);
-    } else if (activeTalhaoIndex !== null && activeTalhaoIndex > index) {
-      setActiveTalhaoIndex(activeTalhaoIndex - 1);
+    if (activePlotIndex === index) {
+      setActivePlotIndex(null);
+    } else if (activePlotIndex !== null && activePlotIndex > index) {
+      setActivePlotIndex(activePlotIndex - 1);
     }
   };
 
-  const updateTalhao = (index: number, field: keyof TalhaoData, value: any) => {
+  const updatePlot = (index: number, field: keyof PlotData, value: any) => {
     let processedValue = value;
 
     if (field === 'area') {
@@ -319,21 +314,21 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
     setFormData(prev => ({
       ...prev,
-      talhoes: prev.talhoes.map((t, i) =>
+      plots: prev.plots.map((t, i) =>
         i === index ? { ...t, [field]: processedValue } : t
       ),
     }));
   };
 
-  const handleTalhaoPolygonCreated = (polygon: any) => {
-    if (activeTalhaoIndex !== null) {
-      updateTalhao(activeTalhaoIndex, 'polygon', polygon);
+  const handlePlotPolygonCreated = (polygon: any) => {
+    if (activePlotIndex !== null) {
+      updatePlot(activePlotIndex, 'polygon', polygon);
     }
   };
 
-  const handleTalhaoPolygonDeleted = () => {
-    if (activeTalhaoIndex !== null) {
-      updateTalhao(activeTalhaoIndex, 'polygon', null);
+  const handlePlotPolygonDeleted = () => {
+    if (activePlotIndex !== null) {
+      updatePlot(activePlotIndex, 'polygon', null);
     }
   };
 
@@ -353,13 +348,13 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     });
 
     // 2. Validação dos Talhões (cada talhão precisa ter todos os campos preenchidos)
-    let areTalhoesValid = true;
-    formData.talhoes.forEach(talhao => {
-      if (validateTalhaoField('name', talhao.name)) areTalhoesValid = false;
-      if (validateTalhaoField('area', talhao.area)) areTalhoesValid = false;
+    let areplotsValid = true;
+    formData.plots.forEach(plot => {
+      if (validatePlotField('name', plot.name)) areplotsValid = false;
+      if (validatePlotField('area', plot.area)) areplotsValid = false;
     });
 
-    setIsValid(isBasicPropertyValid && areTalhoesValid);
+    setIsValid(isBasicPropertyValid && areplotsValid);
   }, [formData]);
 
 
@@ -389,15 +384,15 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     });
 
     // 4. Valida todos os talhões
-    formData.talhoes.forEach((talhao, index) => {
-      const nameError = validateTalhaoField('name', talhao.name);
-      const areaError = validateTalhaoField('area', talhao.area);
+    formData.plots.forEach((plot, index) => {
+      const nameError = validatePlotField('name', plot.name);
+      const areaError = validatePlotField('area', plot.area);
 
       if (nameError || areaError) {
         hasError = true;
-        // Set active talhao to the first one with error
-        if (activeTalhaoIndex === null) {
-          setActiveTalhaoIndex(index);
+        // Set active plot to the first one with error
+        if (activePlotIndex === null) {
+          setActivePlotIndex(index);
         }
       }
     });
@@ -436,16 +431,16 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   // Handlers para o desenho no mapa 2 (talhão)
   const _onCreated = (e: any) => {
     if (e.layerType === 'polygon') {
-      handleTalhaoPolygonCreated(e.layer.getLatLngs());
+      handlePlotPolygonCreated(e.layer.getLatLngs());
     }
   };
 
   const _onDeleted = (_e: any) => {
-    handleTalhaoPolygonDeleted();
+    handlePlotPolygonDeleted();
   };
 
   // Get active talhão for display
-  const activeTalhao = activeTalhaoIndex !== null ? formData.talhoes[activeTalhaoIndex] : null;
+  const activePlot = activePlotIndex !== null ? formData.plots[activePlotIndex] : null;
 
   const title = isEditMode ? 'Editar propriedade' : 'Nova propriedade/talhão';
   const submitText = isEditMode ? 'Salvar alterações' : 'Salvar propriedade';
@@ -632,40 +627,40 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             <Button
               variant="secondary"
               type="button"
-              onClick={addTalhao}
+              onClick={addPlot}
               leftIcon={<FiPlus />}
             >
               Adicionar talhão
             </Button>
           </div>
 
-          {formData.talhoes.length === 0 ? (
+          {formData.plots.length === 0 ? (
             <p className={styles.subtitle}>Nenhum talhão adicionado. Clique em "Adicionar talhão" para criar um.</p>
           ) : (
-            <div className={styles.talhoesList}>
-              {formData.talhoes.map((talhao, index) => (
+            <div className={styles.plotsList}>
+              {formData.plots.map((Plot, index) => (
                 <div
                   key={index}
-                  className={`${styles.talhaoCard} ${activeTalhaoIndex === index ? styles.talhaoCardActive : ''}`}
-                  onClick={() => setActiveTalhaoIndex(index)}
+                  className={`${styles.PlotCard} ${activePlotIndex === index ? styles.PlotCardActive : ''}`}
+                  onClick={() => setActivePlotIndex(index)}
                 >
-                  <div className={styles.talhaoCardHeader}>
-                    <span className={styles.talhaoCardTitle}>
-                      {talhao.name || `Talhão ${index + 1}`}
+                  <div className={styles.PlotCardHeader}>
+                    <span className={styles.PlotCardTitle}>
+                      {Plot.name || `Talhão ${index + 1}`}
                     </span>
                     <button
                       type="button"
-                      className={styles.talhaoRemoveBtn}
+                      className={styles.PlotRemoveBtn}
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeTalhao(index);
+                        removePlot(index);
                       }}
                     >
                       <FiTrash2 size={16} />
                     </button>
                   </div>
-                  <div className={styles.talhaoCardInfo}>
-                    {talhao.area && <span>{talhao.area} ha</span>}
+                  <div className={styles.PlotCardInfo}>
+                    {Plot.area && <span>{Plot.area} ha</span>}
                   </div>
                 </div>
               ))}
@@ -674,23 +669,23 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         </div>
 
         {/* === SEÇÃO 5: EDIÇÃO DO TALHÃO SELECIONADO === */}
-        {activeTalhao && activeTalhaoIndex !== null && (
+        {activePlot && activePlotIndex !== null && (
           <>
             <div className={styles.section}>
-              <h3 className={styles.textTitle}>Editar Talhão: {activeTalhao.name || `Talhão ${activeTalhaoIndex + 1}`}</h3>
+              <h3 className={styles.textTitle}>Editar Talhão: {activePlot.name || `Talhão ${activePlotIndex + 1}`}</h3>
               <Input
                 label="Nome do talhão"
-                name={`talhao-name-${activeTalhaoIndex}`}
-                value={activeTalhao.name}
-                onChange={(e) => updateTalhao(activeTalhaoIndex, 'name', e.target.value)}
+                name={`Plot-name-${activePlotIndex}`}
+                value={activePlot.name}
+                onChange={(e) => updatePlot(activePlotIndex, 'name', e.target.value)}
                 placeholder="Ex: Talhão Norte"
                 required
               />
               <Input
                 label="Área (hectares)"
-                name={`talhao-area-${activeTalhaoIndex}`}
-                value={activeTalhao.area}
-                onChange={(e) => updateTalhao(activeTalhaoIndex, 'area', e.target.value)}
+                name={`Plot-area-${activePlotIndex}`}
+                value={activePlot.area}
+                onChange={(e) => updatePlot(activePlotIndex, 'area', e.target.value)}
                 placeholder="1"
                 required
               />
@@ -699,24 +694,24 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               <div className={styles.tagGroup}>
                 <TagToggle
                   color="blue"
-                  isActive={activeTalhao.situacao === 'producao'}
-                  onClick={() => updateTalhao(activeTalhaoIndex, 'situacao', 'producao')}
+                  isActive={activePlot.situacao === 'producao'}
+                  onClick={() => updatePlot(activePlotIndex, 'situacao', 'producao')}
                   type="button"
                 >
                   Em produção
                 </TagToggle>
                 <TagToggle
                   color="green"
-                  isActive={activeTalhao.situacao === 'preparo'}
-                  onClick={() => updateTalhao(activeTalhaoIndex, 'situacao', 'preparo')}
+                  isActive={activePlot.situacao === 'preparo'}
+                  onClick={() => updatePlot(activePlotIndex, 'situacao', 'preparo')}
                   type="button"
                 >
                   Em preparo
                 </TagToggle>
                 <TagToggle
                   color="orange"
-                  isActive={activeTalhao.situacao === 'pousio'}
-                  onClick={() => updateTalhao(activeTalhaoIndex, 'situacao', 'pousio')}
+                  isActive={activePlot.situacao === 'pousio'}
+                  onClick={() => updatePlot(activePlotIndex, 'situacao', 'pousio')}
                   type="button"
                 >
                   Em pousio
@@ -727,19 +722,50 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             {/* === SEÇÃO 6: MAPA DO TALHÃO === */}
             <div className={styles.section}>
               <h3 className={styles.textTitle}>Área do talhão</h3>
-              <p className={styles.subtitle}>Desenhe no mapa a área do talhão.</p>
+              <p className={styles.subtitle}>Desenhe a área do talhão.</p>
 
-              <div className={styles.mapContainer}>
-                <MapContainer center={[-22.852, -50.651]} zoom={16} scrollWheelZoom={false} className={styles.map}>
-                  <TileLayer
-                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                  />
+              <div className={`${styles.mapWrapper} ${isMap2Fullscreen ? styles.fullscreenMap : ''}`}>
+                
+                <div className={styles.mapToolbar}>
+                  <button 
+                    type="button" 
+                    onClick={handleLocateMe} // Pode reutilizar ou criar um específico se quiser centralizar no talhão
+                    className={styles.mapBtn} 
+                  >
+                    <FiCrosshair size={22} />
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsMap2Fullscreen(!isMap2Fullscreen)} 
+                    className={styles.mapBtn}
+                  >
+                    {isMap2Fullscreen ? <FiMinimize size={22} /> : <FiMaximize size={22} />}
+                  </button>
+                </div>
+
+                <MapContainer center={mapCenter} zoom={16} scrollWheelZoom={true} className={styles.map}>
+                  <MapResizer isFullscreen={isMap2Fullscreen} />
+                  <MapController center={mapCenter} />
+                  
+                  <LayersControl position="topright">
+                    <LayersControl.BaseLayer checked name="Satélite Híbrido">
+                      <LayerGroup>
+                        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+                        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}" />
+                      </LayerGroup>
+                    </LayersControl.BaseLayer>
+                    <LayersControl.BaseLayer name="Ruas">
+                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    </LayersControl.BaseLayer>
+                  </LayersControl>
+
                   <EditableMap
                     onCreated={_onCreated}
                     onDeleted={_onDeleted}
-                    existingPolygon={activeTalhao.polygon}
+                    existingPolygon={formData.plots[activePlotIndex].polygon}
                   />
                 </MapContainer>
+                {isMap2Fullscreen && <div className={styles.escHint}>Clique no botão para sair</div>}
               </div>
             </div>
           </>
