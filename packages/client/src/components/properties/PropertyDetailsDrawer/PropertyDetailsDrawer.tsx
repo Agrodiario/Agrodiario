@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import styles from './PropertyDetailsDrawer.module.css';
 import { Button } from '../../common/Button/Button';
 import { InfoBlock } from '../../common/InfoBlock/InfoBlock'; // Importe o novo InfoBlock
-import { TalhaoCard, Talhao } from '../TalhaoCard/TalhaoCard';
+import { TalhaoCard } from '../TalhaoCard/TalhaoCard';
 import { FiTrash2, FiEdit2, FiMap, FiPlus } from 'react-icons/fi';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal/ConfirmationModal';
 import { useState } from 'react';
+import { Plot } from '@/types/property.types';
 
 export type Property = {
   id: string;
@@ -15,7 +16,7 @@ export type Property = {
   areaTotal: number;
   areaCultivada: number;
   cultivoPrincipal: string;
-  talhoes: Talhao[];
+  plots?: Plot[];
 };
 
 type Props = {
@@ -34,7 +35,8 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
   };
 
   const handleAddTalhao = () => {
-    console.log('Adicionar novo talhão:', property.id);
+    // Navigate to edit page where user can add talhões
+    navigate(`/properties/edit/${property.id}`);
   };
 
   // 4. Handler para confirmar a exclusão
@@ -65,8 +67,8 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
         {/* Seção 2: Talhões */}
         <section className={styles.section}>
           <h3 className={styles.sectionTitle}>Talhões</h3>
-          
-          {property.talhoes.length === 0 ? (
+
+          {!property.plots || property.plots.length === 0 ? (
             // Estado Vazio
             <p className={styles.emptyState}>
               Nenhum talhão cadastrado. Que tal adicionar?
@@ -74,8 +76,17 @@ export function PropertyDetailsDrawer({ property, onDelete }: Props) {
           ) : (
             // Lista de Talhões
             <div className={styles.talhoesList}>
-              {property.talhoes.map((talhao) => (
-                <TalhaoCard key={talhao.id} talhao={talhao} />
+              {property.plots.map((plot, index) => (
+                <TalhaoCard
+                  key={index}
+                  talhao={{
+                    id: index,
+                    name: plot.name,
+                    cultura: plot.culture,
+                    area: plot.area,
+                    status: plot.situacao === 'preparo' ? 'em preparo' : plot.situacao === 'producao' ? 'plantado' : 'colhido',
+                  }}
+                />
               ))}
             </div>
           )}

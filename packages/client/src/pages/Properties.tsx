@@ -48,8 +48,8 @@ export default function PropertiesPage() {
       const transformedProperties = response.data.map(prop => ({
         id: prop.id,
         name: prop.name,
-        location: prop.address.split(',').slice(-2).join(',').trim(), 
-        talhoes: [], 
+        location: prop.address.split(',').slice(-2).join(',').trim(),
+        plots: prop.plots || [],
         cultivo: prop.mainCrop,
         area: prop.productionArea,
         address: prop.address,
