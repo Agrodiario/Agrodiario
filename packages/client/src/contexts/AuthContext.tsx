@@ -1,6 +1,17 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService } from '../services/auth.service';
-import { User, LoginDto, RegisterDto, AuthContextType } from '../types/auth.types';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { authService } from "../services/auth.service";
+import {
+  User,
+  LoginDto,
+  RegisterDto,
+  AuthContextType,
+} from "../types/auth.types";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -19,8 +30,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const checkAuth = async () => {
     try {
-      const storedToken = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
+      const storedToken = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
 
       if (storedToken && storedUser) {
         setToken(storedToken);
@@ -29,9 +40,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
           const currentUser = await authService.getCurrentUser();
           setUser(currentUser);
-          localStorage.setItem('user', JSON.stringify(currentUser));
+          localStorage.setItem("user", JSON.stringify(currentUser));
         } catch (error) {
-          console.log('Token inválido, fazendo logout...');
+          console.log("Token inválido, fazendo logout...");
           logout();
         }
       } else {
@@ -39,7 +50,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setToken(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error("Auth check failed:", error);
       setUser(null);
       setToken(null);
     } finally {
@@ -55,10 +66,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setToken(response.accessToken);
       setUser(response.user);
 
-      localStorage.setItem('token', response.accessToken);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem("token", response.accessToken);
+      localStorage.setItem("user", JSON.stringify(response.user));
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Erro ao fazer login';
+      const errorMessage =
+        error.response?.data?.message || error.message || "Erro ao fazer login";
       const errorWithInfo = new Error(errorMessage);
       (errorWithInfo as any).status = error.response?.status;
       throw errorWithInfo;
@@ -75,8 +87,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setToken(response.accessToken);
       setUser(response.user);
 
-      localStorage.setItem('token', response.accessToken);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem("token", response.accessToken);
+      localStorage.setItem("user", JSON.stringify(response.user));
     } catch (error) {
       setIsLoading(false);
       throw error;
@@ -88,8 +100,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   const value: AuthContextType = {
@@ -109,7 +121,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

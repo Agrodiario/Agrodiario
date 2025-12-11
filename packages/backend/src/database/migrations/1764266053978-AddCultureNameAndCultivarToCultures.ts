@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class AddCultureNameAndCultivarToCultures1764266053978
-  implements MigrationInterface
-{
+export class AddCultureNameAndCultivarToCultures1764266053978 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(
       'cultures',

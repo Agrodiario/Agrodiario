@@ -1,9 +1,9 @@
 // src/services/activityService.ts
-import { apiClient } from '../config/api.client';
+import { apiClient } from "../config/api.client";
 
 export interface ActivityDTO {
   id?: number;
-  titulo: string;   
+  titulo: string;
   date: string;
   propriedade: string;
   cultureId: string;
@@ -25,38 +25,41 @@ export interface ActivityDTO {
 }
 
 export interface PaginatedActivities {
-  data: ActivityDTO[]; 
+  data: ActivityDTO[];
   total: number;
 }
 
 const createFormData = (data: ActivityDTO) => {
   const formData = new FormData();
 
-  formData.append('titulo', data.titulo);
-  formData.append('date', data.date);
-  formData.append('propriedade', data.propriedade);
-  formData.append('cultureId', data.cultureId);
-  formData.append('tipo', data.tipo);
-  formData.append('descricao', data.descricao);
-  formData.append('responsavel', data.responsavel);
-  formData.append('operacao', data.operacao);
+  formData.append("titulo", data.titulo);
+  formData.append("date", data.date);
+  formData.append("propriedade", data.propriedade);
+  formData.append("cultureId", data.cultureId);
+  formData.append("tipo", data.tipo);
+  formData.append("descricao", data.descricao);
+  formData.append("responsavel", data.responsavel);
+  formData.append("operacao", data.operacao);
 
-  if (data.insumoNome) formData.append('insumoNome', data.insumoNome);
-  
-  if (data.insumoQuantidade !== undefined && data.insumoQuantidade !== undefined) {
-    formData.append('insumoQuantidade', String(data.insumoQuantidade));
+  if (data.insumoNome) formData.append("insumoNome", data.insumoNome);
+
+  if (
+    data.insumoQuantidade !== undefined &&
+    data.insumoQuantidade !== undefined
+  ) {
+    formData.append("insumoQuantidade", String(data.insumoQuantidade));
   }
-  
-  if (data.insumoUnidade) formData.append('insumoUnidade', data.insumoUnidade);
+
+  if (data.insumoUnidade) formData.append("insumoUnidade", data.insumoUnidade);
 
   if (data.files && data.files.length > 0) {
     data.files.forEach((file) => {
-      formData.append('files', file); 
+      formData.append("files", file);
     });
   }
 
   if (data.removedFiles && data.removedFiles.length > 0) {
-    formData.append('removedFiles', JSON.stringify(data.removedFiles));
+    formData.append("removedFiles", JSON.stringify(data.removedFiles));
   }
 
   return formData;
@@ -64,13 +67,14 @@ const createFormData = (data: ActivityDTO) => {
 
 export const activityService = {
   getAll: async (
-    page: number = 1, 
-    limit: number = 6, 
-    order: 'ASC' | 'DESC' = 'DESC',
-    search: string = ''
+    page: number = 1,
+    limit: number = 6,
+    order: "ASC" | "DESC" = "DESC",
+    search: string = "",
   ): Promise<PaginatedActivities> => {
-    
-    const response = await apiClient.get(`/activities?page=${page}&limit=${limit}&order=${order}&search=${encodeURIComponent(search)}`);
+    const response = await apiClient.get(
+      `/activities?page=${page}&limit=${limit}&order=${order}&search=${encodeURIComponent(search)}`,
+    );
     return response.data;
   },
 
@@ -81,10 +85,10 @@ export const activityService = {
 
   create: async (data: ActivityDTO) => {
     const formData = createFormData(data);
-    
-    const response = await apiClient.post('/activities', formData, {
+
+    const response = await apiClient.post("/activities", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data', 
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -92,10 +96,10 @@ export const activityService = {
 
   update: async (id: string, data: ActivityDTO) => {
     const formData = createFormData(data);
-    
+
     const response = await apiClient.patch(`/activities/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;

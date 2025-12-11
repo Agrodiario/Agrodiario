@@ -21,8 +21,8 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { CultureSearchSelect } from '@/components/cultures/CultureSearchSelect/CultureSearchSelect';
 
 // IMPORTAÇÕES DOS UTILS
-import { validateNumberField } from '@/utils/validators';
-import { numberMask } from '@/utils/masks';
+import { validateNumberField } from "@/utils/validators";
+import { numberMask } from "@/utils/masks";
 
 // --- Correção de ícones do Leaflet ---
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -36,7 +36,7 @@ L.Icon.Default.mergeOptions({
 export type PlotData = {
   name: string;
   area: string;
-  situacao: 'producao' | 'preparo' | 'pousio';
+  situacao: "producao" | "preparo" | "pousio";
   polygon: any;
 };
 
@@ -119,7 +119,11 @@ const createEmptyPlot = (): PlotData => ({
   polygon: null,
 });
 
-export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props) {
+export function PropertyForm({
+  initialData,
+  onSubmit,
+  isLoading = false,
+}: Props) {
   const navigate = useNavigate();
   const isEditMode = !!initialData;
 
@@ -129,11 +133,11 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   const [isMap2Fullscreen, setIsMap2Fullscreen] = useState(false);
 
   const [formData, setFormData] = useState<PropertyFormData>({
-    name: initialData?.name || '',
-    address: initialData?.address || '',
-    areaTotal: initialData?.areaTotal || '',
-    areaProducao: initialData?.areaProducao || '',
-    cultivo: initialData?.cultivo || '',
+    name: initialData?.name || "",
+    address: initialData?.address || "",
+    areaTotal: initialData?.areaTotal || "",
+    areaProducao: initialData?.areaProducao || "",
+    cultivo: initialData?.cultivo || "",
     markerPosition: initialData?.markerPosition || [-22.85, -50.65],
     plots: initialData?.plots || [],
   });
@@ -199,88 +203,80 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   // --- LÓGICA DE VALIDAÇÃO ---
 
-  const validateField = (fieldName: keyof PropertyFormData, value: string): string => {
+  const validateField = (
+    fieldName: keyof PropertyFormData,
+    value: string,
+  ): string => {
     // Campos de texto obrigatórios (Propriedade)
-    if (['name', 'address', 'cultivo'].includes(fieldName)) {
-      if (!value || value.trim() === '') {
+    if (["name", "address", "cultivo"].includes(fieldName)) {
+      if (!value || value.trim() === "") {
         switch (fieldName) {
-          case 'name': return 'Nome da propriedade é obrigatório';
-          case 'address': return 'Endereço é obrigatório';
-          case 'cultivo': return 'Cultivo principal é obrigatório';
-          default: return 'Campo obrigatório';
+          case "name":
+            return "Nome da propriedade é obrigatório";
+          case "address":
+            return "Endereço é obrigatório";
+          case "cultivo":
+            return "Cultivo principal é obrigatório";
+          default:
+            return "Campo obrigatório";
         }
       }
     }
 
     // Validação para campos de área (Numéricos)
-    if (['areaTotal', 'areaProducao'].includes(fieldName)) {
+    if (["areaTotal", "areaProducao"].includes(fieldName)) {
       // Campos de Propriedade (Área Total e Produção) são obrigatórios
-      if (!value || value.trim() === '') {
-        return `${fieldName === 'areaTotal' ? 'Área total' : 'Área de produção'} é obrigatória`;
+      if (!value || value.trim() === "") {
+        return `${fieldName === "areaTotal" ? "Área total" : "Área de produção"} é obrigatória`;
       }
 
-      let error = validateNumberField(
+      const error = validateNumberField(
         value,
-        fieldName === 'areaTotal' ? 'Área total' : 'Área de produção'
+        fieldName === "areaTotal" ? "Área total" : "Área de produção",
       );
 
       // Ajuste específico para área de produção (pode ser 0)
-      if (fieldName === 'areaProducao' && error.includes('maior que zero')) {
-        const numValue = parseFloat(value.replace(',', '.'));
-        if (numValue >= 0) return '';
+      if (fieldName === "areaProducao" && error.includes("maior que zero")) {
+        const numValue = parseFloat(value.replace(",", "."));
+        if (numValue >= 0) return "";
       }
 
       return error;
     }
 
-    return '';
+    return "";
   };
 
   const validatePlotField = (fieldName: keyof PlotData, value: string): string => {
     if (fieldName === 'name' && (!value || value.trim() === '')) {
       return 'Nome do talhão é obrigatório';
     }
-    if (fieldName === 'area') {
-      if (!value || value.trim() === '') {
-        return 'Área do talhão é obrigatória';
+    if (fieldName === "area") {
+      if (!value || value.trim() === "") {
+        return "Área do talhão é obrigatória";
       }
-      return validateNumberField(value, 'Área do talhão');
+      return validateNumberField(value, "Área do talhão");
     }
-    return '';
+    return "";
   };
 
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     const fieldName = name as keyof PropertyFormData;
     let processedValue = value;
 
     // Aplica máscara de número para os campos de área
-    if (['areaTotal', 'areaProducao'].includes(fieldName)) {
+    if (["areaTotal", "areaProducao"].includes(fieldName)) {
       processedValue = numberMask(value);
     }
 
     setFormData((prev) => {
       const updatedFormData = { ...prev, [fieldName]: processedValue };
 
-      // Valida o campo se já foi tocado
-      if (touchedFields[fieldName]) {
-        const error = validateField(fieldName, processedValue);
-        setErrors(prevErrors => ({ ...prevErrors, [fieldName]: error }));
-      }
-
       return updatedFormData;
     });
-  };
-
-  const handleBlur = (fieldName: keyof PropertyFormData, customValue?: string) => {
-    setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
-
-    const value = customValue !== undefined ? customValue : (formData[fieldName] || '').toString();
-
-    const error = validateField(fieldName, value);
-
-    setErrors(prev => ({ ...prev, [fieldName]: error }));
   };
 
   // --- TALHÃO HANDLERS ---
@@ -308,11 +304,11 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   const updatePlot = (index: number, field: keyof PlotData, value: any) => {
     let processedValue = value;
 
-    if (field === 'area') {
+    if (field === "area") {
       processedValue = numberMask(value);
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       plots: prev.plots.map((t, i) =>
         i === index ? { ...t, [field]: processedValue } : t
@@ -334,7 +330,13 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   // Efeito para validar o formulário inteiro em tempo real
   useEffect(() => {
-    const requiredPropertyFields: (keyof PropertyFormData)[] = ['name', 'address', 'areaTotal', 'areaProducao', 'cultivo'];
+    const requiredPropertyFields: (keyof PropertyFormData)[] = [
+      "name",
+      "address",
+      "areaTotal",
+      "areaProducao",
+      "cultivo",
+    ];
 
     let isBasicPropertyValid = true;
 
@@ -357,7 +359,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
     setIsValid(isBasicPropertyValid && areplotsValid);
   }, [formData]);
 
-
   // Handler para o envio do formulário
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -367,15 +368,16 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
     // 2. Marca os campos de propriedade como tocados
     const newTouched: Record<string, boolean> = {};
-    requiredPropertyFields.forEach(field => { newTouched[field] = true; });
-    setTouchedFields(newTouched);
+    requiredPropertyFields.forEach((field) => {
+      newTouched[field] = true;
+    });
 
     // 3. Valida campos de propriedade
     const finalErrors: Record<string, string> = {};
     let hasError = false;
 
-    requiredPropertyFields.forEach(field => {
-      const value = (formData[field] || '').toString();
+    requiredPropertyFields.forEach((field) => {
+      const value = (formData[field] || "").toString();
       const error = validateField(field, value);
       if (error) {
         finalErrors[field] = error;
@@ -397,8 +399,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
       }
     });
 
-    setErrors(finalErrors);
-
     if (hasError) {
       return;
     }
@@ -408,7 +408,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   // Handler para atualizar a posição do pino no mapa 1
   const handleMarkerChange = (pos: [number, number]) => {
-    setFormData(prev => ({ ...prev, markerPosition: pos }));
+    setFormData((prev) => ({ ...prev, markerPosition: pos }));
   };
 
   // Handlers para upload de arquivos
@@ -425,7 +425,7 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
   const handleViewFile = (file: File) => {
     const url = URL.createObjectURL(file);
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   // Handlers para o desenho no mapa 2 (talhão)
@@ -442,8 +442,8 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
   // Get active talhão for display
   const activePlot = activePlotIndex !== null ? formData.plots[activePlotIndex] : null;
 
-  const title = isEditMode ? 'Editar propriedade' : 'Nova propriedade/talhão';
-  const submitText = isEditMode ? 'Salvar alterações' : 'Salvar propriedade';
+  const title = isEditMode ? "Editar propriedade" : "Nova propriedade/talhão";
+  const submitText = isEditMode ? "Salvar alterações" : "Salvar propriedade";
 
   return (
     <div className={styles.page}>
@@ -464,7 +464,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             name="name"
             value={formData.name}
             onChange={handleChange}
-            onBlur={() => handleBlur('name')}
             placeholder="Ex: Sítio Oliveira"
             required
           />
@@ -473,7 +472,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             name="address"
             value={formData.address}
             onChange={handleChange}
-            onBlur={() => handleBlur('address')}
             placeholder="Estrada da Lavoura..."
             required
           />
@@ -484,7 +482,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               name="areaTotal"
               value={formData.areaTotal}
               onChange={handleChange}
-              onBlur={() => handleBlur('areaTotal')}
               placeholder="10"
               required
             />
@@ -493,7 +490,6 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
               name="areaProducao"
               value={formData.areaProducao}
               onChange={handleChange}
-              onBlur={() => handleBlur('areaProducao')}
               placeholder="2"
               required
             />
@@ -502,7 +498,9 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
             <label className={styles.label}>Cultivo principal</label>
             <CultureSearchSelect
               value={formData.cultivo}
-              onChange={(selectedCrop) => setFormData(prev => ({ ...prev, cultivo: selectedCrop }))}
+              onChange={(selectedCrop) =>
+                setFormData((prev) => ({ ...prev, cultivo: selectedCrop }))
+              }
               placeholder="Selecione o cultivo principal..."
             />
           </div>
@@ -510,8 +508,14 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
 
         <div className={styles.section}>
           <h3 className={styles.textTitle}>Certificações</h3>
-          <p className={styles.subtitle}>Você pode inserir certificações já existentes, se houver.</p>
-          <FileInput leftIcon={<FiUpload />} onChange={handleFileChange} multiple>
+          <p className={styles.subtitle}>
+            Você pode inserir certificações já existentes, se houver.
+          </p>
+          <FileInput
+            leftIcon={<FiUpload />}
+            onChange={handleFileChange}
+            multiple
+          >
             Fazer upload de foto ou documento
           </FileInput>
 
@@ -690,7 +694,9 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
                 required
               />
 
-              <h4 className={styles.textTitle} style={{ marginTop: '1rem' }}>Situação do talhão</h4>
+              <h4 className={styles.textTitle} style={{ marginTop: "1rem" }}>
+                Situação do talhão
+              </h4>
               <div className={styles.tagGroup}>
                 <TagToggle
                   color="blue"
@@ -772,15 +778,23 @@ export function PropertyForm({ initialData, onSubmit, isLoading = false }: Props
         )}
 
         <footer className={styles.footer}>
-          <Button variant="tertiary" type="button" onClick={() => navigate(-1)} disabled={isLoading}>
+          <Button
+            variant="tertiary"
+            type="button"
+            onClick={() => navigate(-1)}
+            disabled={isLoading}
+          >
             Cancelar
           </Button>
-          <Button variant="primary" type="submit" disabled={!isValid || isLoading}>
-            {isLoading ? 'Salvando...' : submitText}
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={!isValid || isLoading}
+          >
+            {isLoading ? "Salvando..." : submitText}
           </Button>
         </footer>
-
-      </form >
-    </div >
+      </form>
+    </div>
   );
 }

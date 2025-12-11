@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Culture } from './entities/culture.entity';
@@ -39,7 +35,7 @@ export class CulturesService {
     });
 
     const savedCulture = await this.culturesRepository.save(culture);
-    
+
     // Load the property relationship
     const cultureWithProperty = await this.culturesRepository.findOne({
       where: { id: savedCulture.id },
@@ -69,17 +65,24 @@ export class CulturesService {
       .leftJoinAndSelect('culture.activities', 'activities')
       .select([
         'culture',
-        'property.id', 'property.name', 'property.address', 'property.totalArea', 'property.productionArea', 'property.mainCrop',
-        'activities.id', 'activities.titulo', 'activities.date', 'activities.tipo', 'activities.descricao'
+        'property.id',
+        'property.name',
+        'property.address',
+        'property.totalArea',
+        'property.productionArea',
+        'property.mainCrop',
+        'activities.id',
+        'activities.titulo',
+        'activities.date',
+        'activities.tipo',
+        'activities.descricao',
       ])
       .where('culture.userId = :userId', { userId });
 
     this.applySearchFilter(queryBuilder, search);
     this.applySorting(queryBuilder, sortBy, sortOrder);
 
-    queryBuilder
-      .skip(skip)
-      .take(limit);
+    queryBuilder.skip(skip).take(limit);
 
     const [cultures, total] = await queryBuilder.getManyAndCount();
 
@@ -87,7 +90,7 @@ export class CulturesService {
     await this.updateCulturesActiveStatus(cultures);
 
     const data = this.mapCulturesToResponseDtos(cultures);
-    
+
     // Log para debug
     console.log('[CulturesService] Total cultures:', total);
     if (data.length > 0) {
@@ -126,7 +129,7 @@ export class CulturesService {
 
     const dto = this.mapToResponseDto(culture);
     dto.activitiesCount = culture.activities?.length || 0;
-    
+
     return dto;
   }
 
@@ -149,15 +152,19 @@ export class CulturesService {
     }
 
     // Convert DTO to entity format and update fields
-    if (updateCultureDto.cultureName !== undefined) culture.cultureName = updateCultureDto.cultureName;
+    if (updateCultureDto.cultureName !== undefined)
+      culture.cultureName = updateCultureDto.cultureName;
     if (updateCultureDto.cultivar !== undefined) culture.cultivar = updateCultureDto.cultivar;
     if (updateCultureDto.cycle !== undefined) culture.cycle = updateCultureDto.cycle;
     if (updateCultureDto.origin !== undefined) culture.origin = updateCultureDto.origin;
     if (updateCultureDto.supplier !== undefined) culture.supplier = updateCultureDto.supplier;
-    if (updateCultureDto.plantingDate !== undefined) culture.plantingDate = this.parseDateString(updateCultureDto.plantingDate);
-    if (updateCultureDto.plantingArea !== undefined) culture.plantingArea = updateCultureDto.plantingArea;
+    if (updateCultureDto.plantingDate !== undefined)
+      culture.plantingDate = this.parseDateString(updateCultureDto.plantingDate);
+    if (updateCultureDto.plantingArea !== undefined)
+      culture.plantingArea = updateCultureDto.plantingArea;
     if (updateCultureDto.plotName !== undefined) culture.plotName = updateCultureDto.plotName;
-    if (updateCultureDto.observations !== undefined) culture.observations = updateCultureDto.observations;
+    if (updateCultureDto.observations !== undefined)
+      culture.observations = updateCultureDto.observations;
 
     // Recalcular isActive baseado na data de plantio e ciclo
     culture.isActive = this.shouldBeActive(culture.plantingDate, culture.cycle);
@@ -220,14 +227,13 @@ export class CulturesService {
   }
 
   private mapToResponseDto(culture: Culture): CultureResponseDto {
-    const plantingDate = culture.plantingDate instanceof Date 
-      ? culture.plantingDate 
-      : new Date(culture.plantingDate);
-    
+    const plantingDate =
+      culture.plantingDate instanceof Date ? culture.plantingDate : new Date(culture.plantingDate);
+
     const daysElapsed = this.calculateDaysElapsed(plantingDate);
-    
+
     const expectedHarvestDate = this.calculateExpectedHarvestDate(plantingDate, culture.cycle);
-    
+
     const daysRemaining = culture.cycle - daysElapsed;
     const isCycleComplete = this.isCycleComplete(plantingDate, culture.cycle);
 
@@ -247,7 +253,7 @@ export class CulturesService {
       isActive: culture.isActive,
       createdAt: culture.createdAt,
       updatedAt: culture.updatedAt,
-      
+
       // Calculated fields
       daysElapsed: Math.max(0, daysElapsed), // Don't return negative days if planting is in future
       daysRemaining,
@@ -267,7 +273,7 @@ export class CulturesService {
     }
 
     if (culture.activities) {
-      response.activities = culture.activities.map(activity => ({
+      response.activities = culture.activities.map((activity) => ({
         id: activity.id,
         titulo: activity.titulo,
         data: activity.date,
@@ -304,7 +310,7 @@ export class CulturesService {
   private calculateDaysElapsed(plantingDate: Date): number {
     const today = this.getTodayAtMidnight();
     const planting = this.getDateAtMidnight(plantingDate);
-    
+
     const diffTime = today.getTime() - planting.getTime();
     return Math.floor(diffTime / CulturesService.MILLISECONDS_PER_DAY);
   }
@@ -333,17 +339,17 @@ export class CulturesService {
   private shouldBeActive(plantingDate: Date, cycle: number): boolean {
     const today = this.getTodayAtMidnight();
     const planting = this.getDateAtMidnight(plantingDate);
-    
+
     // Se a data de plantio é no futuro, deve ser inativa
     if (planting > today) {
       return false;
     }
-    
+
     // Se o ciclo já foi completado, deve ser inativa
     if (this.isCycleComplete(plantingDate, cycle)) {
       return false;
     }
-    
+
     // Caso contrário, deve ser ativa
     return true;
   }
@@ -356,7 +362,7 @@ export class CulturesService {
 
     cultures.forEach((culture) => {
       const shouldBeActive = this.shouldBeActive(culture.plantingDate, culture.cycle);
-      
+
       if (culture.isActive !== shouldBeActive) {
         culturesToUpdate.push({ culture, newStatus: shouldBeActive });
       }
@@ -365,10 +371,7 @@ export class CulturesService {
     if (culturesToUpdate.length > 0) {
       // Update in database
       for (const { culture, newStatus } of culturesToUpdate) {
-        await this.culturesRepository.update(
-          { id: culture.id },
-          { isActive: newStatus }
-        );
+        await this.culturesRepository.update({ id: culture.id }, { isActive: newStatus });
         // Update in memory
         culture.isActive = newStatus;
       }
@@ -382,9 +385,9 @@ export class CulturesService {
     if (search && search.trim()) {
       queryBuilder.andWhere(
         '(LOWER(culture.cultureName) LIKE LOWER(:search) OR ' +
-        'LOWER(culture.cultivar) LIKE LOWER(:search) OR ' +
-        'LOWER(property.name) LIKE LOWER(:search))',
-        { search: `%${search.trim()}%` }
+          'LOWER(culture.cultivar) LIKE LOWER(:search) OR ' +
+          'LOWER(property.name) LIKE LOWER(:search))',
+        { search: `%${search.trim()}%` },
       );
     }
   }
@@ -395,7 +398,7 @@ export class CulturesService {
   private applySorting(
     queryBuilder: any,
     sortBy?: string,
-    sortOrder: 'ASC' | 'DESC' = 'DESC'
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
   ): void {
     const sortField = this.getSortField(sortBy);
     queryBuilder.orderBy(sortField, sortOrder);
@@ -433,7 +436,7 @@ export class CulturesService {
   private sortByCalculatedFields(
     data: CultureResponseDto[],
     sortBy?: string,
-    sortOrder: 'ASC' | 'DESC' = 'DESC'
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
   ): void {
     if (sortBy === 'daysRemaining' || sortBy === 'daysElapsed') {
       const field = sortBy as 'daysRemaining' | 'daysElapsed';

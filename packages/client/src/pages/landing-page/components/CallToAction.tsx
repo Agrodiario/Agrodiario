@@ -20,7 +20,9 @@ export function CallToAction() {
         <p className={styles.ctaDescription}>
           Cadastre-se e registre suas ações de forma simples e organizada.
         </p>
-        <Button variant='quaternary' onClick={handleSignup}>Criar minha conta</Button>
+        <Button variant="quaternary" onClick={handleSignup}>
+          Criar minha conta
+        </Button>
       </div>
     </section>
   );

@@ -7,7 +7,7 @@ import { ProdutoFormuladoResponseDto } from './dto/produto-formulado-response.dt
 @Injectable()
 export class EmbrapaService {
   private accessToken: string | null = null;
-  private tokenExpiration: number = 0; 
+  private tokenExpiration: number = 0;
 
   constructor(
     private readonly httpService: HttpService,
@@ -25,7 +25,10 @@ export class EmbrapaService {
     const secret = this.configService.get<string>('EMBRAPA_CONSUMER_SECRET');
 
     console.log('[EMBRAPA] Consumer Key:', key ? `${key.substring(0, 4)}...` : 'undefined');
-    console.log('[EMBRAPA] Consumer Secret:', secret ? `${secret.substring(0, 4)}...` : 'undefined');
+    console.log(
+      '[EMBRAPA] Consumer Secret:',
+      secret ? `${secret.substring(0, 4)}...` : 'undefined',
+    );
 
     if (!key || !secret) {
       console.error('[EMBRAPA] Credenciais não configuradas!');
@@ -49,8 +52,8 @@ export class EmbrapaService {
       );
 
       this.accessToken = response.data.access_token;
-      console.log("Token Embrapa obtido:", this.accessToken);
-      this.tokenExpiration = now + (response.data.expires_in * 1000);
+      console.log('Token Embrapa obtido:', this.accessToken);
+      this.tokenExpiration = now + response.data.expires_in * 1000;
 
       return this.accessToken;
     } catch (error) {
@@ -65,7 +68,7 @@ export class EmbrapaService {
       const params: any = {
         itens: 50,
         pagina: 1,
-        marca_comercial: search
+        marca_comercial: search,
       };
 
       const response = await firstValueFrom(
@@ -73,7 +76,7 @@ export class EmbrapaService {
           'https://api.cnptia.embrapa.br/agrofit/v1/search/produtos-formulados',
           {
             headers: { Authorization: `Bearer ${token}` },
-            params: params
+            params: params,
           },
         ),
       );
@@ -91,13 +94,11 @@ export class EmbrapaService {
       }
 
       return options;
-
     } catch (error) {
       console.error('Erro ao buscar insumos', error);
       return [];
     }
   }
-
 
   async getAllProdutoFormuladoByMarcaComercial(search?: string) {
     const token = await this.getAccessToken();

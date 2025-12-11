@@ -26,10 +26,10 @@ export class Property extends BaseEntity {
   isActive: boolean;
 
   @Column({ type: 'jsonb', nullable: true })
-  plots: { 
-    name: string; 
-    area: number; 
-    culture?: string; 
+  plots: {
+    name: string;
+    area: number;
+    culture?: string;
     situacao?: 'producao' | 'preparo' | 'pousio';
     polygon?: any;
   }[];

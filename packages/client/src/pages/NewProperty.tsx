@@ -1,9 +1,12 @@
 // src/pages/NewPropertyPage.tsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PropertyForm, PropertyFormData } from '../components/properties/PropertyForm/PropertyForm';
-import { propertyService } from '../services/property.service';
-import { CreatePropertyDto, Plot } from '../types/property.types';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  PropertyForm,
+  PropertyFormData,
+} from "../components/properties/PropertyForm/PropertyForm";
+import { propertyService } from "../services/property.service";
+import { CreatePropertyDto, Plot } from "../types/property.types";
 
 export default function NewPropertyPage() {
   const navigate = useNavigate();
@@ -11,7 +14,7 @@ export default function NewPropertyPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleCreate = async (data: PropertyFormData) => {
-    console.log('data', data);
+    console.log("data", data);
     setIsLoading(true);
     setError(null);
 
@@ -29,8 +32,8 @@ export default function NewPropertyPage() {
       const propertyDto: CreatePropertyDto = {
         name: data.name,
         address: data.address,
-        totalArea: parseFloat(data.areaTotal.replace(',', '.')),
-        productionArea: parseFloat(data.areaProducao.replace(',', '.')),
+        totalArea: parseFloat(data.areaTotal.replace(",", ".")),
+        productionArea: parseFloat(data.areaProducao.replace(",", ".")),
         mainCrop: data.cultivo,
         certifications: '', 
         plots: plots.length > 0 ? plots : undefined,
@@ -38,15 +41,18 @@ export default function NewPropertyPage() {
 
       // Validate data
       if (propertyDto.productionArea > propertyDto.totalArea) {
-        console.log('error', 'A área de produção não pode ser maior que a área total');
-        setError('A área de produção não pode ser maior que a área total');
+        console.log(
+          "error",
+          "A área de produção não pode ser maior que a área total",
+        );
+        setError("A área de produção não pode ser maior que a área total");
         setIsLoading(false);
         return;
       }
 
       if (!propertyDto.name || !propertyDto.address || !propertyDto.mainCrop) {
-        console.log('error', 'Preencha todos os campos obrigatórios');
-        setError('Preencha todos os campos obrigatórios');
+        console.log("error", "Preencha todos os campos obrigatórios");
+        setError("Preencha todos os campos obrigatórios");
         setIsLoading(false);
         return;
       }
@@ -55,10 +61,10 @@ export default function NewPropertyPage() {
       await propertyService.create(propertyDto);
 
       // Success - navigate to properties list
-      navigate('/properties');
+      navigate("/properties");
     } catch (err: any) {
-      console.error('Erro ao criar propriedade:', err);
-      setError(err.message || 'Erro ao criar propriedade. Tente novamente.');
+      console.error("Erro ao criar propriedade:", err);
+      setError(err.message || "Erro ao criar propriedade. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -67,16 +73,18 @@ export default function NewPropertyPage() {
   return (
     <div>
       {error && (
-        <div style={{
-          padding: '12px',
-          backgroundColor: '#fee',
-          color: '#c33',
-          borderRadius: '4px',
-          marginBottom: '16px',
-          fontSize: '14px',
-          maxWidth: '800px',
-          margin: '0 auto 16px'
-        }}>
+        <div
+          style={{
+            padding: "12px",
+            backgroundColor: "#fee",
+            color: "#c33",
+            borderRadius: "4px",
+            marginBottom: "16px",
+            fontSize: "14px",
+            maxWidth: "800px",
+            margin: "0 auto 16px",
+          }}
+        >
           {error}
         </div>
       )}

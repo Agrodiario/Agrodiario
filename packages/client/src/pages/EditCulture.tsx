@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { CultureForm, CultureFormData } from '../components/cultures/CultureForm/CultureForm';
-import { cultureService } from '../services/culture.service';
-import { UpdateCultureDto } from '../types/culture.types';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  CultureForm,
+  CultureFormData,
+} from "../components/cultures/CultureForm/CultureForm";
+import { cultureService } from "../services/culture.service";
+import { UpdateCultureDto } from "../types/culture.types";
 
 export default function EditCulture() {
   const navigate = useNavigate();
@@ -10,32 +13,36 @@ export default function EditCulture() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialData, setInitialData] = useState<Partial<CultureFormData> | undefined>();
+  const [initialData, setInitialData] = useState<
+    Partial<CultureFormData> | undefined
+  >();
 
   // Fetch culture data on mount
   useEffect(() => {
     const fetchCulture = async () => {
       if (!id) {
-        navigate('/cultures');
+        navigate("/cultures");
         return;
       }
 
       try {
         setIsFetching(true);
         const culture = await cultureService.findOne(id);
-        
-        console.log('Culture loaded:', culture);
+
+        console.log("Culture loaded:", culture);
 
         // Transform backend data to form data
         // Converter de YYYY-MM-DD para dd/mm/yyyy
-        let plantingDateStr = '';
-        if (typeof culture.plantingDate === 'string') {
-          const [year, month, day] = culture.plantingDate.split('T')[0].split('-');
+        let plantingDateStr = "";
+        if (typeof culture.plantingDate === "string") {
+          const [year, month, day] = culture.plantingDate
+            .split("T")[0]
+            .split("-");
           plantingDateStr = `${day}/${month}/${year}`;
         } else {
           const date = new Date(culture.plantingDate);
-          const day = String(date.getDate()).padStart(2, '0');
-          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, "0");
+          const month = String(date.getMonth() + 1).padStart(2, "0");
           const year = date.getFullYear();
           plantingDateStr = `${day}/${month}/${year}`;
         }
@@ -43,20 +50,26 @@ export default function EditCulture() {
         setInitialData({
           propertyId: culture.propertyId,
           cultureName: culture.cultureName,
-          cultivar: culture.cultivar || '',
+          cultivar: culture.cultivar || "",
           cycle: culture.cycle.toString(),
-          origin: (culture.origin as 'organic' | 'conventional' | 'transgenic') || 'conventional',
-          supplier: culture.supplier || '',
+          origin:
+            (culture.origin as "organic" | "conventional" | "transgenic") ||
+            "conventional",
+          supplier: culture.supplier || "",
           plantingDate: plantingDateStr,
           plantingArea: culture.plantingArea.toString(),
-          plotName: culture.plotName || '',
-          observations: culture.observations || '',
+          plotName: culture.plotName || "",
+          observations: culture.observations || "",
         });
       } catch (err: any) {
-        console.error('Erro completo ao carregar cultura:', err);
-        console.error('Response:', err.response);
-        console.error('Message:', err.message);
-        setError(err.response?.data?.message || err.message || 'Erro ao carregar cultura. Tente novamente.');
+        console.error("Erro completo ao carregar cultura:", err);
+        console.error("Response:", err.response);
+        console.error("Message:", err.message);
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            "Erro ao carregar cultura. Tente novamente.",
+        );
       } finally {
         setIsFetching(false);
       }
@@ -73,7 +86,7 @@ export default function EditCulture() {
 
     try {
       // Converter data de dd/mm/yyyy para YYYY-MM-DD
-      const [day, month, year] = data.plantingDate.split('/');
+      const [day, month, year] = data.plantingDate.split("/");
       const plantingDateISO = `${year}-${month}-${day}`;
 
       // Transform form data to match backend DTO
@@ -93,10 +106,10 @@ export default function EditCulture() {
       await cultureService.update(id, updateDto);
 
       // Success - navigate to cultures list
-      navigate('/cultures');
+      navigate("/cultures");
     } catch (err: any) {
-      console.error('Erro ao atualizar cultura:', err);
-      setError(err.message || 'Erro ao atualizar cultura. Tente novamente.');
+      console.error("Erro ao atualizar cultura:", err);
+      setError(err.message || "Erro ao atualizar cultura. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +117,7 @@ export default function EditCulture() {
 
   if (isFetching) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
+      <div style={{ textAlign: "center", padding: "2rem" }}>
         <p>Carregando cultura...</p>
       </div>
     );
@@ -112,9 +125,9 @@ export default function EditCulture() {
 
   if (error && !initialData) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <p style={{ color: 'red' }}>{error}</p>
-        <button onClick={() => navigate('/cultures')}>Voltar</button>
+      <div style={{ textAlign: "center", padding: "2rem" }}>
+        <p style={{ color: "red" }}>{error}</p>
+        <button onClick={() => navigate("/cultures")}>Voltar</button>
       </div>
     );
   }
@@ -124,14 +137,14 @@ export default function EditCulture() {
       {error && (
         <div
           style={{
-            padding: '12px',
-            backgroundColor: '#fee',
-            color: '#c33',
-            borderRadius: '4px',
-            marginBottom: '16px',
-            fontSize: '14px',
-            maxWidth: '800px',
-            margin: '0 auto 16px',
+            padding: "12px",
+            backgroundColor: "#fee",
+            color: "#c33",
+            borderRadius: "4px",
+            marginBottom: "16px",
+            fontSize: "14px",
+            maxWidth: "800px",
+            margin: "0 auto 16px",
           }}
         >
           {error}

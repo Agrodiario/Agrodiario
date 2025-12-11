@@ -123,7 +123,7 @@ export class ProductApplicationsService {
     }
 
     if (productApplication.userId !== userId) {
-      throw new ForbiddenException('Você não tem permissão para acessar esse registro')
+      throw new ForbiddenException('Você não tem permissão para acessar esse registro');
     }
 
     return new ProductApplicationResponseDto(productApplication);

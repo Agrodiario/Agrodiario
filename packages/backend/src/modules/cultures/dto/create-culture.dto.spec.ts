@@ -44,9 +44,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const propertyIdError = errors.find((e) => e.property === 'propertyId');
       expect(propertyIdError).toBeDefined();
-      expect(propertyIdError?.constraints?.isNotEmpty).toBe(
-        'Propriedade associada é obrigatória',
-      );
+      expect(propertyIdError?.constraints?.isNotEmpty).toBe('Propriedade associada é obrigatória');
     });
 
     it('deve falhar quando propertyId é undefined', async () => {
@@ -60,9 +58,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const propertyIdError = errors.find((e) => e.property === 'propertyId');
       expect(propertyIdError).toBeDefined();
-      expect(propertyIdError?.constraints?.isNotEmpty).toBe(
-        'Propriedade associada é obrigatória',
-      );
+      expect(propertyIdError?.constraints?.isNotEmpty).toBe('Propriedade associada é obrigatória');
     });
 
     it('deve falhar quando propertyId não é um UUID válido', async () => {
@@ -85,9 +81,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const propertyIdError = errors.find((e) => e.property === 'propertyId');
       expect(propertyIdError).toBeDefined();
-      expect(propertyIdError?.constraints?.isUuid).toBe(
-        'ID da propriedade inválido',
-      );
+      expect(propertyIdError?.constraints?.isUuid).toBe('ID da propriedade inválido');
     });
 
     it('deve falhar quando propertyId é um número', async () => {
@@ -110,9 +104,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const propertyIdError = errors.find((e) => e.property === 'propertyId');
       expect(propertyIdError).toBeDefined();
-      expect(propertyIdError?.constraints?.isUuid).toBe(
-        'ID da propriedade inválido',
-      );
+      expect(propertyIdError?.constraints?.isUuid).toBe('ID da propriedade inválido');
     });
   });
 
@@ -157,9 +149,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cycleError = errors.find((e) => e.property === 'cycle');
       expect(cycleError).toBeDefined();
-      expect(cycleError?.constraints?.isNotEmpty).toBe(
-        'Ciclo da cultura é obrigatório',
-      );
+      expect(cycleError?.constraints?.isNotEmpty).toBe('Ciclo da cultura é obrigatório');
     });
 
     it('deve falhar quando cycle é undefined', async () => {
@@ -181,9 +171,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cycleError = errors.find((e) => e.property === 'cycle');
       expect(cycleError).toBeDefined();
-      expect(cycleError?.constraints?.isNotEmpty).toBe(
-        'Ciclo da cultura é obrigatório',
-      );
+      expect(cycleError?.constraints?.isNotEmpty).toBe('Ciclo da cultura é obrigatório');
     });
 
     it('deve falhar quando cycle não é um inteiro', async () => {
@@ -206,9 +194,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cycleError = errors.find((e) => e.property === 'cycle');
       expect(cycleError).toBeDefined();
-      expect(cycleError?.constraints?.isInt).toBe(
-        'Ciclo deve ser um número inteiro',
-      );
+      expect(cycleError?.constraints?.isInt).toBe('Ciclo deve ser um número inteiro');
     });
 
     it('deve falhar quando cycle é zero', async () => {
@@ -231,9 +217,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cycleError = errors.find((e) => e.property === 'cycle');
       expect(cycleError).toBeDefined();
-      expect(cycleError?.constraints?.min).toBe(
-        'Ciclo deve ser maior que zero',
-      );
+      expect(cycleError?.constraints?.min).toBe('Ciclo deve ser maior que zero');
     });
 
     it('deve falhar quando cycle é negativo', async () => {
@@ -256,9 +240,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cycleError = errors.find((e) => e.property === 'cycle');
       expect(cycleError).toBeDefined();
-      expect(cycleError?.constraints?.min).toBe(
-        'Ciclo deve ser maior que zero',
-      );
+      expect(cycleError?.constraints?.min).toBe('Ciclo deve ser maior que zero');
     });
 
     it('deve falhar quando cycle é uma string', async () => {
@@ -281,9 +263,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cycleError = errors.find((e) => e.property === 'cycle');
       expect(cycleError).toBeDefined();
-      expect(cycleError?.constraints?.isInt).toBe(
-        'Ciclo deve ser um número inteiro',
-      );
+      expect(cycleError?.constraints?.isInt).toBe('Ciclo deve ser um número inteiro');
     });
   });
 
@@ -364,9 +344,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const originError = errors.find((e) => e.property === 'origin');
       expect(originError).toBeDefined();
-      expect(originError?.constraints?.isNotEmpty).toBe(
-        'Origem da cultura é obrigatória',
-      );
+      expect(originError?.constraints?.isNotEmpty).toBe('Origem da cultura é obrigatória');
     });
 
     it('deve falhar quando origin é undefined', async () => {
@@ -384,9 +362,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const originError = errors.find((e) => e.property === 'origin');
       expect(originError).toBeDefined();
-      expect(originError?.constraints?.isNotEmpty).toBe(
-        'Origem da cultura é obrigatória',
-      );
+      expect(originError?.constraints?.isNotEmpty).toBe('Origem da cultura é obrigatória');
     });
 
     it('deve falhar quando origin tem valor inválido', async () => {
@@ -526,9 +502,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const supplierError = errors.find((e) => e.property === 'supplier');
       expect(supplierError).toBeDefined();
-      expect(supplierError?.constraints?.isString).toBe(
-        'Fornecedor deve ser um texto',
-      );
+      expect(supplierError?.constraints?.isString).toBe('Fornecedor deve ser um texto');
     });
 
     it('deve falhar quando supplier excede 255 caracteres', async () => {
@@ -652,9 +626,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const plantingDateError = errors.find((e) => e.property === 'plantingDate');
       expect(plantingDateError).toBeDefined();
-      expect(plantingDateError?.constraints?.isNotEmpty).toBe(
-        'Data de plantio é obrigatória',
-      );
+      expect(plantingDateError?.constraints?.isNotEmpty).toBe('Data de plantio é obrigatória');
     });
 
     it('deve falhar quando plantingDate é undefined', async () => {
@@ -674,9 +646,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const plantingDateError = errors.find((e) => e.property === 'plantingDate');
       expect(plantingDateError).toBeDefined();
-      expect(plantingDateError?.constraints?.isNotEmpty).toBe(
-        'Data de plantio é obrigatória',
-      );
+      expect(plantingDateError?.constraints?.isNotEmpty).toBe('Data de plantio é obrigatória');
     });
 
     it('deve falhar quando plantingDate é null', async () => {
@@ -697,9 +667,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const plantingDateError = errors.find((e) => e.property === 'plantingDate');
       expect(plantingDateError).toBeDefined();
-      expect(plantingDateError?.constraints?.isNotEmpty).toBe(
-        'Data de plantio é obrigatória',
-      );
+      expect(plantingDateError?.constraints?.isNotEmpty).toBe('Data de plantio é obrigatória');
     });
 
     it('deve aceitar plantingDate em formato DD/MM/YYYY (validação apenas de string)', async () => {
@@ -755,9 +723,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const plantingDateError = errors.find((e) => e.property === 'plantingDate');
       expect(plantingDateError).toBeDefined();
-      expect(plantingDateError?.constraints?.isString).toBe(
-        'Data de plantio deve ser uma string',
-      );
+      expect(plantingDateError?.constraints?.isString).toBe('Data de plantio deve ser uma string');
     });
 
     it('deve validar com sucesso data no passado', async () => {
@@ -858,9 +824,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const plantingAreaError = errors.find((e) => e.property === 'plantingArea');
       expect(plantingAreaError).toBeDefined();
-      expect(plantingAreaError?.constraints?.isNotEmpty).toBe(
-        'Área de plantio é obrigatória',
-      );
+      expect(plantingAreaError?.constraints?.isNotEmpty).toBe('Área de plantio é obrigatória');
     });
 
     it('deve falhar quando plantingArea é undefined', async () => {
@@ -881,9 +845,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const plantingAreaError = errors.find((e) => e.property === 'plantingArea');
       expect(plantingAreaError).toBeDefined();
-      expect(plantingAreaError?.constraints?.isNotEmpty).toBe(
-        'Área de plantio é obrigatória',
-      );
+      expect(plantingAreaError?.constraints?.isNotEmpty).toBe('Área de plantio é obrigatória');
     });
 
     it('deve falhar quando plantingArea é zero', async () => {
@@ -953,9 +915,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const plantingAreaError = errors.find((e) => e.property === 'plantingArea');
       expect(plantingAreaError).toBeDefined();
-      expect(plantingAreaError?.constraints?.isNumber).toBe(
-        'Área de plantio deve ser um número',
-      );
+      expect(plantingAreaError?.constraints?.isNumber).toBe('Área de plantio deve ser um número');
     });
   });
 
@@ -1059,9 +1019,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const observationsError = errors.find((e) => e.property === 'observations');
       expect(observationsError).toBeDefined();
-      expect(observationsError?.constraints?.isString).toBe(
-        'Observações devem ser um texto',
-      );
+      expect(observationsError?.constraints?.isString).toBe('Observações devem ser um texto');
     });
   });
 
@@ -1104,9 +1062,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cultureNameError = errors.find((e) => e.property === 'cultureName');
       expect(cultureNameError).toBeDefined();
-      expect(cultureNameError?.constraints?.isNotEmpty).toBe(
-        'Nome da cultura é obrigatório',
-      );
+      expect(cultureNameError?.constraints?.isNotEmpty).toBe('Nome da cultura é obrigatório');
     });
 
     it('deve falhar quando cultureName não está presente', async () => {
@@ -1148,9 +1104,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cultureNameError = errors.find((e) => e.property === 'cultureName');
       expect(cultureNameError).toBeDefined();
-      expect(cultureNameError?.constraints?.isString).toBe(
-        'Nome da cultura deve ser um texto',
-      );
+      expect(cultureNameError?.constraints?.isString).toBe('Nome da cultura deve ser um texto');
     });
 
     it('deve falhar quando cultureName excede 255 caracteres', async () => {
@@ -1273,9 +1227,7 @@ describe('CreateCultureDto', () => {
       expect(errors.length).toBeGreaterThan(0);
       const cultivarError = errors.find((e) => e.property === 'cultivar');
       expect(cultivarError).toBeDefined();
-      expect(cultivarError?.constraints?.isString).toBe(
-        'Cultivar/Variedade deve ser um texto',
-      );
+      expect(cultivarError?.constraints?.isString).toBe('Cultivar/Variedade deve ser um texto');
     });
 
     it('deve falhar quando cultivar excede 255 caracteres', async () => {

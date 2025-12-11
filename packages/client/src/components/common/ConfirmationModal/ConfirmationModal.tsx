@@ -1,7 +1,7 @@
 // src/components/common/ConfirmationModal/ConfirmationModal.tsx
-import { ReactNode, useEffect } from 'react';
-import styles from './ConfirmationModal.module.css';
-import { Button } from '../Button/Button';
+import { ReactNode, useEffect } from "react";
+import styles from "./ConfirmationModal.module.css";
+import { Button } from "../Button/Button";
 
 type ModalProps = {
   isOpen: boolean;
@@ -21,13 +21,13 @@ export function ConfirmationModal({
   // Efeito para fechar com 'Esc'
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
 

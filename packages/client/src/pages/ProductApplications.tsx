@@ -1,16 +1,16 @@
-import styles from './ProductApplications.module.css'
-import { Input } from '../components/common/Input/Input';
-import { useEffect, useState, useCallback } from 'react';
-import { FiDownload, FiEdit, FiSearch, FiTrash2 } from 'react-icons/fi';
-import { Dropdown } from '../components/common/Dropdown/Dropdown';
-import { Button } from '../components/common/Button/Button';
-import { FaRegCalendarPlus } from 'react-icons/fa';
-import { MdArrowDropDown } from 'react-icons/md';
-import { ProductApplication } from '../types/productApplication.types.ts';
-import { useNavigate } from 'react-router-dom';
-import { productApplicationService } from '../services/productApplication.service.ts';
-import { ConfirmationModal } from '../components/common/ConfirmationModal/ConfirmationModal.tsx';
-import { generateProductApplicationReport } from '@/utils/generatePDF.ts';
+import styles from "./ProductApplications.module.css";
+import { Input } from "../components/common/Input/Input";
+import { useEffect, useState, useCallback } from "react";
+import { FiDownload, FiEdit, FiSearch, FiTrash2 } from "react-icons/fi";
+import { Dropdown } from "../components/common/Dropdown/Dropdown";
+import { Button } from "../components/common/Button/Button";
+import { FaRegCalendarPlus } from "react-icons/fa";
+import { MdArrowDropDown } from "react-icons/md";
+import { ProductApplication } from "../types/productApplication.types.ts";
+import { useNavigate } from "react-router-dom";
+import { productApplicationService } from "../services/productApplication.service.ts";
+import { ConfirmationModal } from "../components/common/ConfirmationModal/ConfirmationModal.tsx";
+import { generateProductApplicationReport } from "@/utils/generatePDF.ts";
 
 export interface PaginatedProductApplications {
   data: ProductApplication[];
@@ -21,8 +21,8 @@ export interface PaginatedProductApplications {
 export default function ProductApplicationsPage() {
   const navigate = useNavigate();
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const [page, setPage] = useState(1);
@@ -31,10 +31,11 @@ export default function ProductApplicationsPage() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const [productApplications, setProductApplications] = useState<ProductApplication[]>([]);
-  const [selectedProductApplication, setSelectedProductApplication] = useState<ProductApplication | null>(
-    null
-  );
+  const [productApplications, setProductApplications] = useState<
+    ProductApplication[]
+  >([]);
+  const [selectedProductApplication, setSelectedProductApplication] =
+    useState<ProductApplication | null>(null);
 
   const handleGenerateReport = async () => {
     try {
@@ -45,31 +46,39 @@ export default function ProductApplicationsPage() {
         1,
         1000, // Buscar muitas para o relatório
         sortOrder,
-        searchTerm
+        searchTerm,
       );
 
       const textoFiltro = searchTerm
         ? `Busca por: "${searchTerm}"`
-        : 'Todos os registros';
+        : "Todos os registros";
 
       // Gerar o relatório
       await generateProductApplicationReport(response.data, textoFiltro);
     } catch (error) {
-      console.error('Erro ao gerar relatório', error);
-      alert('Erro ao gerar o relatório. Tente novamente.');
+      console.error("Erro ao gerar relatório", error);
+      alert("Erro ao gerar o relatório. Tente novamente.");
     } finally {
       setIsGeneratingReport(false);
     }
   };
 
-  const fetchProductApplications = useCallback(async (page: number, order: 'ASC' | 'DESC') => {
-    const response = await productApplicationService.findAll(page, 5, order, '');
-    setProductApplications(response.data);
-    setPage(response.page);
-    setLastPage(response.data.length > 0 ? response.lastPage : 0);
-  }, []);
+  const fetchProductApplications = useCallback(
+    async (page: number, order: "ASC" | "DESC") => {
+      const response = await productApplicationService.findAll(
+        page,
+        5,
+        order,
+        "",
+      );
+      setProductApplications(response.data);
+      setPage(response.page);
+      setLastPage(response.data.length > 0 ? response.lastPage : 0);
+    },
+    [],
+  );
 
-  const handleSortChange = (order: 'ASC' | 'DESC') => {
+  const handleSortChange = (order: "ASC" | "DESC") => {
     setSortOrder(order);
     setPage(1);
     fetchProductApplications(1, order);
@@ -79,7 +88,7 @@ export default function ProductApplicationsPage() {
   const handleEdit = (id: string) => {
     console.log(selectedProductApplication);
     navigate(`/products/edit/${id}`);
-  }
+  };
 
   // DELETAR
   const handleConfirmDelete = (item: ProductApplication) => {
@@ -93,16 +102,19 @@ export default function ProductApplicationsPage() {
     try {
       await productApplicationService.remove(selectedProductApplication.id);
       // Defina tipos explicitamente para os parâmetros
-      setProductApplications(prev =>
-        prev.filter((item: ProductApplication) => item.id !== selectedProductApplication.id)
+      setProductApplications((prev) =>
+        prev.filter(
+          (item: ProductApplication) =>
+            item.id !== selectedProductApplication.id,
+        ),
       );
       setSelectedProductApplication(null);
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Erro ao excluir:", error);
-      alert('Erro ao excluir');
+      alert("Erro ao excluir");
     }
-  }
+  };
 
   // BUSCA LISTA PAGINADA DE APLICAÇÕES
   useEffect(() => {
@@ -138,20 +150,26 @@ export default function ProductApplicationsPage() {
             <div className={styles.dropdownMenu}>
               <button
                 className={styles.dropdownItem}
-                onClick={() => handleSortChange('DESC')}
+                onClick={() => handleSortChange("DESC")}
                 style={{
-                  fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal',
-                  backgroundColor: sortOrder === 'DESC' ? 'var(--color-bg-light)' : 'transparent'
+                  fontWeight: sortOrder === "DESC" ? "bold" : "normal",
+                  backgroundColor:
+                    sortOrder === "DESC"
+                      ? "var(--color-bg-light)"
+                      : "transparent",
                 }}
               >
                 Mais recentes
               </button>
               <button
                 className={styles.dropdownItem}
-                onClick={() => handleSortChange('ASC')}
+                onClick={() => handleSortChange("ASC")}
                 style={{
-                  fontWeight: sortOrder === 'ASC' ? 'bold' : 'normal',
-                  backgroundColor: sortOrder === 'ASC' ? 'var(--color-bg-light)' : 'transparent'
+                  fontWeight: sortOrder === "ASC" ? "bold" : "normal",
+                  backgroundColor:
+                    sortOrder === "ASC"
+                      ? "var(--color-bg-light)"
+                      : "transparent",
                 }}
               >
                 Mais antigas
@@ -166,7 +184,7 @@ export default function ProductApplicationsPage() {
             onClick={handleGenerateReport}
             disabled={isGeneratingReport}
           >
-            {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
+            {isGeneratingReport ? "Gerando..." : "Gerar relatório"}
           </Button>
         </div>
       </div>
@@ -197,9 +215,15 @@ export default function ProductApplicationsPage() {
                 </td>
                 <td className={styles.cell} data-label="Status">
                   <div
-                    className={`${styles.status} ${item.product.organicFarmingProduct ? styles.allowed : styles.denied
-                      }`}>
-                    {item.product.organicFarmingProduct ? "Permitido" : "Proibido"}
+                    className={`${styles.status} ${
+                      item.product.organicFarmingProduct
+                        ? styles.allowed
+                        : styles.denied
+                    }`}
+                  >
+                    {item.product.organicFarmingProduct
+                      ? "Permitido"
+                      : "Proibido"}
                   </div>
                 </td>
                 <td className={styles.cell} data-label="Data Aplicação">
@@ -250,7 +274,7 @@ export default function ProductApplicationsPage() {
               <button
                 key={num}
                 onClick={() => setPage(num)}
-                className={num === page ? styles.activePage : ''}
+                className={num === page ? styles.activePage : ""}
               >
                 {num}
               </button>
@@ -259,5 +283,5 @@ export default function ProductApplicationsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
