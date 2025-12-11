@@ -24,6 +24,7 @@ build/
 .env
 .env.local
 .env.development.local
+.env.test
 .env.test.local
 .env.production.local
 
@@ -70,4 +71,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-.env.test
+
+# Miscellaneous
+uploads/

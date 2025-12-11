@@ -20,12 +20,12 @@ export default function NewPropertyPage() {
 
     try {
       // Transform talhões to plots
-      const plots: Plot[] = data.talhoes.map((talhao) => ({
-        name: talhao.name,
-        area: parseFloat(talhao.area.replace(",", ".")),
-        culture: "",
-        situacao: talhao.situacao,
-        polygon: talhao.polygon,
+      const plots: Plot[] = data.plots.map(plot => ({
+        name: plot.name,
+        area: parseFloat(plot.area.replace(',', '.')),
+        culture: '',
+        situacao: plot.situacao,
+        polygon: plot.polygon,
       }));
 
       // Transform form data to match backend DTO
@@ -35,7 +35,7 @@ export default function NewPropertyPage() {
         totalArea: parseFloat(data.areaTotal.replace(",", ".")),
         productionArea: parseFloat(data.areaProducao.replace(",", ".")),
         mainCrop: data.cultivo,
-        certifications: "", // Optional field - can be empty for now
+        certifications: '', 
         plots: plots.length > 0 ? plots : undefined,
       };
 
