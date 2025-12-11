@@ -59,6 +59,7 @@ export class ProductsService {
 
   // Organize the vector by order of similarity to the search string
   private reorderBySimilarity(names: string[], search: string): string[] {
+    if (!names) return [];
     if (!search || names.length <= 1) return names;
 
     const term = search.toLowerCase();
@@ -89,16 +90,29 @@ export class ProductsService {
 
       for (const item of apiResponse.data) {
         const orderedNames = this.reorderBySimilarity(item.marca_comercial, search);
+        let ingredienteAtivo: string[];
+
+        if (
+          Array.isArray(item?.ingrediente_ativo_detalhado) &&
+          item.ingrediente_ativo_detalhado.length > 0
+        ) {
+          ingredienteAtivo = item.ingrediente_ativo_detalhado.map((det) => det.ingrediente_ativo);
+        } else if (Array.isArray(item?.ingrediente_ativo) && item.ingrediente_ativo.length > 0) {
+          ingredienteAtivo = item.ingrediente_ativo.map((det) => det?.split('(')[0].trim() || '');
+        } else {
+          ingredienteAtivo = [];
+        }
 
         result.push({
-          registrationNumber: item.numero_registro,
+          registrationNumber: item.numero_registro ? item.numero_registro.toString() : '',
           commercialNames: orderedNames,
-          registrationHolder: item.titular_registro,
-          categories: item.classe_categoria_agronomica,
-          activeIngredients: item.ingrediente_ativo_detalhado.map(det => det.ingrediente_ativo),
+          registrationHolder: item.titular_registro ? item.titular_registro.toString() : '',
+          categories: item.classe_categoria_agronomica ? item.classe_categoria_agronomica : [],
+          activeIngredients: ingredienteAtivo,
           organicFarmingProduct: item.produto_agricultura_organica,
         });
       }
+
       return result;
     } catch (error) {
       console.error(error);

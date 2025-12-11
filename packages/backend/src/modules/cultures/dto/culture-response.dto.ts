@@ -32,4 +32,12 @@ export class CultureResponseDto {
     productionArea: number;
     mainCrop: string;
   };
+
+  activities?: Array<{
+    id: number;
+    titulo: string;
+    data: Date;
+    tipo?: string;
+    descricao?: string;
+  }>;
 }

@@ -8,7 +8,7 @@ declare module 'translate-google' {
 
   function translate(
     text: string | string[],
-    options?: TranslateOptions
+    options?: TranslateOptions,
   ): Promise<string | string[]>;
 
   export = translate;

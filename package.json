@@ -5,10 +5,6 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/translate-google",
-      "**/translate-google/**"
     ]
   },
   "scripts": {

@@ -488,7 +488,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             placeholder="Ex: Adubação do talhão 1"
             required 
             error={errors.titulo}
-            showError={touchedFields.titulo && !!errors.titulo}
           />
           <div className={styles.fieldGroup}>
             <Input
@@ -501,7 +500,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
               maxLength={10}
               required
               error={errors.date}
-              showError={touchedFields.date && !!errors.date}
             />
 
             <Input
@@ -516,7 +514,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
               disabled={isLoadingProperties}
               required
               error={errors.propriedade}
-              showError={touchedFields.propriedade && !!errors.propriedade}
             />
           </div>
 
@@ -532,7 +529,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             disabled={!formData.propriedade || isLoadingCultures || culturesOptions.length === 0}
             required
             error={errors.cultureId}
-            showError={touchedFields.cultureId && !!errors.cultureId}
           />
           {isLoadingCultures && formData.propriedade && (
             <div className={styles.loadingMessage}>
@@ -570,7 +566,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             rows={4}
             required
             error={errors.descricao}
-            showError={touchedFields.descricao && !!errors.descricao}
           />
           <Input
             label="Responsável pela execução"
@@ -580,7 +575,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
             onBlur={() => handleBlur('responsavel')}
             required
             error={errors.responsavel}
-            showError={touchedFields.responsavel && !!errors.responsavel}
           />
         </div>
 
@@ -619,7 +613,6 @@ export function ActivityForm({ initialData, onSubmit, isLoading = false }: Props
                   onBlur={() => handleBlur('insumoQuantidade')}
                   required
                   error={errors.insumoQuantidade}
-                  showError={touchedFields.insumoQuantidade && !!errors.insumoQuantidade}
                 />
                 <Input
                   as="select"

@@ -72,14 +72,87 @@ export function Input({
 
   // INPUT
   if (as === 'input') {
-    InputElement = (
-      <input
-        className={inputClass}
-        {...(props as ComponentPropsWithoutRef<'input'>)}
-        {...commonEvents}
-        placeholder={isFocused || hasValue ? '' : label}
-      />
-    );
+    const inputType = (props as ComponentPropsWithoutRef<'input'>).type;
+    const isDateInput = inputType === 'date';
+    
+    // Para campos de data, usa input text com máscara (formato brasileiro dd/mm/yyyy)
+    if (isDateInput) {
+      const handleDateInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value;
+        
+        // Remove tudo que não é número
+        const numbersOnly = value.replace(/\D/g, '');
+        
+        // Se está apagando (valor atual é menor que o anterior), não adiciona barras
+        const currentLength = numbersOnly.length;
+        
+        // Formata apenas os números sem as barras
+        let formatted = numbersOnly;
+        
+        // Adiciona primeira barra após o dia (2 dígitos)
+        if (currentLength >= 3) {
+          formatted = numbersOnly.slice(0, 2) + '/' + numbersOnly.slice(2);
+        }
+        
+        // Adiciona segunda barra após o mês (2 dígitos) - formato dd/mm/yyyy
+        if (currentLength >= 5) {
+          formatted = numbersOnly.slice(0, 2) + '/' + numbersOnly.slice(2, 4) + '/' + numbersOnly.slice(4, 8);
+        }
+        
+        // Atualiza o valor
+        e.target.value = formatted;
+        props.onChange?.(e as any);
+      };
+      
+      const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        // Permite apagar normalmente
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          const input = e.currentTarget;
+          const cursorPos = input.selectionStart || 0;
+          const value = input.value;
+          
+          // Se está tentando apagar uma barra, pula ela e apaga o número anterior
+          if (e.key === 'Backspace' && value[cursorPos - 1] === '/') {
+            e.preventDefault();
+            const newValue = value.slice(0, cursorPos - 2) + value.slice(cursorPos);
+            input.value = newValue;
+            
+            // Reformata o valor
+            const event = {
+              target: input,
+              currentTarget: input
+            } as React.ChangeEvent<HTMLInputElement>;
+            handleDateInput(event);
+          }
+        }
+      };
+      
+      InputElement = (
+        <input
+          {...(props as ComponentPropsWithoutRef<'input'>)}
+          type="text"
+          className={inputClass}
+          onChange={handleDateInput}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={(e) => {
+            setIsFocused(false);
+            props.onBlur?.(e as any);
+          }}
+          placeholder={isFocused || hasValue ? '' : label}
+          maxLength={10}
+        />
+      );
+    } else {
+      InputElement = (
+        <input
+          className={inputClass}
+          {...(props as ComponentPropsWithoutRef<'input'>)}
+          {...commonEvents}
+          placeholder={isFocused || hasValue ? '' : label}
+        />
+      );
+    }
   }
 
   // TEXTAREA

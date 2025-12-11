@@ -1,4 +1,42 @@
-import { IsNotEmpty, IsString, IsNumber, IsOptional, MaxLength, Min } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsOptional,
+  MaxLength,
+  Min,
+  IsArray,
+  ValidateNested,
+  IsIn,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class PlotDto {
+  @IsNotEmpty({ message: 'Nome do talhão é obrigatório' })
+  @IsString()
+  @MaxLength(255)
+  name: string;
+
+  @IsNotEmpty({ message: 'Área do talhão é obrigatória' })
+  @IsNumber()
+  @Min(0, { message: 'Área do talhão deve ser maior ou igual a zero' })
+  area: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  culture?: string;
+
+  @IsNotEmpty({ message: 'Situação do talhão é obrigatória' })
+  @IsString()
+  @IsIn(['producao', 'preparo', 'pousio'], {
+    message: 'Situação deve ser: producao, preparo ou pousio',
+  })
+  situacao: 'producao' | 'preparo' | 'pousio';
+
+  @IsOptional()
+  polygon?: any;
+}
 
 export class CreatePropertyDto {
   @IsNotEmpty({ message: 'Nome da propriedade é obrigatório' })
@@ -29,4 +67,10 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString()
   certifications?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PlotDto)
+  plots?: PlotDto[];
 }

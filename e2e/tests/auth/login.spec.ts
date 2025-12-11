@@ -71,7 +71,7 @@ test.describe('Login Page', () => {
     await loginPage.login('invalid@example.com', 'wrongpassword123');
 
     // Wait for error message to appear
-    await expect(loginPage.page.locator('text=Credenciais incorretas')).toBeVisible({ timeout: 10000 });
+    await expect(loginPage.page.locator('text=E-mail ou senha incorretos')).toBeVisible({ timeout: 10000 });
   });
 
   test('should toggle remember me checkbox', async ({ loginPage }) => {

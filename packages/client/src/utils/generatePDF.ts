@@ -4,6 +4,7 @@ import { ActivityDTO } from '../services/activityService';
 import { Property as PropertyResponseDTO } from '../types/property.types';
 import logo from '@/assets/logo-grande.png';
 import { Culture } from '@/types/culture.types';
+import { ProductApplication } from '@/types/productApplication.types';
 
 // ------------------------------
 // Função para converter imagem para Base64 + obter proporção
@@ -299,9 +300,11 @@ export const generateCultureReport = async (
     "Status"
   ];
 
-  const tableRows = cultures.map(item => {
-    const dataPlantio = new Date(item.plantingDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-    const areaPlantio = item.plantingArea ? `${Number(item.plantingArea).toFixed(2)}` : 'N/A';
+const tableRows = cultures.map(item => {
+  // Converter data sem problemas de timezone
+  const [year, month, day] = item.plantingDate.toString().split('T')[0].split('-');
+  const dataPlantio = `${day}/${month}/${year}`;
+  const areaPlantio = item.plantingArea ? `${Number(item.plantingArea).toFixed(2)}` : 'N/A';
     const variedade = item.cultivar || '-';
     const propriedade = item.property?.name || 'N/A';
 
@@ -392,4 +395,137 @@ export const generateCultureReport = async (
   }
 
   doc.save(`agrodiario_relatorio_culturas_${new Date().toISOString().slice(0, 10)}.pdf`);
+};
+
+// =====================================
+// RELATÓRIO DE APLICAÇÕES DE PRODUTOS
+// =====================================
+export const generateProductApplicationReport = async (
+  applications: ProductApplication[],
+  filterDescription?: string
+) => {
+  const doc = new jsPDF('landscape', 'mm', 'a4');
+
+  // Adicionar logo
+  const { base64, width, height } = await loadImageAsBase64(logo);
+  const targetWidth = 28;
+  const targetHeight = (height / width) * targetWidth;
+
+  doc.addImage(base64, 'PNG', 255, 5, targetWidth, targetHeight);
+
+  const colorPrimary = '#008542';
+  const colorSecondary = '#e3f4e9';
+
+  // Cabeçalho
+  doc.setFontSize(18);
+  doc.setTextColor(colorPrimary);
+  doc.text('Relatório de Aplicações de Produtos - AgroDiário', 14, 22);
+
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  const today = new Date().toLocaleDateString('pt-BR');
+  doc.text(`Gerado em: ${today}`, 14, 30);
+
+  if (filterDescription) {
+    doc.text(`Filtro aplicado: ${filterDescription}`, 14, 35);
+  }
+
+  doc.setDrawColor(200);
+  doc.line(14, 38, 283, 38);
+
+  // Colunas da tabela
+  const tableColumn = [
+    "Data Aplicação",
+    "Produto",
+    "Princípio Ativo",
+    "Categoria",
+    "Área (ha)",
+    "Propriedade",
+    "Cultura principal",
+    "Status Orgânico"
+  ];
+
+  // Preparar dados
+  const tableRows = applications.map(item => {
+    const dataAplicacao = new Date(item.applicationDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    const propriedade = item.propertyName || '-';
+    const cultura = item.cultureName || '-';
+    
+    const statusOrganico = item.product.organicFarmingProduct ? 'Permitido' : 'Proibido';
+
+    return [
+      dataAplicacao,
+      item.productName,
+      item.product.activeIngredients.join(', ') || '-',
+      item.product.categories.join(', ') || '-',
+      item.area ? `${Number(item.area).toFixed(2)}` : 'N/A',
+      propriedade,
+      cultura,
+      statusOrganico
+    ];
+  });
+
+  // Criar tabela
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 45,
+    theme: 'grid',
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+      valign: 'middle',
+      overflow: 'linebreak',
+    },
+    headStyles: {
+      fillColor: colorPrimary,
+      textColor: 255,
+      fontSize: 9,
+      fontStyle: 'bold',
+    },
+    columnStyles: {
+      0: { cellWidth: 25 }, // Data
+      1: { cellWidth: 40 }, // Produto
+      2: { cellWidth: 40 }, // Princípio Ativo
+      3: { cellWidth: 30 }, // Categoria
+      4: { cellWidth: 20, halign: 'center' }, // Área
+      5: { cellWidth: 35 }, // Propriedade
+      6: { cellWidth: 30 }, // Cultura
+      7: { 
+        cellWidth: 25,
+        halign: 'center',
+        fontStyle: 'bold'
+      } // Status
+    },
+    didParseCell: (data) => {
+      if (data.section === 'body' && data.column.index === 7) {
+        const status = data.cell.raw as string;
+        if (status === 'Proibido') {
+          data.cell.styles.textColor = '#ff6b6b';
+        } else {
+          data.cell.styles.textColor = colorPrimary;
+        }
+      }
+    },
+    alternateRowStyles: {
+      fillColor: colorSecondary,
+    },
+  });
+
+  // Rodapé com número de páginas
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(
+      `Página ${i} de ${pageCount}`,
+      doc.internal.pageSize.width / 2,
+      doc.internal.pageSize.height - 10,
+      { align: 'center' }
+    );
+  }
+
+  // Salvar PDF
+  doc.save(`agrodiario_relatorio_aplicacoes_${new Date().toISOString().slice(0, 10)}.pdf`);
 };

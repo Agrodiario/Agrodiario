@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ProductsService } from '../products/products.service';
+import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 
 @Controller('products')
@@ -27,7 +27,7 @@ export class ProductsController {
 
   @Get('search/commercial-name')
   @HttpCode(HttpStatus.OK)
-  async searchByCommercialName(@Query('name') name?: string) {
+  async searchByCommercialName(@Query('q') name?: string) {
     return this.productsService.searchByCommercialName(name);
   }
 }

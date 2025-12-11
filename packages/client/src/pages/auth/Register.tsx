@@ -273,7 +273,8 @@ export default function RegisterPage() {
             label="Seu nome completo" name="name" value={formData.name}
             onChange={handleChange} onBlur={() => handleBlur('name')}
             placeholder="Ex: Maria da Silva" required
-            error={errors.name} showError={touched.name && !!errors.name}
+            error={errors.name}
+            showError={!!errors.name}
           />
 
           {/* CPF */}
@@ -281,15 +282,17 @@ export default function RegisterPage() {
             label="CPF" name="cpf" value={formData.cpf}
             onChange={handleChange} onBlur={() => handleBlur('cpf')}
             placeholder="000.000.000-00" maxLength={14} required
-            error={errors.cpf} showError={touched.cpf && !!errors.cpf}
+            error={errors.cpf}
+            showError={!!errors.cpf}
           />
-          
+
           {/* Data de nascimento */}
           <Input
             label="Data de nascimento" name="birthDate" value={formData.birthDate}
             onChange={handleChange} onBlur={() => handleBlur('birthDate')}
             placeholder="DD/MM/AAAA" maxLength={10} required
-            error={errors.birthDate} showError={touched.birthDate && !!errors.birthDate}
+            error={errors.birthDate}
+            showError={!!errors.birthDate}
           />
 
           {/* Telefone */}
@@ -297,15 +300,17 @@ export default function RegisterPage() {
             label="Seu número de telefone" name="phone" value={formData.phone}
             onChange={handleChange} onBlur={() => handleBlur('phone')}
             placeholder="(00) 00000-0000" maxLength={15} required
-            error={errors.phone} showError={touched.phone && !!errors.phone}
+            error={errors.phone}
+            showError={!!errors.phone}
           />
-          
+
           {/* E-mail */}
           <Input
             label="Seu e-mail" name="email" type="email" value={formData.email}
             onChange={handleChange} onBlur={() => handleBlur('email')}
             placeholder="Ex: maria.silva@email.com" required
-            error={errors.email} showError={touched.email && !!errors.email}
+            error={errors.email}
+            showError={!!errors.email}
           />
 
           {/* Senha */}
@@ -315,7 +320,8 @@ export default function RegisterPage() {
             placeholder="Mínimo 8 caracteres" required
             icon={showPassword ? <FaEyeSlash /> : <FaEye />}
             onIconClick={() => setShowPassword(!showPassword)}
-            error={errors.password} showError={touched.password && !!errors.password}
+            error={errors.password}
+            showError={!!errors.password}
           />
 
           {/* Confirma Senha */}
@@ -325,7 +331,8 @@ export default function RegisterPage() {
             placeholder="Repita sua senha" required
             icon={showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             onIconClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            error={errors.confirmPassword} showError={touched.confirmPassword && !!errors.confirmPassword}
+            error={errors.confirmPassword}
+            showError={!!errors.confirmPassword}
           />
 
           <Button type="submit" disabled={isButtonDisabled}>

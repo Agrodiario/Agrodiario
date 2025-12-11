@@ -10,6 +10,7 @@ import { ProductApplication } from '../types/productApplication.types.ts';
 import { useNavigate } from 'react-router-dom';
 import { productApplicationService } from '../services/productApplication.service.ts';
 import { ConfirmationModal } from '../components/common/ConfirmationModal/ConfirmationModal.tsx';
+import { generateProductApplicationReport } from '@/utils/generatePDF.ts';
 
 export interface PaginatedProductApplications {
   data: ProductApplication[];
@@ -22,10 +23,10 @@ export default function ProductApplicationsPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
-  // const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
+  const [lastPage, setLastPage] = useState(0);
   const pageNumbers = Array.from({ length: lastPage }, (_, i) => i + 1);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -35,20 +36,24 @@ export default function ProductApplicationsPage() {
     null
   );
 
-  // Se não está usando a função, remova ou comente
-  /*
   const handleGenerateReport = async () => {
     try {
       setIsGeneratingReport(true);
 
+      // Buscar todas as aplicações (ou as filtradas)
       const response = await productApplicationService.findAll(
         1,
-        1000,
-        // sortOrder,
-        // searchTerm
+        1000, // Buscar muitas para o relatório
+        sortOrder,
+        searchTerm
       );
-      const textoFiltro = searchTerm ? `Busca por: "${searchTerm}"` : 'Todos os registros';
-      // generateReport(response.data, textoFiltro);
+
+      const textoFiltro = searchTerm
+        ? `Busca por: "${searchTerm}"`
+        : 'Todos os registros';
+
+      // Gerar o relatório
+      await generateProductApplicationReport(response.data, textoFiltro);
     } catch (error) {
       console.error('Erro ao gerar relatório', error);
       alert('Erro ao gerar o relatório. Tente novamente.');
@@ -56,13 +61,12 @@ export default function ProductApplicationsPage() {
       setIsGeneratingReport(false);
     }
   };
-  */
 
   const fetchProductApplications = useCallback(async (page: number, order: 'ASC' | 'DESC') => {
     const response = await productApplicationService.findAll(page, 5, order, '');
     setProductApplications(response.data);
     setPage(response.page);
-    setLastPage(response.lastPage);
+    setLastPage(response.data.length > 0 ? response.lastPage : 0);
   }, []);
 
   const handleSortChange = (order: 'ASC' | 'DESC') => {
@@ -73,7 +77,6 @@ export default function ProductApplicationsPage() {
 
   // EDITAR
   const handleEdit = (id: string) => {
-    console.log("Aqui!!")
     console.log(selectedProductApplication);
     navigate(`/products/edit/${id}`);
   }
@@ -90,7 +93,7 @@ export default function ProductApplicationsPage() {
     try {
       await productApplicationService.remove(selectedProductApplication.id);
       // Defina tipos explicitamente para os parâmetros
-      setProductApplications(prev => 
+      setProductApplications(prev =>
         prev.filter((item: ProductApplication) => item.id !== selectedProductApplication.id)
       );
       setSelectedProductApplication(null);
@@ -131,7 +134,7 @@ export default function ProductApplicationsPage() {
                 <span className={styles.buttonText}>Ordenar por</span>
               </Button>
             }
-            >
+          >
             <div className={styles.dropdownMenu}>
               <button
                 className={styles.dropdownItem}
@@ -140,7 +143,7 @@ export default function ProductApplicationsPage() {
                   fontWeight: sortOrder === 'DESC' ? 'bold' : 'normal',
                   backgroundColor: sortOrder === 'DESC' ? 'var(--color-bg-light)' : 'transparent'
                 }}
-                >
+              >
                 Mais recentes
               </button>
               <button
@@ -156,14 +159,14 @@ export default function ProductApplicationsPage() {
             </div>
           </Dropdown>
 
-          {/* Botão de relatório - adicione onClick se for usar */}
           <Button
             variant="secondary"
             leftIcon={<FiDownload size={18} />}
             className={styles.reportButton}
-            // onClick={handleGenerateReport} // Descomente se for usar
-            >
-            Gerar relatório
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport}
+          >
+            {isGeneratingReport ? 'Gerando...' : 'Gerar relatório'}
           </Button>
         </div>
       </div>
@@ -183,24 +186,29 @@ export default function ProductApplicationsPage() {
           <tbody>
             {productApplications.map((item: ProductApplication) => (
               <tr key={item.id} className={styles.row}>
-                <td className={styles.cell}>{item.productName}</td>
-                <td className={styles.cell}>{item.product.activeIngredients[0]}</td>
-                <td className={styles.cell}>{item.product.categories[0]}</td>
-                <td>
+                <td className={styles.cell} data-label="Produto">
+                  {item.productName}
+                </td>
+                <td className={styles.cell} data-label="Princípio Ativo">
+                  {item.product.activeIngredients[0]}
+                </td>
+                <td className={styles.cell} data-label="Tipo">
+                  {item.product.categories[0]}
+                </td>
+                <td className={styles.cell} data-label="Status">
                   <div
-                    className={`${styles.status} ${
-                      item.product.organicFarmingProduct ? styles.allowed : styles.denied
-                    }`}>
+                    className={`${styles.status} ${item.product.organicFarmingProduct ? styles.allowed : styles.denied
+                      }`}>
                     {item.product.organicFarmingProduct ? "Permitido" : "Proibido"}
                   </div>
                 </td>
-                <td className={styles.cell}>
+                <td className={styles.cell} data-label="Data Aplicação">
                   {new Date(item.applicationDate).toLocaleDateString("pt-BR")}
                 </td>
                 <td className={styles.buttonGroup}>
                   <Button
                     variant={"secondary"}
-                    leftIcon={<FiEdit size={18}/>}
+                    leftIcon={<FiEdit size={18} />}
                     onClick={() => handleEdit(item.id)}
                     style={{
                       width: "40px",
@@ -211,7 +219,7 @@ export default function ProductApplicationsPage() {
                   ></Button>
                   <Button
                     variant={"quinternary"}
-                    rightIcon={<FiTrash2 size={18}/>}
+                    rightIcon={<FiTrash2 size={18} />}
                     onClick={() => handleConfirmDelete(item)}
                     style={{
                       width: "40px",
@@ -225,7 +233,7 @@ export default function ProductApplicationsPage() {
             ))}
           </tbody>
         </table>
-        
+
         {/* MODAL DE CONFIRMAÇÃO FORA DO MAP */}
         <ConfirmationModal
           isOpen={isDeleteModalOpen}
@@ -235,18 +243,20 @@ export default function ProductApplicationsPage() {
         >
           Tem certeza de que deseja excluir esse registro?
         </ConfirmationModal>
-        
-        <div className={styles.pagination}>
-          {pageNumbers.map((num) => (
-            <button
-              key={num}
-              onClick={() => setPage(num)}
-              className={num === page ? styles.activePage : ''}
-            >
-              {num}
-            </button>
-          ))}
-        </div>
+
+        {lastPage > 0 && (
+          <div className={styles.pagination}>
+            {pageNumbers.map((num) => (
+              <button
+                key={num}
+                onClick={() => setPage(num)}
+                className={num === page ? styles.activePage : ''}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

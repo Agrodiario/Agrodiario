@@ -203,6 +203,79 @@
   min-width: 140px;
 }
 
+/* --- Talhões --- */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.talhoesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.talhaoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-bg-white);
+}
+
+.talhaoCard:hover {
+  border-color: var(--color-primary);
+  background-color: #f8fafc;
+}
+
+.talhaoCardActive {
+  border-color: var(--color-primary);
+  background-color: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(0, 133, 66, 0.2);
+}
+
+.talhaoCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.talhaoCardTitle {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.talhaoRemoveBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.talhaoRemoveBtn:hover {
+  color: #dc2626;
+  background-color: #fee2e2;
+}
+
+.talhaoCardInfo {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
 @media (max-width: 600px) {
   .row {
     grid-template-columns: 1fr;
@@ -211,4 +284,65 @@
   .footer button {
     flex: 1;
   }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.fileItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f2f4f7;
+}
+
+.fileName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+
+.fileActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #ffefe5;
+  color: #d95a2a;
+}
+
+.actionBtn:hover {
+  background-color: #ffdcc9;
+}
+
+.deleteBtn {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.deleteBtn:hover {
+  background-color: #fecaca;
 }

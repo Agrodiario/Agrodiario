@@ -12,27 +12,25 @@ export function ProductCardList({ products, value, onSelect }: ProductCardListPr
   if (products.length === 0) return <div className={styles.emptyMessage}>Nenhum produto encontrado.</div>;
 
   return (
-    <div className={styles.grid}>
+    <div className={styles.list}>
       {products.map((product) => (
         <div
           key={product.registrationNumber}
-          className={`${styles.card} ${value === product.registrationNumber ? styles.selected : ''}`}
+          className={`${styles.item} ${value === product.registrationNumber ? styles.selected : ''}`}
           onClick={() => onSelect(product)}
         >
-          <h4>{product.commercialNames[0]}</h4>
-          <p>{product.categories[0]}</p>
-          <p
-            className={`${styles.status} ${
-              product.organicFarmingProduct ? styles.allowed : styles.denied
-            }`}> {product.organicFarmingProduct ? (
-            <>
-              <FiCheck className={styles.icon} />
-              Permitido em sistemas orgânicos
-            </> ) : ( <>
-              <FiX className={styles.icon} />
-              Não permitido em sistemas orgânicos
-          </> )
-          } </p>
+          <div className={styles.itemContent}>
+            <div className={styles.itemHeader}>
+              <span className={styles.itemTitle}>{product.commercialNames[0]}</span>
+              {product.organicFarmingProduct && (
+                <FiCheck className={styles.organicIcon} title="Permitido em sistemas orgânicos" />
+              )}
+            </div>
+            <span className={styles.itemCategory}>{product.categories[0]}</span>
+          </div>
+          {value === product.registrationNumber && (
+            <FiCheck className={styles.checkIcon} />
+          )}
         </div>
       ))}
     </div>

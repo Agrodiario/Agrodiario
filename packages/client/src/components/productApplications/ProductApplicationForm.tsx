@@ -43,6 +43,10 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
     applicationDate: initialData?.applicationDate || '',
   });
 
+  const [areaInputType, setAreaInputType] = useState<'hectares' | 'plot'>('hectares');
+  const [plotName, setPlotName] = useState<string>('');
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+
   // ESTADOS PARA PROPRIEDADES
   const [propertiesOptions, setPropertiesOptions] = useState<{ label: string, value: string }[]>([]);
   const [allProperties, setAllProperties] = useState<any[]>([]);
@@ -50,7 +54,7 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
 
   // ESTADOS PARA CULTURAS
   const [culturesOptions, setCulturesOptions] = useState<{ label: string, value: string }[]>([]);
-  // const [allCultures, setAllCultures] = useState<any[]>([]);
+  const [allCultures, setAllCultures] = useState<any[]>([]);
   const [isLoadingCultures, setIsLoadingCultures] = useState(false);
 
   // ESTADOS PARA PRODUTO
@@ -94,6 +98,22 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
     fetchProperties();
   }, []);
 
+  // Atualiza a propriedade selecionada quando propertyId muda
+  useEffect(() => {
+    if (formData.propertyId && allProperties.length > 0) {
+      const property = allProperties.find(p => p.id === formData.propertyId);
+      setSelectedProperty(property || null);
+      
+      // Define o tipo de área baseado se há talhões
+      const hasPlots = property?.plots && property.plots.length > 0;
+      if (!hasPlots) {
+        setAreaInputType('hectares');
+      }
+    } else {
+      setSelectedProperty(null);
+    }
+  }, [formData.propertyId, allProperties]);
+
   // Carrega culturas do usuário
   useEffect(() => {
     async function fetchCulturesForProperty() {
@@ -123,6 +143,8 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
           setErrors(prev => ({ ...prev, cultureId: null })); // Use null para limpar
 
           const cultures = await cultureService.findByProperty(selectedProperty.id);
+          setAllCultures(cultures);
+          
           const options = cultures.map(c => ({
             label: `${c.cultureName}${c.cultivar ? ` - ${c.cultivar}` : ''}`,
             value: c.id
@@ -206,6 +228,41 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
         return null;
       case 'area':
         if (!value || value.trim() === '') return 'Área da aplicação é obrigatório';
+        
+        // Validar se a área não excede a área da cultura selecionada
+        if (formData.cultureId && areaInputType === 'hectares') {
+          const selectedCulture = allCultures.find(c => c.id === formData.cultureId);
+          if (selectedCulture) {
+            const areaValue = parseFloat(value);
+            
+            // Se a cultura está associada a um talhão, validar contra a área do talhão
+            if (selectedCulture.plotName && selectedProperty?.plots) {
+              const plot = selectedProperty.plots.find((p: any) => p.name === selectedCulture.plotName);
+              if (plot) {
+                const plotArea = parseFloat(plot.area.toString());
+                if (areaValue > plotArea) {
+                  return `Área não pode exceder a área do talhão ${plot.name} (${plotArea} ha)`;
+                }
+              }
+            } else {
+              // Se não tem talhão, validar contra a plantingArea da cultura
+              const cultureArea = parseFloat(selectedCulture.plantingArea);
+              if (areaValue > cultureArea) {
+                return `Área não pode exceder a área da cultura (${cultureArea} ha)`;
+              }
+            }
+          }
+        }
+        
+        // Validar se a área não excede a área da propriedade
+        if (selectedProperty && areaInputType === 'hectares') {
+          const areaValue = parseFloat(value);
+          const maxArea = selectedProperty.productionArea || selectedProperty.totalArea;
+          if (areaValue > maxArea) {
+            return `Área não pode exceder ${maxArea} ha`;
+          }
+        }
+        
         return null;
       case 'productId':
         if (!value || value.trim() === '') return 'Produto é obrigatória';
@@ -330,6 +387,67 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
     }));
   };
 
+  const handleAreaTypeChange = (type: 'hectares' | 'plot') => {
+    setAreaInputType(type);
+    if (type === 'hectares') {
+      setPlotName('');
+      setFormData(prev => ({ ...prev, cultureId: '' }));
+    } else {
+      setFormData(prev => ({ ...prev, area: '' }));
+    }
+  };
+
+  const handlePlotChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const selectedPlotName = e.target.value;
+    console.log('[handlePlotChange] Talhão selecionado:', selectedPlotName);
+    setPlotName(selectedPlotName);
+    
+    if (!selectedPlotName) {
+      setFormData(prev => ({ ...prev, area: '', cultureId: '' }));
+      return;
+    }
+    
+    const plot = selectedProperty?.plots?.find((p: any) => p.name === selectedPlotName);
+    console.log('[handlePlotChange] Plot encontrado:', plot);
+    
+    if (plot) {
+      // Preenche a área automaticamente
+      setFormData(prev => ({ ...prev, area: plot.area.toString() }));
+      
+      // Busca a cultura associada a este talhão
+      try {
+        setIsLoadingCultures(true);
+        const cultures = await cultureService.findByProperty(formData.propertyId);
+        console.log('[handlePlotChange] Todas as culturas da propriedade:', cultures);
+        console.log('[handlePlotChange] Procurando por plotName:', selectedPlotName);
+        
+        // Verifica todas as culturas e seus plotNames
+        cultures.forEach(c => {
+          console.log(`[handlePlotChange] Cultura: ${c.cultureName}, plotName: "${c.plotName}"`);
+        });
+        
+        const cultureForPlot = cultures.find(c => {
+          console.log(`[handlePlotChange] Comparando "${c.plotName}" === "${selectedPlotName}"`);
+          return c.plotName && c.plotName.trim() === selectedPlotName.trim();
+        });
+        
+        console.log('[handlePlotChange] Cultura encontrada para o talhão:', cultureForPlot);
+        
+        if (cultureForPlot) {
+          setFormData(prev => ({ ...prev, cultureId: cultureForPlot.id }));
+          console.log('[handlePlotChange] Cultura setada:', cultureForPlot.id, cultureForPlot.cultureName);
+        } else {
+          setFormData(prev => ({ ...prev, cultureId: '' }));
+          console.log('[handlePlotChange] Nenhuma cultura encontrada para este talhão');
+        }
+      } catch (error) {
+        console.error('[handlePlotChange] Erro ao buscar cultura do talhão:', error);
+      } finally {
+        setIsLoadingCultures(false);
+      }
+    }
+  };
+
   const title = isEditMode ? 'Editar aplicação de produto' : 'Nova aplicação de produto';
   const submitText = isEditMode ? 'Salvar alterações' : 'Salvar aplicação';
 
@@ -356,9 +474,134 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             icon={<IoIosArrowDown size={18} />}
             disabled={isLoadingProperties}
             required
-            error={errors.propertyId || undefined} // Converter null para undefined
-            showError={touchedFields.propertyId && !!errors.propertyId}
+            error={errors.propertyId || undefined}
           />
+
+          {formData.propertyId && selectedProperty && (
+            <>
+              <label className={styles.label}>
+                Área da aplicação <span style={{ color: 'red' }}>*</span>
+              </label>
+              
+              {selectedProperty.plots && selectedProperty.plots.length > 0 && (
+                <div className={styles.radioGroup}>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="areaType"
+                      value="hectares"
+                      checked={areaInputType === 'hectares'}
+                      onChange={() => handleAreaTypeChange('hectares')}
+                    />
+                    <span>Hectares</span>
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="areaType"
+                      value="plot"
+                      checked={areaInputType === 'plot'}
+                      onChange={() => handleAreaTypeChange('plot')}
+                    />
+                    <span>Talhão</span>
+                  </label>
+                </div>
+              )}
+
+              {!selectedProperty.plots || selectedProperty.plots.length === 0 && (
+                <p style={{ fontSize: '0.85rem', color: '#667085', marginBottom: '0.5rem' }}>
+                  Esta propriedade não possui talhões cadastrados. Digite a área em hectares.
+                </p>
+              )}
+
+              {areaInputType === 'hectares' ? (
+                <>
+                  <Input
+                    as="input"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={(() => {
+                      const selectedCulture = allCultures.find(c => c.id === formData.cultureId);
+                      if (selectedCulture) {
+                        // Se cultura tem talhão, usar área do talhão
+                        if (selectedCulture.plotName && selectedProperty?.plots) {
+                          const plot = selectedProperty.plots.find((p: any) => p.name === selectedCulture.plotName);
+                          if (plot) return parseFloat(plot.area.toString());
+                        }
+                        // Caso contrário, usar plantingArea da cultura
+                        return parseFloat(selectedCulture.plantingArea);
+                      }
+                      if (selectedProperty) return selectedProperty.productionArea || selectedProperty.totalArea;
+                      return undefined;
+                    })()}
+                    label="Área (em hectares)"
+                    name="area"
+                    value={formData.area}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur('area')}
+                    placeholder="Digite a área em hectares"
+                    required
+                    error={errors.area || undefined}
+                  />
+                  {(() => {
+                    const selectedCulture = allCultures.find(c => c.id === formData.cultureId);
+                    if (selectedCulture && formData.area) {
+                      const areaValue = parseFloat(formData.area);
+                      
+                      // Se cultura tem talhão, validar contra área do talhão
+                      if (selectedCulture.plotName && selectedProperty?.plots) {
+                        const plot = selectedProperty.plots.find((p: any) => p.name === selectedCulture.plotName);
+                        if (plot) {
+                          const plotArea = parseFloat(plot.area.toString());
+                          if (areaValue > plotArea) {
+                            return (
+                              <p style={{ fontSize: '0.85rem', color: '#d92d20', marginTop: '0.5rem' }}>
+                                A área da aplicação não pode ser maior que a área do talhão {plot.name} ({plotArea} ha)
+                              </p>
+                            );
+                          }
+                        }
+                      } else {
+                        // Se não tem talhão, validar contra plantingArea
+                        const cultureArea = parseFloat(selectedCulture.plantingArea);
+                        if (areaValue > cultureArea) {
+                          return (
+                            <p style={{ fontSize: '0.85rem', color: '#d92d20', marginTop: '0.5rem' }}>
+                              A área da aplicação não pode ser maior que a área da cultura ({cultureArea} ha)
+                            </p>
+                          );
+                        }
+                      }
+                    }
+                    if (selectedProperty && formData.area && parseFloat(formData.area) > (selectedProperty.productionArea || selectedProperty.totalArea)) {
+                      return (
+                        <p style={{ fontSize: '0.85rem', color: '#d92d20', marginTop: '0.5rem' }}>
+                          A área da aplicação não pode ser maior que a área de produção da propriedade ({selectedProperty.productionArea || selectedProperty.totalArea} ha)
+                        </p>
+                      );
+                    }
+                    return null;
+                  })()}
+                </>
+              ) : (
+                <Input
+                  as="select"
+                  label="Talhão"
+                  name="plotName"
+                  value={plotName}
+                  onChange={handlePlotChange}
+                  options={selectedProperty.plots?.map((plot: any) => ({
+                    label: `${plot.name} - ${plot.area} hectares`,
+                    value: plot.name
+                  })) || []}
+                  icon={<IoIosArrowDown size={18} />}
+                  required
+                />
+              )}
+            </>
+          )}
+
           <Input
             as="select"
             label="Cultura associada"
@@ -366,24 +609,30 @@ export function ProductApplicationForm({ initialData, onSubmit, isLoading = fals
             value={formData.cultureId}
             onChange={handleChange}
             onBlur={() => handleBlur('cultureId')}
-            options={culturesOptions}
+            options={[
+              { label: 'Selecione uma cultura', value: '' },
+              ...culturesOptions
+            ]}
             icon={<IoIosArrowDown size={18} />}
             disabled={isLoadingCultures}
             required
-            error={errors.cultureId || undefined} // Converter null para undefined
-            showError={touchedFields.cultureId && !!errors.cultureId}
+            error={errors.cultureId || undefined}
           />
-          <Input
-            as="input"
-            label="Área/talhão"
-            name="area"
-            value={formData.area}
-            onChange={handleChange}
-            onBlur={() => handleBlur('area')}
-            required
-            error={errors.area || undefined} // Converter null para undefined
-            showError={touchedFields.area && !!errors.area}
-          />
+          {isLoadingCultures && formData.propertyId && (
+            <p style={{ fontSize: '0.85rem', color: '#667085' }}>
+              Carregando culturas...
+            </p>
+          )}
+          {areaInputType === 'plot' && plotName && !formData.cultureId && (
+            <p style={{ fontSize: '0.85rem', color: '#667085' }}>
+              Nenhuma cultura associada a este talhão.
+            </p>
+          )}
+          {areaInputType === 'plot' && plotName && formData.cultureId && (
+            <p style={{ fontSize: '0.85rem', color: '#16a34a' }}>
+              ✓ Cultura preenchida automaticamente com base no talhão
+            </p>
+          )}
         </div>
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Buscar na base EMBRAPA</h3>
